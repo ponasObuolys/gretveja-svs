@@ -1,0 +1,209 @@
+.admin-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-container h1 {
+  margin-bottom: 1.5rem;
+  color: #343a40;
+}
+
+.admin-container .card {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 8px;
+}
+
+.admin-container .card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+.admin-container .card-body {
+  padding: 1.5rem;
+}
+
+.admin-container .table {
+  margin-bottom: 0;
+}
+
+.admin-container .table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  padding: 1rem;
+  white-space: nowrap;
+}
+
+.admin-container .table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.admin-container .table th[style*="cursor: pointer"]:hover {
+  background-color: #e9ecef;
+}
+
+.admin-container .modal-content {
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.admin-container .modal-header {
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.admin-container .modal-footer {
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.admin-container .form-label {
+  font-weight: 500;
+}
+
+.admin-container .form-control,
+.admin-container .form-select {
+  border-radius: 0.25rem;
+  border: 1px solid #ced4da;
+  padding: 0.5rem 0.75rem;
+}
+
+.admin-container .form-control:focus,
+.admin-container .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.admin-container .btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.admin-container .btn-primary:hover {
+  background-color: #0069d9;
+  border-color: #0062cc;
+}
+
+.admin-container .btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.admin-container .btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.admin-container .table-responsive {
+  margin-top: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container .nav-tabs {
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  list-style-type: none;
+}
+
+.admin-container .nav-tabs .nav-link {
+  font-weight: 500;
+  color: #495057;
+  padding: 1rem 1.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  margin-bottom: -2px;
+  transition: all 0.2s ease-in-out;
+  background-color: #f8f9fa;
+  text-align: center;
+  cursor: pointer;
+  margin: 0 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container .nav-tabs .nav-link:hover {
+  border-color: #0d6efd;
+  color: #0d6efd;
+  background-color: #f0f7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container .nav-tabs .nav-link.active {
+  color: #fff;
+  border: 1px solid #0d6efd;
+  background-color: #0d6efd;
+  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.25);
+}
+
+.admin-tabs {
+  padding-left: 0 !important;
+}
+
+.admin-tab-item {
+  list-style-type: none;
+}
+
+.admin-container .input-group {
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+}
+
+.admin-container .input-group-text {
+  background-color: #f8f9fa;
+  border-right: none;
+}
+
+.admin-container .btn-outline-primary,
+.admin-container .btn-outline-danger {
+  padding: 0.25rem 0.75rem;
+  font-weight: 500;
+}
+
+.admin-container .btn-outline-primary:hover,
+.admin-container .btn-outline-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 10px;
+  }
+  
+  .admin-container .card-header {
+    padding: 1rem;
+  }
+  
+  .admin-container .nav-tabs .nav-link {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    margin: 0 0.25rem;
+  }
+  
+  .admin-container .table th,
+  .admin-container .table td {
+    padding: 0.5rem;
+  }
+  
+  .admin-container .btn-outline-primary,
+  .admin-container .btn-outline-danger {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-container .nav-tabs {
+    flex-direction: column;
+  }
+  
+  .admin-container .nav-tabs .nav-link {
+    margin: 0.25rem 0;
+  }
+} 

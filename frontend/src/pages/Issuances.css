@@ -1,0 +1,105 @@
+.issuances-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.issuances-container h1 {
+  color: #2c3e50;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.btn-add-issuance {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.btn-add-issuance:hover {
+  background-color: #2980b9;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 40px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  color: #666;
+}
+
+.table-responsive {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.actions-cell {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.action-button {
+  margin-right: 5px;
+}
+
+.action-button:last-child {
+  margin-right: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.issued {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.not-issued {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .issuances-container {
+    padding: 15px;
+  }
+  
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+  
+  .action-button {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8rem;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+  }
+} 

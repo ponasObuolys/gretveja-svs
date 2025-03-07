@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: gretveja-svs-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gretveja_svs
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gretveja-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: gretveja-svs-backend
+    restart: always
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+    environment:
+      - PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=gretveja_svs
+      - JWT_SECRET=slaptasRaktas123
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - gretveja-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gretveja-svs-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - gretveja-network
+
+networks:
+  gretveja-network:
+    driver: bridge
+
+volumes:
+  postgres_data: 

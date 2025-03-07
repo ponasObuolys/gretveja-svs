@@ -1,0 +1,124 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a1a2e;
+  color: white;
+  padding: 0 20px;
+  height: 60px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navbar-nav {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin-left: 20px;
+}
+
+.nav-link {
+  color: #ddd;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: white;
+  text-decoration: none;
+}
+
+.nav-link.active {
+  font-weight: bold;
+  border-bottom: 2px solid #4CAF50;
+  padding-bottom: 5px;
+}
+
+.custom-navbar {
+  background-color: #1a1a2e !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-navbar .navbar-brand {
+  color: white !important;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+}
+
+.custom-navbar .nav-link {
+  color: #ddd !important;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.custom-navbar .nav-link:hover {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.custom-navbar .nav-link.active {
+  color: white !important;
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  position: relative;
+}
+
+.custom-navbar .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 2px;
+  background-color: #4CAF50;
+}
+
+.custom-navbar .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.custom-navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Pridedame padding viršuje, kad turinys nebūtų po fiksuota navigacijos juosta */
+body {
+  padding-top: 60px;
+}
+
+@media (max-width: 991.98px) {
+  .custom-navbar .navbar-collapse {
+    background-color: #1a1a2e;
+    padding: 1rem;
+    border-radius: 0 0 8px 8px;
+    margin-top: 0.5rem;
+  }
+
+  .custom-navbar .nav-link {
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0;
+  }
+
+  .custom-navbar .nav-link.active::after {
+    width: 4px;
+    height: 100%;
+    left: 0;
+    top: 0;
+    transform: none;
+  }
+} 
