@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
+import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 function Home() {
+  const { t } = useTranslation();
   const [stockData, setStockData] = useState([]);
   const [purchaseStats, setPurchaseStats] = useState([]);
   const [issuanceStats, setIssuanceStats] = useState([]);
@@ -118,26 +120,26 @@ function Home() {
   };
 
   if (loading) {
-    return <div className="loading">Kraunami duomenys...</div>;
+    return <div className="loading">{t('common.messages.loading')}</div>;
   }
 
   if (error) {
-    return <div className="error">Klaida: {error}</div>;
+    return <div className="error">{t('common.messages.error')}: {error}</div>;
   }
 
   return (
     <div className="home-container">
       <div className="hero-section">
-        <h1>Gretvėja-SVS</h1>
-        <p className="subtitle">Sandėlio valdymo sistema</p>
+        <h1>{t('common.welcome')}</h1>
+        <p className="subtitle">{t('common.system.title')}</p>
       </div>
       
       <div className="stats-dashboard">
-        <h2>Pirkimų ir išdavimų statistika</h2>
+        <h2>{t('common.statistics.purchases_issuances')}</h2>
         
         <div className="charts-container">
           <div className="chart-wrapper">
-            <h3>Pirkimai per paskutinius 6 mėnesius</h3>
+            <h3>{t('common.statistics.purchases_6months')}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={purchaseStats}
@@ -146,15 +148,15 @@ function Home() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${value} vnt.`, 'Kiekis']} />
+                <Tooltip formatter={(value) => [`${value} ${t('common.labels.unit')}`, t('common.labels.quantity')]} />
                 <Legend />
-                <Bar dataKey="quantity" name="Kiekis (vnt.)" fill="#0088FE" />
+                <Bar dataKey="quantity" name={`${t('common.labels.quantity')} (${t('common.labels.unit')})`} fill="#0088FE" />
               </BarChart>
             </ResponsiveContainer>
           </div>
           
           <div className="chart-wrapper">
-            <h3>Išdavimai per paskutinius 6 mėnesius</h3>
+            <h3>{t('common.statistics.issuances_6months')}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={issuanceStats}
@@ -163,9 +165,9 @@ function Home() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${value} vnt.`, 'Kiekis']} />
+                <Tooltip formatter={(value) => [`${value} ${t('common.labels.unit')}`, t('common.labels.quantity')]} />
                 <Legend />
-                <Bar dataKey="quantity" name="Kiekis (vnt.)" fill="#00C49F" />
+                <Bar dataKey="quantity" name={`${t('common.labels.quantity')} (${t('common.labels.unit')})`} fill="#00C49F" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -173,7 +175,7 @@ function Home() {
         
         <div className="charts-container">
           <div className="chart-wrapper">
-            <h3>Top 10 prekių pagal likutį</h3>
+            <h3>{t('common.statistics.top_10_by_stock')}</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={topProducts}
@@ -183,38 +185,38 @@ function Home() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis type="category" dataKey="name" width={100} />
-                <Tooltip formatter={(value) => [`${value} vnt.`, 'Kiekis']} />
+                <Tooltip formatter={(value) => [`${value} ${t('common.labels.unit')}`, t('common.inventory.balance')]} />
                 <Legend />
-                <Bar dataKey="value" name="Likutis (vnt.)" fill="#8884d8" />
+                <Bar dataKey="value" name={t('common.inventory.balance')} fill="#8884d8" />
               </BarChart>
             </ResponsiveContainer>
           </div>
           
           <div className="chart-wrapper stats-card-container">
-            <h3>Sandėlio apžvalga</h3>
+            <h3>{t('common.statistics.warehouse_overview')}</h3>
             <div className="stats-grid">
               <div className="stat-card">
                 <div className="stat-value">{stockData.length}</div>
-                <div className="stat-label">Prekių</div>
+                <div className="stat-label">{t('common.labels.products')}</div>
               </div>
               
               <div className="stat-card">
                 <div className="stat-value">
                   {purchaseStats.length > 0 ? purchaseStats[purchaseStats.length - 1].count : 0}
                 </div>
-                <div className="stat-label">Pirkimų per mėnesį</div>
+                <div className="stat-label">{t('common.statistics.monthly_purchases')}</div>
               </div>
               
               <div className="stat-card">
                 <div className="stat-value">
                   {issuanceStats.length > 0 ? issuanceStats[issuanceStats.length - 1].count : 0}
                 </div>
-                <div className="stat-label">Išdavimų per mėnesį</div>
+                <div className="stat-label">{t('common.statistics.monthly_issuances')}</div>
               </div>
               
               <div className="stat-card">
                 <div className="stat-value">4</div>
-                <div className="stat-label">Logistikos įmonės</div>
+                <div className="stat-label">{t('common.warehouse.logistics_companies')}</div>
               </div>
             </div>
           </div>
@@ -222,15 +224,15 @@ function Home() {
       </div>
       
       <div className="inventory-section">
-        <h2>Sandėlio atsargos</h2>
+        <h2>{t('common.warehouse.stock')}</h2>
         <div className="inventory-table-container">
           <table className="inventory-table">
             <thead>
               <tr>
-                <th>Produktas</th>
-                <th>Pirkimai (vnt.)</th>
-                <th>Išdavimai (vnt.)</th>
-                <th>Likutis (vnt.)</th>
+                <th>{t('common.labels.product')}</th>
+                <th>{t('common.inventory.purchases_units')}</th>
+                <th>{t('common.inventory.issuances_units')}</th>
+                <th>{t('common.inventory.balance')}</th>
               </tr>
             </thead>
             <tbody>
@@ -246,7 +248,6 @@ function Home() {
           </table>
         </div>
       </div>
-      
     </div>
   );
 }

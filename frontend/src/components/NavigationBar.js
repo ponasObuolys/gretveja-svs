@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher.tsx';
 import './NavigationBar.css';
 
 function NavigationBar() {
   const location = useLocation();
+  const { t } = useTranslation();
   
   return (
     <Navbar bg="dark" variant="dark" expand="lg" fixed="top" className="custom-navbar">
@@ -18,37 +21,38 @@ function NavigationBar() {
               to="/" 
               active={location.pathname === '/'}
             >
-              Pradžia
+              {t('common.menu.home')}
             </Nav.Link>
             <Nav.Link 
               as={Link} 
               to="/purchases" 
               active={location.pathname === '/purchases'}
             >
-              Pirkimai
+              {t('common.tables.purchases')}
             </Nav.Link>
             <Nav.Link 
               as={Link} 
               to="/issuances" 
               active={location.pathname === '/issuances'}
             >
-              Išdavimai
+              {t('common.tables.issuances')}
             </Nav.Link>
             <Nav.Link 
               as={Link} 
               to="/stocks" 
               active={location.pathname === '/stocks'}
             >
-              Atsargos
+              {t('common.tables.stocks')}
             </Nav.Link>
             <Nav.Link 
               as={Link} 
               to="/admin" 
               active={location.pathname === '/admin'}
             >
-              Administravimas
+              {t('common.menu.admin')}
             </Nav.Link>
           </Nav>
+          <LanguageSwitcher />
         </Navbar.Collapse>
       </Container>
     </Navbar>

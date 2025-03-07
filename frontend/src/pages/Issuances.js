@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Table, Modal, Form, Alert } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import './Issuances.css';
 import IssuanceForm from '../components/IssuanceForm';
 
 function Issuances() {
+  const { t } = useTranslation();
   const [issuances, setIssuances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -100,54 +102,54 @@ function Issuances() {
 
   return (
     <div className="issuances-container">
-      <h1>Išdavimai</h1>
+      <h1>{t('common.issuances.title')}</h1>
       
       <div className="action-buttons">
         <button 
           className="btn-add-issuance" 
           onClick={handleAddNew}
         >
-          Naujas išdavimas
+          {t('common.issuances.new_issuance')}
         </button>
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}
 
       {loading ? (
-        <div className="loading-spinner">Kraunama...</div>
+        <div className="loading-spinner">{t('common.messages.loading')}</div>
       ) : (
         <>
           {issuances.length === 0 ? (
             <div className="no-data-message">
-              Nėra įrašytų išdavimų. Sukurkite naują išdavimą paspaudę mygtuką "Naujas išdavimas".
+              {t('common.issuances.no_data')}
             </div>
           ) : (
             <div className="table-responsive">
               <Table striped bordered hover>
                 <thead>
                   <tr>
-                    <th>Data</th>
-                    <th>Produktas</th>
-                    <th>Kiekis</th>
-                    <th>Vairuotojas</th>
-                    <th>Vilkikas</th>
-                    <th>Įmonė</th>
-                    <th>Išduota?</th>
-                    <th>Veiksmai</th>
+                    <th>{t('common.issuances.issuance_date')}</th>
+                    <th>{t('common.labels.product')}</th>
+                    <th>{t('common.labels.quantity')}</th>
+                    <th>{t('common.issuances.driver_name')}</th>
+                    <th>{t('common.issuances.plate_number')}</th>
+                    <th>{t('common.issuances.company')}</th>
+                    <th>{t('common.labels.status')}</th>
+                    <th>{t('common.labels.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {issuances.map((issuance) => (
                     <tr key={issuance.id}>
                       <td>{formatDate(issuance.issuanceDate)}</td>
-                      <td>{issuance.product?.name || 'Nenurodyta'}</td>
+                      <td>{issuance.product?.name || t('common.messages.no_data')}</td>
                       <td>{issuance.quantity}</td>
                       <td>{issuance.driverName}</td>
-                      <td>{issuance.truck?.plateNumber || 'Nenurodyta'}</td>
-                      <td>{issuance.truck?.company?.name || 'Nenurodyta'}</td>
+                      <td>{issuance.truck?.plateNumber || t('common.messages.no_data')}</td>
+                      <td>{issuance.truck?.company?.name || t('common.messages.no_data')}</td>
                       <td>
                         <span className={`status-badge ${issuance.isIssued ? 'issued' : 'not-issued'}`}>
-                          {issuance.isIssued ? 'Taip' : 'Ne'}
+                          {issuance.isIssued ? t('common.issuances.is_issued') : t('common.issuances.not_issued')}
                         </span>
                       </td>
                       <td className="actions-cell">
@@ -157,7 +159,7 @@ function Issuances() {
                           onClick={() => handleEdit(issuance)}
                           className="action-button"
                         >
-                          Redaguoti
+                          {t('common.buttons.edit')}
                         </Button>
                         <Button 
                           variant="outline-danger" 
@@ -165,7 +167,7 @@ function Issuances() {
                           onClick={() => handleDeleteClick(issuance)}
                           className="action-button"
                         >
-                          Ištrinti
+                          {t('common.buttons.delete')}
                         </Button>
                         <Button 
                           variant="outline-success" 
@@ -173,7 +175,7 @@ function Issuances() {
                           onClick={() => handleDownloadPdf(issuance)}
                           className="action-button"
                         >
-                          PDF
+                          {t('common.issuances.download_pdf')}
                         </Button>
                       </td>
                     </tr>
@@ -195,17 +197,17 @@ function Issuances() {
       {/* Ištrynimo patvirtinimo modalas */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Patvirtinkite ištrynimą</Modal.Title>
+          <Modal.Title>{t('common.issuances.delete_issuance')}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Ar tikrai norite ištrinti šį išdavimą?
+          {t('common.issuances.confirm_delete')}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
-            Atšaukti
+            {t('common.buttons.cancel')}
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            Ištrinti
+            {t('common.buttons.delete')}
           </Button>
         </Modal.Footer>
       </Modal>

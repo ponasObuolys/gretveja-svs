@@ -1,0 +1,161 @@
+{
+  "common": {
+    "welcome": "Welcome to Gretveja-SVS",
+    "menu": {
+      "home": "Home",
+      "products": "Products",
+      "trucks": "Trucks",
+      "suppliers": "Suppliers",
+      "admin": "Admin",
+      "contact": "Contact"
+    },
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "add": "Add",
+      "new": "New"
+    },
+    "labels": {
+      "code": "Code",
+      "name": "Name",
+      "unit": "Unit",
+      "actions": "Actions",
+      "quantity": "Quantity",
+      "price": "Price",
+      "date": "Date",
+      "supplier": "Supplier",
+      "company": "Company",
+      "truck": "Truck",
+      "driver": "Driver",
+      "notes": "Notes",
+      "status": "Status",
+      "search": "Search",
+      "product": "product",
+      "all_products": "All Products",
+      "in_stock_only": "In Stock Only",
+      "out_of_stock_only": "Out of Stock Only",
+      "products": "Products"
+    },
+    "tables": {
+      "products": "Products List",
+      "suppliers": "Suppliers List",
+      "trucks": "Trucks List",
+      "purchases": "Purchases List",
+      "issuances": "Issuances List",
+      "stocks": "Stock List"
+    },
+    "messages": {
+      "success": "Operation successful",
+      "error": "An error occurred",
+      "loading": "Loading...",
+      "no_data": "No data available",
+      "confirm_delete": "Are you sure you want to delete?",
+      "changes_saved": "Changes saved successfully",
+      "cannot_undo": "This action cannot be undone"
+    },
+    "system": {
+      "title": "Warehouse Management System",
+      "copyright": "All rights reserved.",
+      "created_by": "Created by Aurimas Butvilauskas"
+    },
+    "statistics": {
+      "purchases_issuances": "Purchases and Issuances Statistics",
+      "purchases_6months": "Purchases in Last 6 Months",
+      "issuances_6months": "Issuances in Last 6 Months",
+      "top_10_by_stock": "Top 10 Products by Stock",
+      "warehouse_overview": "Warehouse Overview",
+      "monthly_purchases": "Monthly Purchases",
+      "monthly_issuances": "Monthly Issuances"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "warehouse": {
+      "stock": "Warehouse Stock",
+      "initial_balance": "Add Initial Balance",
+      "logistics_companies": "Logistics Companies",
+      "stock_overview": "Stock Overview"
+    },
+    "purchases": {
+      "title": "Purchases",
+      "new_purchase": "New Purchase",
+      "edit_purchase": "Edit Purchase",
+      "delete_purchase": "Delete Purchase",
+      "invoice_number": "Invoice Number",
+      "purchase_date": "Purchase Date",
+      "unit_price": "Unit Price",
+      "total_price": "Total Price",
+      "confirm_delete": "Are you sure you want to delete this purchase?",
+      "select_product": "Select Product",
+      "select_supplier": "Select Supplier",
+      "select_company": "Select Company"
+    },
+    "issuances": {
+      "title": "Issuances",
+      "new_issuance": "New Issuance",
+      "edit_issuance": "Edit Issuance",
+      "delete_issuance": "Delete Issuance",
+      "issuance_date": "Issuance Date",
+      "driver_name": "Driver",
+      "plate_number": "Plate Number",
+      "company": "Company",
+      "is_issued": "Issued",
+      "not_issued": "Not Issued",
+      "confirm_delete": "Are you sure you want to delete this issuance?",
+      "download_pdf": "Download PDF",
+      "no_data": "No issuances recorded. Create a new issuance by clicking the \"New Issuance\" button."
+    },
+    "admin": {
+      "title": "Administration",
+      "users": "Users",
+      "roles": "Roles",
+      "settings": "Settings",
+      "new_user": "New User",
+      "edit_user": "Edit User",
+      "delete_user": "Delete User",
+      "username": "Username",
+      "email": "Email",
+      "role": "Role",
+      "active": "Active",
+      "inactive": "Inactive",
+      "confirm_delete": "Are you sure you want to delete this user?"
+    },
+    "inventory": {
+      "quantity": "quantity",
+      "unit": "pcs",
+      "balance": "Balance (pcs)",
+      "total_purchased": "Total Purchased (PCS)",
+      "total_issued": "Total Issued (PCS)",
+      "current_balance": "Current Balance (PCS)",
+      "purchases_units": "Purchases (pcs)",
+      "issuances_units": "Issuances (pcs)"
+    },
+    "search": {
+      "by_name_id": "Search by name or ID...",
+      "by_plate_model_company": "Search by plate number, model or company...",
+      "by_name_contact_phone_email": "Search by name, contact person, phone or email..."
+    },
+    "vehicle": {
+      "plate_number": "Plate Number",
+      "model": "Model"
+    },
+    "supplier": {
+      "contact_person": "Contact Person",
+      "phone": "Phone",
+      "email": "Email"
+    }
+  }
+} 

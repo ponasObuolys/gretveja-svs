@@ -1,0 +1,122 @@
+{
+  "common": {
+    "welcome": "Добро пожаловать в Гретвежа-СВС",
+    "menu": {
+      "home": "Главная",
+      "products": "Продукты",
+      "trucks": "Грузовики",
+      "suppliers": "Поставщики",
+      "admin": "Admin",
+      "contact": "Контакты"
+    },
+    "buttons": {
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "add": "Добавить",
+      "new": "Новый"
+    },
+    "labels": {
+      "code": "Код",
+      "name": "Название",
+      "unit": "Ед.",
+      "actions": "Действия",
+      "quantity": "Количество",
+      "price": "Цена",
+      "date": "Дата",
+      "supplier": "Поставщик",
+      "company": "Компания",
+      "truck": "Грузовик",
+      "driver": "Водитель",
+      "notes": "Примечания",
+      "status": "Статус",
+      "search": "Поиск",
+      "product": "продукт"
+    },
+    "tables": {
+      "products": "Список продуктов",
+      "suppliers": "Список поставщиков",
+      "trucks": "Список грузовиков",
+      "purchases": "Список закупок",
+      "issuances": "Список выдач",
+      "stocks": "Список запасов"
+    },
+    "messages": {
+      "success": "Операция выполнена успешно",
+      "error": "Произошла ошибка",
+      "loading": "Загрузка...",
+      "no_data": "Данные отсутствуют",
+      "confirm_delete": "Вы уверены, что хотите удалить?",
+      "changes_saved": "Изменения сохранены",
+      "cannot_undo": "Это действие нельзя отменить"
+    },
+    "system": {
+      "title": "Система управления складом",
+      "copyright": "Все права защищены.",
+      "created_by": "Разработал Аурим Бутвилаускас"
+    },
+    "statistics": {
+      "purchases_issuances": "Статистика закупок и выдач",
+      "purchases_6months": "Закупки за последние 6 месяцев",
+      "issuances_6months": "Выдачи за последние 6 месяцев",
+      "top_10_by_stock": "Топ 10 товаров по остатку",
+      "warehouse_overview": "Обзор склада",
+      "monthly_purchases": "Закупки за месяц",
+      "monthly_issuances": "Выдачи за месяц"
+    },
+    "months": {
+      "january": "январь",
+      "february": "февраль",
+      "march": "март",
+      "april": "апрель",
+      "may": "май",
+      "june": "июнь",
+      "july": "июль",
+      "august": "август",
+      "september": "сентябрь",
+      "october": "октябрь",
+      "november": "ноябрь",
+      "december": "декабрь"
+    },
+    "warehouse": {
+      "stock": "Складские запасы",
+      "initial_balance": "Добавить начальный остаток",
+      "logistics_companies": "Логистические компании",
+      "stock_overview": "Обзор запасов"
+    },
+    "purchases": {
+      "new_purchase": "Добавить новую закупку",
+      "invoice_number": "Номер счета:",
+      "select_product": "Выберите продукт",
+      "select_supplier": "Выберите поставщика",
+      "select_company": "Выберите компанию",
+      "unit_price": "Цена за единицу:",
+      "total_amount": "Общая сумма"
+    },
+    "inventory": {
+      "quantity": "количество",
+      "unit": "шт.",
+      "balance": "Остаток (шт.)",
+      "total_purchased": "Всего закуплено (ШТ)",
+      "total_issued": "Всего выдано (ШТ)",
+      "current_balance": "Текущий остаток (ШТ)",
+      "purchases_units": "Закупки (шт.)",
+      "issuances_units": "Выдачи (шт.)"
+    },
+    "search": {
+      "by_name_id": "Поиск по названию или ID...",
+      "by_plate_model_company": "Поиск по гос. номеру, модели или компании...",
+      "by_name_contact_phone_email": "Поиск по названию, контактному лицу, телефону или эл. почте..."
+    },
+    "vehicle": {
+      "plate_number": "Гос. номер",
+      "model": "Модель"
+    },
+    "supplier": {
+      "contact_person": "Контактное лицо",
+      "phone": "Телефон",
+      "email": "Эл. почта"
+    }
+  }
+} 

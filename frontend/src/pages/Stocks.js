@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './Stocks.css';
 import StockTable from '../components/StockTable';
 
 function Stocks() {
+  const { t } = useTranslation();
   const [stocks, setStocks] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,13 +72,13 @@ function Stocks() {
 
   return (
     <div className="stocks-container">
-      <h1 className="page-title">Atsargos</h1>
+      <h1 className="page-title">{t('common.warehouse.stock')}</h1>
       
       <div className="filters-container">
         <div className="search-container">
           <input
             type="text"
-            placeholder="Ieškoti pagal pavadinimą arba ID..."
+            placeholder={t('common.search.by_name_id')}
             value={searchTerm}
             onChange={handleSearchChange}
             className="search-input"
@@ -89,9 +91,9 @@ function Stocks() {
             onChange={handleFilterChange}
             className="filter-select"
           >
-            <option value="all">Visi produktai</option>
-            <option value="inStock">Tik turintys atsargų</option>
-            <option value="outOfStock">Tik neturintys atsargų</option>
+            <option value="all">{t('common.labels.all_products')}</option>
+            <option value="inStock">{t('common.labels.in_stock_only')}</option>
+            <option value="outOfStock">{t('common.labels.out_of_stock_only')}</option>
           </select>
         </div>
       </div>

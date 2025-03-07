@@ -1,0 +1,161 @@
+{
+  "common": {
+    "welcome": "Sveiki atvykę į Gretvėją-SVS",
+    "menu": {
+      "home": "Pagrindinis",
+      "products": "Produktai",
+      "trucks": "Vilkikai",
+      "suppliers": "Tiekėjai",
+      "admin": "Admin",
+      "contact": "Kontaktai"
+    },
+    "buttons": {
+      "save": "Išsaugoti",
+      "cancel": "Atšaukti",
+      "edit": "Redaguoti",
+      "delete": "Ištrinti",
+      "add": "Pridėti",
+      "new": "Naujas"
+    },
+    "labels": {
+      "code": "Kodas",
+      "name": "Pavadinimas",
+      "unit": "Vnt.",
+      "actions": "Veiksmai",
+      "quantity": "Kiekis",
+      "price": "Kaina",
+      "date": "Data",
+      "supplier": "Tiekėjas",
+      "company": "Įmonė",
+      "truck": "Vilkikas",
+      "driver": "Vairuotojas",
+      "notes": "Pastabos",
+      "status": "Būsena",
+      "search": "Ieškoti",
+      "product": "produktas",
+      "all_products": "Visi produktai",
+      "in_stock_only": "Tik turintys atsargų",
+      "out_of_stock_only": "Tik neturintys atsargų",
+      "products": "Prekės"
+    },
+    "tables": {
+      "products": "Produktų sąrašas",
+      "suppliers": "Tiekėjų sąrašas",
+      "trucks": "Vilkikų sąrašas",
+      "purchases": "Pirkimų sąrašas",
+      "issuances": "Išdavimų sąrašas",
+      "stocks": "Atsargų sąrašas"
+    },
+    "messages": {
+      "success": "Operacija sėkminga",
+      "error": "Įvyko klaida",
+      "loading": "Kraunama...",
+      "no_data": "Nėra duomenų",
+      "confirm_delete": "Ar tikrai norite ištrinti?",
+      "changes_saved": "Pakeitimai išsaugoti",
+      "cannot_undo": "Šio veiksmo negalima atšaukti"
+    },
+    "system": {
+      "title": "Sandėlio valdymo sistema",
+      "copyright": "Visos teisės saugomos.",
+      "created_by": "Sukūrė Aurimas Butvilauskas"
+    },
+    "statistics": {
+      "purchases_issuances": "Pirkimų ir išdavimų statistika",
+      "purchases_6months": "Pirkimai per paskutinius 6 mėnesius",
+      "issuances_6months": "Išdavimai per paskutinius 6 mėnesius",
+      "top_10_by_stock": "Top 10 prekių pagal likutį",
+      "warehouse_overview": "Sandėlio apžvalga",
+      "monthly_purchases": "Pirkimų per mėnesį",
+      "monthly_issuances": "Išdavimų per mėnesį"
+    },
+    "months": {
+      "january": "sausis",
+      "february": "vasaris",
+      "march": "kovas",
+      "april": "balandis",
+      "may": "gegužė",
+      "june": "birželis",
+      "july": "liepa",
+      "august": "rugpjūtis",
+      "september": "rugsėjis",
+      "october": "spalis",
+      "november": "lapkritis",
+      "december": "gruodis"
+    },
+    "warehouse": {
+      "stock": "Sandėlio atsargos",
+      "initial_balance": "Pridėti pradinį likutį",
+      "logistics_companies": "Logistikos įmonės",
+      "stock_overview": "Sandėlio atsargos"
+    },
+    "purchases": {
+      "title": "Pirkimai",
+      "new_purchase": "Naujas pirkimas",
+      "edit_purchase": "Redaguoti pirkimą",
+      "delete_purchase": "Ištrinti pirkimą",
+      "invoice_number": "Sąskaitos numeris",
+      "purchase_date": "Pirkimo data",
+      "unit_price": "Vieneto kaina",
+      "total_price": "Bendra suma",
+      "confirm_delete": "Ar tikrai norite ištrinti šį pirkimą?",
+      "select_product": "Pasirinkite produktą",
+      "select_supplier": "Pasirinkite tiekėją",
+      "select_company": "Pasirinkite įmonę"
+    },
+    "issuances": {
+      "title": "Išdavimai",
+      "new_issuance": "Naujas išdavimas",
+      "edit_issuance": "Redaguoti išdavimą",
+      "delete_issuance": "Ištrinti išdavimą",
+      "issuance_date": "Išdavimo data",
+      "driver_name": "Vairuotojas",
+      "plate_number": "Valst. numeris",
+      "company": "Įmonė",
+      "is_issued": "Išduota",
+      "not_issued": "Neišduota",
+      "confirm_delete": "Ar tikrai norite ištrinti šį išdavimą?",
+      "download_pdf": "Atsisiųsti PDF",
+      "no_data": "Nėra įrašytų išdavimų. Sukurkite naują išdavimą paspaudę mygtuką \"Naujas išdavimas\"."
+    },
+    "admin": {
+      "title": "Administravimas",
+      "users": "Vartotojai",
+      "roles": "Rolės",
+      "settings": "Nustatymai",
+      "new_user": "Naujas vartotojas",
+      "edit_user": "Redaguoti vartotoją",
+      "delete_user": "Ištrinti vartotoją",
+      "username": "Vartotojo vardas",
+      "email": "El. paštas",
+      "role": "Rolė",
+      "active": "Aktyvus",
+      "inactive": "Neaktyvus",
+      "confirm_delete": "Ar tikrai norite ištrinti šį vartotoją?"
+    },
+    "inventory": {
+      "quantity": "kiekis",
+      "unit": "vnt.",
+      "balance": "Likutis (vnt.)",
+      "total_purchased": "Iš viso įsigyta (VNT)",
+      "total_issued": "Iš viso išduota (VNT)",
+      "current_balance": "Likutis (VNT)",
+      "purchases_units": "Pirkimai (vnt.)",
+      "issuances_units": "Išdavimai (vnt.)"
+    },
+    "search": {
+      "by_name_id": "Ieškoti pagal pavadinimą arba ID...",
+      "by_plate_model_company": "Ieškoti pagal valst. numerį, modelį ar įmonę...",
+      "by_name_contact_phone_email": "Ieškoti pagal pavadinimą, kontaktinį asmenį, telefoną ar el. paštą..."
+    },
+    "vehicle": {
+      "plate_number": "Valst. numeris",
+      "model": "Modelis"
+    },
+    "supplier": {
+      "contact_person": "Kontaktinis asmuo",
+      "phone": "Telefonas",
+      "email": "El. paštas"
+    }
+  }
+} 

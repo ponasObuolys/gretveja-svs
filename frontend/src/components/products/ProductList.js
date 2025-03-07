@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Button, Table, InputGroup, Form } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import { getSortIcon } from '../../utils/common';
 
 /**
@@ -20,12 +21,14 @@ const ProductList = ({
   loading,
   filteredProducts
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className="mb-4">
       <Card.Header className="d-flex justify-content-between align-items-center">
-        <h3 className="mb-0">Produktų sąrašas</h3>
+        <h3 className="mb-0">{t('common.tables.products')}</h3>
         <Button variant="primary" onClick={handleAddProduct}>
-          Naujas produktas
+          {t('common.buttons.new')} {t('common.labels.product')}
         </Button>
       </Card.Header>
       <Card.Body>
@@ -34,16 +37,16 @@ const ProductList = ({
             <FaSearch />
           </InputGroup.Text>
           <Form.Control
-            placeholder="Ieškoti pagal kodą, pavadinimą..."
+            placeholder={t('common.labels.search')}
             value={productSearch}
             onChange={(e) => setProductSearch(e.target.value)}
           />
         </InputGroup>
 
-        {loading && <p>Kraunama...</p>}
+        {loading && <p>{t('common.messages.loading')}</p>}
         
         {!loading && products.length === 0 && (
-          <p className="text-center">Nėra įvestų produktų.</p>
+          <p className="text-center">{t('common.messages.no_data')}</p>
         )}
         
         {!loading && products.length > 0 && (
@@ -52,21 +55,21 @@ const ProductList = ({
               <thead>
                 <tr>
                   <th onClick={() => handleSort('products', 'code')} style={{ cursor: 'pointer' }}>
-                    Kodas {getSortIcon(productSort, 'code')}
+                    {t('common.labels.code')} {getSortIcon(productSort, 'code')}
                   </th>
                   <th onClick={() => handleSort('products', 'name')} style={{ cursor: 'pointer' }}>
-                    Pavadinimas (LT) {getSortIcon(productSort, 'name')}
+                    {t('common.labels.name')} (LT) {getSortIcon(productSort, 'name')}
                   </th>
                   <th onClick={() => handleSort('products', 'nameEn')} style={{ cursor: 'pointer' }}>
-                    Pavadinimas (EN) {getSortIcon(productSort, 'nameEn')}
+                    {t('common.labels.name')} (EN) {getSortIcon(productSort, 'nameEn')}
                   </th>
                   <th onClick={() => handleSort('products', 'nameRu')} style={{ cursor: 'pointer' }}>
-                    Pavadinimas (RU) {getSortIcon(productSort, 'nameRu')}
+                    {t('common.labels.name')} (RU) {getSortIcon(productSort, 'nameRu')}
                   </th>
                   <th onClick={() => handleSort('products', 'unit')} style={{ cursor: 'pointer' }}>
-                    Vnt. {getSortIcon(productSort, 'unit')}
+                    {t('common.labels.unit')} {getSortIcon(productSort, 'unit')}
                   </th>
-                  <th>Veiksmai</th>
+                  <th>{t('common.labels.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -84,14 +87,14 @@ const ProductList = ({
                         className="me-2"
                         onClick={() => handleEditProduct(product)}
                       >
-                        Redaguoti
+                        {t('common.buttons.edit')}
                       </Button>
                       <Button 
                         variant="outline-danger" 
                         size="sm"
                         onClick={() => handleDeleteProductClick(product)}
                       >
-                        Ištrinti
+                        {t('common.buttons.delete')}
                       </Button>
                     </td>
                   </tr>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Purchases.css';
 import InitialStockForm from '../components/InitialStockForm';
+import { useTranslation } from 'react-i18next';
 
 function Purchases() {
+  const { t } = useTranslation();
   const [purchases, setPurchases] = useState([]);
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -288,7 +290,7 @@ function Purchases() {
   
   return (
     <div className="purchases-container">
-      <h1>Pirkimai</h1>
+      <h1>{t('common.purchases.title')}</h1>
       
       <div className="action-buttons">
         <button 
@@ -450,49 +452,51 @@ function Purchases() {
         {purchases.length === 0 ? (
           <p>Nėra pirkimų įrašų.</p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Sąskaitos Nr.</th>
-                <th>Produktas</th>
-                <th>Tiekėjas</th>
-                <th>Kiekis</th>
-                <th>Data</th>
-                <th>Vieneto kaina</th>
-                <th>Bendra suma</th>
-                <th>Įmonė</th>
-                <th>Veiksmai</th>
-              </tr>
-            </thead>
-            <tbody>
-              {purchases.map(purchase => (
-                <tr key={purchase.id}>
-                  <td>{purchase.invoiceNumber}</td>
-                  <td>{purchase.product?.name || 'Nežinomas'}</td>
-                  <td>{purchase.supplier?.name || 'Nežinomas'}</td>
-                  <td>{purchase.quantity}</td>
-                  <td>{new Date(purchase.purchaseDate).toLocaleDateString('lt-LT')}</td>
-                  <td>{typeof purchase.unitPrice === 'number' ? purchase.unitPrice.toFixed(2) : Number(purchase.unitPrice).toFixed(2)} €</td>
-                  <td>{typeof purchase.totalAmount === 'number' ? purchase.totalAmount.toFixed(2) : Number(purchase.totalAmount).toFixed(2)} €</td>
-                  <td>{purchase.company?.name || 'Nežinoma'}</td>
-                  <td>
-                    <button 
-                      className="btn-edit" 
-                      onClick={() => handleEditPurchase(purchase)}
-                    >
-                      Redaguoti
-                    </button>
-                    <button 
-                      className="btn-delete" 
-                      onClick={() => handleDeletePurchase(purchase.id)}
-                    >
-                      Ištrinti
-                    </button>
-                  </td>
+          <div className="table-responsive">
+            <table className="purchases-table">
+              <thead>
+                <tr>
+                  <th>{t('common.purchases.invoice_number')}</th>
+                  <th>{t('common.labels.product')}</th>
+                  <th>{t('common.labels.supplier')}</th>
+                  <th>{t('common.labels.quantity')}</th>
+                  <th>{t('common.purchases.purchase_date')}</th>
+                  <th>{t('common.purchases.unit_price')}</th>
+                  <th>{t('common.purchases.total_price')}</th>
+                  <th>{t('common.labels.company')}</th>
+                  <th>{t('common.labels.actions')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {purchases.map((purchase) => (
+                  <tr key={purchase.id}>
+                    <td>{purchase.invoiceNumber}</td>
+                    <td>{purchase.product?.name || t('common.messages.no_data')}</td>
+                    <td>{purchase.supplier?.name || t('common.messages.no_data')}</td>
+                    <td>{purchase.quantity}</td>
+                    <td>{new Date(purchase.purchaseDate).toLocaleDateString()}</td>
+                    <td>{Number(purchase.unitPrice).toFixed(2)}</td>
+                    <td>{(Number(purchase.quantity) * Number(purchase.unitPrice)).toFixed(2)}</td>
+                    <td>{purchase.company?.name || t('common.messages.no_data')}</td>
+                    <td>
+                      <button
+                        className="btn-edit"
+                        onClick={() => handleEditPurchase(purchase)}
+                      >
+                        {t('common.buttons.edit')}
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDeletePurchase(purchase.id)}
+                      >
+                        {t('common.buttons.delete')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
       

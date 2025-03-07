@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Produktų formos komponentas
@@ -15,17 +16,19 @@ const ProductForm = ({
   handleSaveProduct,
   loading
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Modal show={showProductForm} onHide={() => setShowProductForm(false)} centered>
       <Modal.Header closeButton>
         <Modal.Title>
-          {currentProduct ? 'Redaguoti produktą' : 'Naujas produktas'}
+          {currentProduct ? t('common.buttons.edit') : t('common.buttons.new')} {t('common.labels.product')}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSaveProduct}>
           <Form.Group className="mb-3">
-            <Form.Label>Kodas *</Form.Label>
+            <Form.Label>{t('common.labels.code')} *</Form.Label>
             <Form.Control
               type="text"
               name="code"
@@ -36,7 +39,7 @@ const ProductForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Pavadinimas (LT) *</Form.Label>
+            <Form.Label>{t('common.labels.name')} (LT) *</Form.Label>
             <Form.Control
               type="text"
               name="name"
@@ -47,7 +50,7 @@ const ProductForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Pavadinimas (EN)</Form.Label>
+            <Form.Label>{t('common.labels.name')} (EN)</Form.Label>
             <Form.Control
               type="text"
               name="nameEn"
@@ -57,7 +60,7 @@ const ProductForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Pavadinimas (RU)</Form.Label>
+            <Form.Label>{t('common.labels.name')} (RU)</Form.Label>
             <Form.Control
               type="text"
               name="nameRu"
@@ -67,7 +70,7 @@ const ProductForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Pavadinimas (DE)</Form.Label>
+            <Form.Label>{t('common.labels.name')} (DE)</Form.Label>
             <Form.Control
               type="text"
               name="nameDe"
@@ -77,7 +80,7 @@ const ProductForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Matavimo vienetas *</Form.Label>
+            <Form.Label>{t('common.labels.unit')} *</Form.Label>
             <Form.Control
               type="text"
               name="unit"
@@ -89,10 +92,10 @@ const ProductForm = ({
           
           <div className="d-flex justify-content-end">
             <Button variant="secondary" className="me-2" onClick={() => setShowProductForm(false)}>
-              Atšaukti
+              {t('common.buttons.cancel')}
             </Button>
             <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? 'Saugoma...' : 'Išsaugoti'}
+              {loading ? t('common.messages.loading') : t('common.buttons.save')}
             </Button>
           </div>
         </Form>

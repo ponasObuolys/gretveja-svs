@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Container, Alert, Tabs, Tab } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import './Admin.css';
 
 // Importuojame reikiamus komponentus
@@ -12,12 +13,13 @@ import Tiekejai from './Tiekejai';
  * @returns {JSX.Element} Administravimo puslapio komponentas
  */
 function Admin() {
+  const { t } = useTranslation();
   // Būsenos kintamieji
   const [activeTab, setActiveTab] = useState('trucks');
   
   return (
     <Container className="admin-container">
-      <h1 className="text-center my-4">Administravimas</h1>
+      <h1 className="text-center my-4">{t('common.admin.title')}</h1>
       
       <Tabs
         activeKey={activeTab}
@@ -27,17 +29,17 @@ function Admin() {
         fill
       >
         {/* VILKIKŲ SKILTIS */}
-        <Tab eventKey="trucks" title="Vilkikai" tabClassName="admin-tab-item">
+        <Tab eventKey="trucks" title={t('common.menu.trucks')} tabClassName="admin-tab-item">
           <Vilkikai />
         </Tab>
         
         {/* PRODUKTŲ SKILTIS */}
-        <Tab eventKey="products" title="Produktai" tabClassName="admin-tab-item">
+        <Tab eventKey="products" title={t('common.menu.products')} tabClassName="admin-tab-item">
           <Produktai />
         </Tab>
         
         {/* TIEKĖJŲ SKILTIS */}
-        <Tab eventKey="suppliers" title="Tiekėjai" tabClassName="admin-tab-item">
+        <Tab eventKey="suppliers" title={t('common.menu.suppliers')} tabClassName="admin-tab-item">
           <Tiekejai />
         </Tab>
       </Tabs>

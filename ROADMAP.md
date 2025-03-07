@@ -271,6 +271,13 @@
 - ✅ Optimizuoti duomenų užkrovimo procesai
 - ✅ Patobulinta vartotojo sąsaja su geriau valdomomis funkcijomis
 - ✅ Implementuotas labiau komponentinis požiūris į vartotojo sąsają
+- ✅ Įdiegtas daugiakalbiškumo palaikymas:
+  - ✅ Įdiegta react-i18next biblioteka
+  - ✅ Sukurtas kalbos keitimo komponentas
+  - ✅ Pridėti vertimai lietuvių, anglų ir rusų kalbomis
+  - ✅ Kalbos pasirinkimas išsaugomas naršyklėje
+  - ✅ Automatinis kalbos nustatymas pagal naršyklės kalbą
+  - ✅ Pridėtas kalbos keitiklis į navigacijos juostą
 
 ### 2023-03-10
 - ✅ Sukurtos keturios įmonės duomenų bazėje:
@@ -404,4 +411,15 @@
 - [ ] Įgyvendinti duomenų importavimo funkcijas
 - [ ] Pridėti išplėstinės paieškos galimybes
 - [ ] Sukurti duomenų archyvavimo sistemą
-- [ ] Įgyvendinti vartotojų teisių valdymą 
+- [ ] Įgyvendinti vartotojų teisių valdymą
+
+### 2024-03-21
+- ✅ Atnaujinti vertimai visose kalbose (lietuvių, anglų, rusų):
+  - ✅ Pridėti trūkstami vertimai sisteminiams pranešimams
+  - ✅ Pridėti mėnesių pavadinimai
+  - ✅ Pridėti statistikos skiltys
+  - ✅ Pridėti sandėlio valdymo terminai
+  - ✅ Pridėti paieškos tekstai
+  - ✅ Pridėti transporto priemonių terminai
+  - ✅ Pridėti tiekėjų informacijos terminai
+  - ✅ Atnaujinti bendri sistemos pavadinimai ir aprašymai 
