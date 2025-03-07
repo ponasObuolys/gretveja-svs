@@ -385,6 +385,20 @@
   - ✅ Užtikrintas tinkamas turinio atstumas nuo fiksuotos navigacijos juostos
   - ✅ Pridėti šešėliai ir perėjimai navigacijos elementams
 
+### 2024-03-24
+- ✅ Patobulintas projekto diegimas į kitas sistemas:
+  - ✅ Atnaujintas .gitignore failas, kad įtrauktų svarbius pradinius duomenų failus
+  - ✅ Užtikrinta, kad visi reikalingi failai yra versijuojami:
+    - ✅ package.json (frontend ir backend)
+    - ✅ docker-compose.yml ir Dockerfile failai
+    - ✅ .env.example su pavyzdinėmis konfigūracijomis
+    - ✅ Pradiniai duomenų failai (produktai.csv, Vilkikai.csv, suppliers.json)
+  - ✅ Dokumentuota diegimo procedūra:
+    1. Projekto klonavimas iš GitHub
+    2. .env failo sukūrimas pagal .env.example
+    3. Docker konteinerių paleidimas
+    4. Pradinių duomenų importavimas
+
 ### Planuojami darbai
 - [ ] Pridėti duomenų eksportavimo funkcijas (CSV, Excel)
 - [ ] Įgyvendinti duomenų importavimo funkcijas
