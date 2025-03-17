@@ -13,13 +13,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const Product_1 = require("../models/Product");
+const supabase_1 = require("../config/supabase");
 const router = express_1.default.Router();
 // Gauti visus produktus
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const products = yield Product_1.Product.findAll();
-        return res.status(200).json(products);
+        const { data, error } = yield supabase_1.supabase
+            .from('products')
+            .select('*')
+            .order('name');
+        if (error) {
+            console.error('Klaida gaunant produktus:', error);
+            return res.status(500).json({ message: 'Serverio klaida gaunant produktus' });
+        }
+        // Jei nėra duomenų, grąžinti tuščią masyvą vietoj null
+        if (!data || data.length === 0) {
+            return res.status(200).json([]);
+        }
+        return res.status(200).json(data);
     }
     catch (error) {
         console.error('Klaida gaunant produktus:', error);
@@ -30,11 +41,17 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const product = yield Product_1.Product.findByPk(id);
-        if (!product) {
+        const { data, error } = yield supabase_1.supabase
+            .from('products')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (error)
+            throw error;
+        if (!data) {
             return res.status(404).json({ message: 'Produktas nerastas' });
         }
-        return res.status(200).json(product);
+        return res.status(200).json(data);
     }
     catch (error) {
         console.error(`Klaida gaunant produktą ID ${id}:`, error);
@@ -43,17 +60,24 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 }));
 // Sukurti naują produktą
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { code, name, nameEn, nameRu, description, unit } = req.body;
+    const { name, nameEn, nameRu, description, unit } = req.body;
     try {
-        const product = yield Product_1.Product.create({
-            code,
-            name,
-            nameEn,
-            nameRu,
-            description,
-            unit
-        });
-        return res.status(201).json(product);
+        const { data, error } = yield supabase_1.supabase
+            .from('products')
+            .insert([
+            {
+                name,
+                name_en: nameEn,
+                name_ru: nameRu,
+                description,
+                unit
+            }
+        ])
+            .select()
+            .single();
+        if (error)
+            throw error;
+        return res.status(201).json(data);
     }
     catch (error) {
         console.error('Klaida kuriant produktą:', error);
@@ -63,17 +87,27 @@ router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 // Atnaujinti produktą
 router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const { name, unit } = req.body;
+    const { name, nameEn, nameRu, description, unit } = req.body;
     try {
-        const product = yield Product_1.Product.findByPk(id);
-        if (!product) {
+        const { data, error } = yield supabase_1.supabase
+            .from('products')
+            .update({
+            name,
+            name_en: nameEn,
+            name_ru: nameRu,
+            description,
+            unit,
+            updated_at: new Date()
+        })
+            .eq('id', id)
+            .select()
+            .single();
+        if (error)
+            throw error;
+        if (!data) {
             return res.status(404).json({ message: 'Produktas nerastas' });
         }
-        yield product.update({
-            name,
-            unit
-        });
-        return res.status(200).json(product);
+        return res.status(200).json(data);
     }
     catch (error) {
         console.error(`Klaida atnaujinant produktą ID ${id}:`, error);
@@ -84,11 +118,12 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const product = yield Product_1.Product.findByPk(id);
-        if (!product) {
-            return res.status(404).json({ message: 'Produktas nerastas' });
-        }
-        yield product.destroy();
+        const { error } = yield supabase_1.supabase
+            .from('products')
+            .delete()
+            .eq('id', id);
+        if (error)
+            throw error;
         return res.status(200).json({ message: 'Produktas sėkmingai ištrintas' });
     }
     catch (error) {

@@ -53,9 +53,15 @@
   overflow-x: auto;
 }
 
+.table th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+}
+
 .actions-cell {
   white-space: nowrap;
-  width: 1%;
+  min-width: 200px;
 }
 
 .action-button {
@@ -70,36 +76,78 @@
   display: inline-block;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.issued {
-  background-color: #d4edda;
-  color: #155724;
+.status-badge.issued {
+  background-color: #2ecc71;
+  color: white;
 }
 
-.not-issued {
-  background-color: #f8d7da;
-  color: #721c24;
+.status-badge.not-issued {
+  background-color: #e74c3c;
+  color: white;
+}
+
+/* Filter styles */
+.filter-container {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.filter-container .form-label {
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
+.filter-container .form-select {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+.filter-container .form-select:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+/* Export dropdown styles */
+.export-dropdown {
+  margin-right: 10px;
+}
+
+.dropdown-item {
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
 }
 
 /* Responsive styles */
 @media (max-width: 768px) {
-  .issuances-container {
-    padding: 15px;
+  .filter-container .row {
+    flex-direction: column;
   }
   
-  .table-responsive {
-    font-size: 0.9rem;
-  }
-  
-  .action-button {
-    padding: 0.2rem 0.4rem;
-    font-size: 0.8rem;
+  .filter-container .col-sm-1,
+  .filter-container .col-sm-2,
+  .filter-container .col-sm-3 {
+    width: 100%;
+    margin-bottom: 10px;
   }
   
   .action-buttons {
-    justify-content: center;
+    flex-direction: column;
   }
-} 
+  
+  .export-dropdown,
+  .btn-add-issuance {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}

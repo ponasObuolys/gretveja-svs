@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './Stocks.css';
 import StockTable from '../components/StockTable';
+import { Card, InputGroup, Form } from 'react-bootstrap';
+import { FaSearch } from 'react-icons/fa';
 
 function Stocks() {
   const { t } = useTranslation();
@@ -74,29 +76,34 @@ function Stocks() {
     <div className="stocks-container">
       <h1 className="page-title">{t('common.warehouse.stock')}</h1>
       
-      <div className="filters-container">
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder={t('common.search.by_name_id')}
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="search-input"
-          />
-        </div>
-        
-        <div className="filter-container">
-          <select 
-            value={filterOption} 
-            onChange={handleFilterChange}
-            className="filter-select"
-          >
-            <option value="all">{t('common.labels.all_products')}</option>
-            <option value="inStock">{t('common.labels.in_stock_only')}</option>
-            <option value="outOfStock">{t('common.labels.out_of_stock_only')}</option>
-          </select>
-        </div>
-      </div>
+      <Card className="mb-4">
+        <Card.Body>
+          <div className="filters-row">
+            <InputGroup className="search-group mb-0">
+              <InputGroup.Text>
+                <FaSearch />
+              </InputGroup.Text>
+              <Form.Control
+                type="text"
+                placeholder={t('common.search.by_name_id')}
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="search-input"
+              />
+            </InputGroup>
+            
+            <Form.Select 
+              value={filterOption} 
+              onChange={handleFilterChange}
+              className="filter-select"
+            >
+              <option value="all">{t('common.labels.all_products')}</option>
+              <option value="inStock">{t('common.labels.in_stock_only')}</option>
+              <option value="outOfStock">{t('common.labels.out_of_stock_only')}</option>
+            </Form.Select>
+          </div>
+        </Card.Body>
+      </Card>
       
       <StockTable 
         stocks={filteredStocks} 

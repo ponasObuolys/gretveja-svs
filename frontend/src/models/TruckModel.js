@@ -28,11 +28,9 @@ const transformTruckFromBackend = (truck) => {
  * @returns {Object} Transformed truck data for backend
  */
 const transformTruckToBackend = (truck) => {
-  const { model, ...rest } = truck;
-  
   return {
-    plate_number: rest.plateNumber,
-    company_id: rest.companyId
+    plate_number: truck.plateNumber,
+    company_id: truck.companyId
   };
 };
 
@@ -46,15 +44,22 @@ class TruckModel {
    * @returns {Promise} Pažadas su vilkikų sąrašu
    */
   static async getAll(options = {}) {
-    const params = new URLSearchParams();
-    if (options.include) {
-      params.append('include', options.include);
-    }
-    
     try {
+      const params = new URLSearchParams();
+      if (options.include) {
+        params.append('include', options.include);
+      }
+      
       const response = await axios.get(`/api/trucks?${params.toString()}`);
+      
+      if (!response.data || !Array.isArray(response.data)) {
+        console.error('Unexpected response format:', response.data);
+        return [];
+      }
+      
       return response.data.map(transformTruckFromBackend);
     } catch (error) {
+      console.error('Error fetching trucks:', error);
       throw error;
     }
   }
@@ -69,6 +74,7 @@ class TruckModel {
       const response = await axios.get(`/api/trucks/${id}?include=company`);
       return transformTruckFromBackend(response.data);
     } catch (error) {
+      console.error('Error fetching truck by ID:', error);
       throw error;
     }
   }
@@ -84,6 +90,7 @@ class TruckModel {
       const response = await axios.post('/api/trucks', backendData);
       return transformTruckFromBackend(response.data);
     } catch (error) {
+      console.error('Error creating truck:', error);
       throw error;
     }
   }
@@ -100,6 +107,7 @@ class TruckModel {
       const response = await axios.put(`/api/trucks/${id}`, backendData);
       return transformTruckFromBackend(response.data);
     } catch (error) {
+      console.error('Error updating truck:', error);
       throw error;
     }
   }
@@ -114,6 +122,7 @@ class TruckModel {
       const response = await axios.delete(`/api/trucks/${id}`);
       return response.data;
     } catch (error) {
+      console.error('Error deleting truck:', error);
       throw error;
     }
   }

@@ -1,10 +1,8 @@
-import express from 'express';
+import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 
-const router = express.Router();
-
 // Gauti visus tiekėjus
-router.get('/', async (req, res) => {
+export const getAllSuppliers = async (req: Request, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('suppliers')
@@ -16,7 +14,7 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ message: 'Serverio klaida gaunant tiekėjus' });
     }
     
-    // Jei nėra duomenų, grąžinti tuščią masyvą vietoj null
+    // Jei nėra duomenų, grąžinti tuščią masyvą
     if (!data || data.length === 0) {
       return res.status(200).json([]);
     }
@@ -26,10 +24,10 @@ router.get('/', async (req, res) => {
     console.error('Klaida gaunant tiekėjus:', error);
     return res.status(500).json({ message: 'Serverio klaida gaunant tiekėjus' });
   }
-});
+};
 
 // Gauti konkretų tiekėją pagal ID
-router.get('/:id', async (req, res) => {
+export const getSupplierById = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
@@ -39,7 +37,10 @@ router.get('/:id', async (req, res) => {
       .eq('id', id)
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error(`Klaida gaunant tiekėją ID ${id}:`, error);
+      return res.status(500).json({ message: 'Serverio klaida gaunant tiekėją' });
+    }
     
     if (!data) {
       return res.status(404).json({ message: 'Tiekėjas nerastas' });
@@ -50,10 +51,10 @@ router.get('/:id', async (req, res) => {
     console.error(`Klaida gaunant tiekėją ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida gaunant tiekėją' });
   }
-});
+};
 
 // Sukurti naują tiekėją
-router.post('/', async (req, res) => {
+export const createSupplier = async (req: Request, res: Response) => {
   const { name, contactPerson, phone, email } = req.body;
   
   try {
@@ -70,17 +71,20 @@ router.post('/', async (req, res) => {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Klaida kuriant tiekėją:', error);
+      return res.status(500).json({ message: 'Serverio klaida kuriant tiekėją' });
+    }
     
     return res.status(201).json(data);
   } catch (error) {
     console.error('Klaida kuriant tiekėją:', error);
     return res.status(500).json({ message: 'Serverio klaida kuriant tiekėją' });
   }
-});
+};
 
 // Atnaujinti tiekėją
-router.put('/:id', async (req, res) => {
+export const updateSupplier = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, contactPerson, phone, email } = req.body;
   
@@ -98,7 +102,10 @@ router.put('/:id', async (req, res) => {
       .select()
       .single();
     
-    if (error) throw error;
+    if (error) {
+      console.error(`Klaida atnaujinant tiekėją ID ${id}:`, error);
+      return res.status(500).json({ message: 'Serverio klaida atnaujinant tiekėją' });
+    }
     
     if (!data) {
       return res.status(404).json({ message: 'Tiekėjas nerastas' });
@@ -109,10 +116,10 @@ router.put('/:id', async (req, res) => {
     console.error(`Klaida atnaujinant tiekėją ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida atnaujinant tiekėją' });
   }
-});
+};
 
 // Ištrinti tiekėją
-router.delete('/:id', async (req, res) => {
+export const deleteSupplier = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
@@ -121,13 +128,14 @@ router.delete('/:id', async (req, res) => {
       .delete()
       .eq('id', id);
     
-    if (error) throw error;
+    if (error) {
+      console.error(`Klaida ištrinant tiekėją ID ${id}:`, error);
+      return res.status(500).json({ message: 'Serverio klaida ištrinant tiekėją' });
+    }
     
     return res.status(200).json({ message: 'Tiekėjas sėkmingai ištrintas' });
   } catch (error) {
     console.error(`Klaida ištrinant tiekėją ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida ištrinant tiekėją' });
   }
-});
-
-export default router;
+};

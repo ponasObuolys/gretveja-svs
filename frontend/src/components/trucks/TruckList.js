@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, Button, Table, InputGroup, Form } from 'react-bootstrap';
+import { Card, Button, Table, InputGroup, Form, Spinner } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 import { getSortIcon } from '../../utils/common';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Vilkikų sąrašo komponentas
@@ -14,19 +15,16 @@ const TruckList = ({
   setTruckSearch,
   truckSort,
   handleSort,
-  handleAddTruck,
   handleEditTruck,
   handleDeleteTruckClick,
-  loading,
-  filteredTrucks
+  loading
 }) => {
+  const { t } = useTranslation();
+  
   return (
     <Card className="mb-4">
       <Card.Header className="d-flex justify-content-between align-items-center">
-        <h3 className="mb-0">Vilkikų sąrašas</h3>
-        <Button variant="primary" onClick={handleAddTruck}>
-          Naujas vilkikas
-        </Button>
+        <h3 className="mb-0">{t('common.lists.trucks')}</h3>
       </Card.Header>
       <Card.Body>
         <InputGroup className="mb-3">
@@ -34,34 +32,41 @@ const TruckList = ({
             <FaSearch />
           </InputGroup.Text>
           <Form.Control
-            placeholder="Ieškoti pagal valst. numerį ar įmonę..."
+            placeholder={t('common.search.truckPlaceholder')}
             value={truckSearch}
             onChange={(e) => setTruckSearch(e.target.value)}
+            disabled={loading}
           />
         </InputGroup>
 
-        {loading && <p>Kraunama...</p>}
-        
-        {!loading && trucks.length === 0 && (
-          <p className="text-center">Nėra įvestų vilkikų.</p>
+        {loading && (
+          <div className="text-center my-4">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">{t('common.loading')}</span>
+            </Spinner>
+          </div>
         )}
         
-        {!loading && trucks.length > 0 && (
+        {!loading && (!trucks || trucks.length === 0) && (
+          <p className="text-center">{t('common.noData.trucks')}</p>
+        )}
+        
+        {!loading && trucks && trucks.length > 0 && (
           <div className="table-responsive">
             <Table striped bordered hover>
               <thead>
                 <tr>
                   <th onClick={() => handleSort('trucks', 'plateNumber')} style={{ cursor: 'pointer' }}>
-                    Valst. numeris {getSortIcon(truckSort, 'plateNumber')}
+                    {t('common.fields.plateNumber')} {getSortIcon(truckSort, 'plateNumber')}
                   </th>
                   <th onClick={() => handleSort('trucks', 'company.name')} style={{ cursor: 'pointer' }}>
-                    Įmonė {getSortIcon(truckSort, 'company.name')}
+                    {t('common.fields.company')} {getSortIcon(truckSort, 'company.name')}
                   </th>
-                  <th>Veiksmai</th>
+                  <th>{t('common.fields.actions')}</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredTrucks.map(truck => (
+                {trucks.map(truck => (
                   <tr key={truck.id}>
                     <td>{truck.plateNumber}</td>
                     <td>{truck.company?.name || '-'}</td>
@@ -72,14 +77,14 @@ const TruckList = ({
                         className="me-2"
                         onClick={() => handleEditTruck(truck)}
                       >
-                        Redaguoti
+                        {t('common.buttons.edit')}
                       </Button>
                       <Button 
                         variant="outline-danger" 
                         size="sm"
                         onClick={() => handleDeleteTruckClick(truck)}
                       >
-                        Ištrinti
+                        {t('common.buttons.delete')}
                       </Button>
                     </td>
                   </tr>

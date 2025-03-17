@@ -7,18 +7,46 @@ import { safeApiCall, handleApiError, getNewSortDirection } from '../utils/commo
 class ProductController {
   /**
    * Gauna visus produktus
-   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną
-   * @param {Function} setProducts - Funkcija, kuri nustato produktų sąrašą
-   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną
+   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną (optional)
+   * @param {Function} setProducts - Funkcija, kuri nustato produktų sąrašą (optional)
+   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną (optional)
    * @returns {Promise} Pažadas su produktų sąrašu
    */
   static async fetchProducts(setLoading, setProducts, setError) {
-    return safeApiCall(
-      () => ProductModel.getAll(),
-      setLoading,
-      setError,
-      (data) => setProducts(data)
-    );
+    try {
+      // If setLoading is provided, set loading state to true
+      if (typeof setLoading === 'function') {
+        setLoading(true);
+      }
+      
+      const data = await ProductModel.getAll();
+      
+      // If setError is provided, clear any previous errors
+      if (typeof setError === 'function') {
+        setError(null);
+      }
+      
+      // If setProducts is provided, update the products state
+      if (typeof setProducts === 'function') {
+        setProducts(data);
+      }
+      
+      return data;
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      
+      // If setError is provided, set the error state
+      if (typeof setError === 'function') {
+        setError(err.message || 'Failed to fetch products');
+      }
+      
+      return [];
+    } finally {
+      // If setLoading is provided, set loading state to false
+      if (typeof setLoading === 'function') {
+        setLoading(false);
+      }
+    }
   }
 
   /**

@@ -24,21 +24,41 @@ function IssuanceForm({ show, onHide, issuance }) {
   const [isProductDropdownOpen, setIsProductDropdownOpen] = useState(false);
   const [productSearchTerm, setProductSearchTerm] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [stockData, setStockData] = useState([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
   // Gauti produktus ir vilkikus
   useEffect(() => {
     const fetchData = async () => {
+      setDataLoading(true);
       try {
-        const [productsResponse, trucksResponse] = await Promise.all([
+        const [productsResponse, trucksResponse, stockResponse] = await Promise.all([
           axios.get('/api/products'),
-          axios.get('/api/trucks?include=company')
+          axios.get('/api/trucks?include=company'),
+          axios.get('/api/stocks')
         ]);
         setProducts(productsResponse.data);
         setFilteredProducts(productsResponse.data);
-        setTrucks(trucksResponse.data);
+        
+        // Transform truck data from backend (snake_case) to frontend (camelCase) format
+        const transformedTrucks = trucksResponse.data.map(truck => ({
+          id: truck.id,
+          plateNumber: truck.plate_number,
+          companyId: truck.company_id,
+          company: truck.companies ? {
+            id: truck.companies.id,
+            name: truck.companies.name
+          } : null
+        }));
+        
+        setTrucks(transformedTrucks);
+        setStockData(stockResponse.data);
+        setError(null);
       } catch (err) {
         console.error('Klaida gaunant duomenis:', err);
         setError('Nepavyko gauti duomenų. Bandykite dar kartą vėliau.');
+      } finally {
+        setDataLoading(false);
       }
     };
 
@@ -79,7 +99,6 @@ function IssuanceForm({ show, onHide, issuance }) {
     } else {
       const searchTermLower = productSearchTerm.toLowerCase();
       const filtered = products.filter(product => 
-        product.code.toLowerCase().includes(searchTermLower) || 
         product.name.toLowerCase().includes(searchTermLower)
       );
       setFilteredProducts(filtered);
@@ -175,27 +194,63 @@ function IssuanceForm({ show, onHide, issuance }) {
   // Gauti pasirinkto produkto pavadinimą
   const getSelectedProductName = () => {
     if (!formData.productId) return 'Pasirinkite produktą';
+    
     const product = products.find(p => p.id === parseInt(formData.productId));
-    return product ? `${product.code} - ${product.name}` : 'Pasirinkite produktą';
+    if (!product) return 'Pasirinkite produktą';
+    
+    // Find stock information for the selected product
+    const productStock = stockData.find(item => item.productId === product.id);
+    const stockQuantity = productStock ? productStock.stockInHand : 0;
+    
+    return `${product.name} (Likutis: ${stockQuantity} ${product.unit || 'vnt.'})`;
+  };
+
+  const handleProductSearch = (e) => {
+    setProductSearchTerm(e.target.value);
+  };
+
+  const handleClose = () => {
+    onHide(false);
   };
 
   return (
     <Modal
       show={show}
-      onHide={() => onHide(false)}
+      onHide={handleClose}
       backdrop="static"
       keyboard={false}
       size="lg"
       centered
-      dialogClassName="issuance-modal"
-      contentClassName="modal-content"
-      animation={true}
+      className="issuance-modal"
     >
       <Modal.Header closeButton>
         <Modal.Title>{issuance ? 'Redaguoti išdavimą' : 'Naujas išdavimas'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {error && <Alert variant="danger">{error}</Alert>}
+        {error && (
+          <div className="error-message">
+            {error}
+            <button 
+              className="btn btn-sm btn-outline-danger ms-3" 
+              onClick={() => {
+                setDataLoading(true);
+                setError(null);
+                axios.get('/api/stocks')
+                  .then(response => {
+                    setStockData(response.data);
+                    setDataLoading(false);
+                  })
+                  .catch(err => {
+                    console.error('Klaida gaunant atsargų duomenis:', err);
+                    setError('Nepavyko gauti atsargų duomenų. Bandykite dar kartą.');
+                    setDataLoading(false);
+                  });
+              }}
+            >
+              Bandyti dar kartą
+            </button>
+          </div>
+        )}
         
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
           <Row>
@@ -212,30 +267,36 @@ function IssuanceForm({ show, onHide, issuance }) {
                   </div>
                   
                   {isProductDropdownOpen && (
-                    <div className="custom-dropdown-content">
-                      <div className="search-container">
+                    <div className="custom-dropdown-content" id="product-dropdown">
+                      <div className="dropdown-search">
                         <input
                           type="text"
                           placeholder="Ieškoti produkto..."
                           value={productSearchTerm}
-                          onChange={(e) => setProductSearchTerm(e.target.value)}
-                          className="search-input"
+                          onChange={handleProductSearch}
                         />
                       </div>
+                      
                       <div className="products-list">
-                        {filteredProducts.length > 0 ? (
+                        {dataLoading ? (
+                          <div className="dropdown-loading">
+                            <p>Kraunami produktai...</p>
+                          </div>
+                        ) : filteredProducts.length > 0 ? (
                           filteredProducts.map(product => (
-                            <div 
-                              key={product.id} 
-                              className="product-item"
+                            <div
+                              key={product.id}
+                              className="dropdown-item"
                               onClick={() => handleProductSelect(product.id)}
                             >
-                              <span className="product-code">{product.code}</span>
                               <span className="product-name">{product.name}</span>
+                              <span className="product-stock"> (Likutis: {stockData.find(item => item.productId === product.id)?.stockInHand || 0} {product.unit || 'vnt.'})</span>
                             </div>
                           ))
                         ) : (
-                          <div className="no-products">Produktų nerasta</div>
+                          <div className="no-products">
+                            <p>Produktų nerasta. Pabandykite kitą paieškos frazę.</p>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -375,7 +436,7 @@ function IssuanceForm({ show, onHide, issuance }) {
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => onHide(false)} disabled={loading}>
+        <Button variant="secondary" onClick={handleClose} disabled={loading}>
           Atšaukti
         </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={loading}>

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import './Purchases.css';
 import InitialStockForm from '../components/InitialStockForm';
 import { useTranslation } from 'react-i18next';
+import { Row, Col, Form, Button, Dropdown } from 'react-bootstrap';
+import axios from 'axios';
 
 function Purchases() {
   const { t } = useTranslation();
@@ -35,6 +37,30 @@ function Purchases() {
   const [selectedProductName, setSelectedProductName] = useState('Pasirinkite produktą');
   const [productSearchTerm, setProductSearchTerm] = useState('');
   
+  // Filtravimo būsenos
+  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
+  
+  // Gauti metus filtravimui (nuo 2020 iki dabartinių metų)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2019 }, (_, i) => currentYear - i);
+  
+  // Mėnesių sąrašas
+  const months = [
+    { value: 1, name: 'january' },
+    { value: 2, name: 'february' },
+    { value: 3, name: 'march' },
+    { value: 4, name: 'april' },
+    { value: 5, name: 'may' },
+    { value: 6, name: 'june' },
+    { value: 7, name: 'july' },
+    { value: 8, name: 'august' },
+    { value: 9, name: 'september' },
+    { value: 10, name: 'october' },
+    { value: 11, name: 'november' },
+    { value: 12, name: 'december' }
+  ];
+  
   // Ref produktų dropdown elementui
   const productDropdownRef = useRef(null);
   
@@ -55,53 +81,207 @@ function Purchases() {
     };
   }, [productDropdownRef]);
   
+  // Filtravimo komponentas
+  const FilterComponent = () => {
+    return (
+      <div className="filter-container">
+        <Row>
+          <Col sm={3}>
+            <Form.Group>
+              <Form.Label>{t('common.filters.year')}</Form.Label>
+              <Form.Select
+                value={selectedYear || ''}
+                onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
+              >
+                <option value="">{t('common.filters.all_years')}</option>
+                {years.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col sm={3}>
+            <Form.Group>
+              <Form.Label>{t('common.filters.month')}</Form.Label>
+              <Form.Select
+                value={selectedMonth || ''}
+                onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!selectedYear}
+              >
+                <option value="">{t('common.filters.all_months')}</option>
+                {months.map(month => (
+                  <option key={month.value} value={month.value}>
+                    {t(`common.months.${month.name}`)}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col sm={3} className="d-flex align-items-end">
+            <Button 
+              variant="outline-secondary" 
+              onClick={clearFilters}
+              className="mb-3"
+            >
+              {t('common.filters.clear')}
+            </Button>
+          </Col>
+        </Row>
+      </div>
+    );
+  };
+
+  // Valyti filtrus
+  const clearFilters = () => {
+    setSelectedYear(null);
+    setSelectedMonth(null);
+  };
+
+  // Eksporto mygtukai
+  const ExportButtons = () => {
+    return (
+      <Dropdown className="export-dropdown">
+        <Dropdown.Toggle variant="success">
+          {t('common.buttons.export')}
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={() => handleExport('csv')}>
+            {t('common.purchases.export_csv')}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => handleExport('xlsx')}>
+            {t('common.purchases.export_xlsx')}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => handleExport('pdf')}>
+            {t('common.purchases.export_pdf')}
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+  };
+  
   // Gauti visus pirkimus
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        
-        // Gauti pirkimus
-        const purchasesResponse = await fetch('/api/purchases');
-        if (!purchasesResponse.ok) {
-          throw new Error('Nepavyko gauti pirkimų duomenų');
-        }
-        const purchasesData = await purchasesResponse.json();
-        setPurchases(purchasesData);
-        
-        // Gauti produktus
-        const productsResponse = await fetch('/api/products');
-        if (!productsResponse.ok) {
-          throw new Error('Nepavyko gauti produktų duomenų');
-        }
-        const productsData = await productsResponse.json();
-        setProducts(productsData);
-        
-        // Gauti tiekėjus
-        const suppliersResponse = await fetch('/api/suppliers');
-        if (!suppliersResponse.ok) {
-          throw new Error('Nepavyko gauti tiekėjų duomenų');
-        }
-        const suppliersData = await suppliersResponse.json();
-        setSuppliers(suppliersData);
-        
-        // Gauti įmones
-        const companiesResponse = await fetch('/api/companies');
-        if (!companiesResponse.ok) {
-          throw new Error('Nepavyko gauti įmonių duomenų');
-        }
-        const companiesData = await companiesResponse.json();
-        setCompanies(companiesData);
-        
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
+  const fetchPurchases = async () => {
+    try {
+      setLoading(true);
+      
+      // Sukurti URL su filtrais
+      let url = '/api/purchases';
+      const params = new URLSearchParams();
+      
+      if (selectedYear) {
+        params.append('year', selectedYear);
       }
-    };
-    
-    fetchData();
-  }, []);
+      
+      if (selectedMonth) {
+        params.append('month', selectedMonth);
+      }
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+      
+      const purchasesResponse = await axios.get(url);
+      
+      // Transform data from snake_case (backend) to camelCase (frontend)
+      const transformedPurchases = purchasesResponse.data.map(purchase => ({
+        id: purchase.id,
+        invoiceNumber: purchase.invoice_number,
+        productId: purchase.product_id,
+        supplierId: purchase.supplier_id,
+        quantity: purchase.quantity,
+        purchaseDate: purchase.purchase_date,
+        unitPrice: purchase.unit_price,
+        companyId: purchase.company_id,
+        totalAmount: purchase.total_amount,
+        product: purchase.products,
+        supplier: purchase.suppliers,
+        company: purchase.companies
+      }));
+      
+      setPurchases(transformedPurchases);
+      
+      // Gauti produktus
+      const productsResponse = await fetch('/api/products');
+      if (!productsResponse.ok) {
+        throw new Error('Nepavyko gauti produktų duomenų');
+      }
+      const productsData = await productsResponse.json();
+      setProducts(productsData);
+      
+      // Gauti tiekėjus
+      const suppliersResponse = await fetch('/api/suppliers');
+      if (!suppliersResponse.ok) {
+        throw new Error('Nepavyko gauti tiekėjų duomenų');
+      }
+      const suppliersData = await suppliersResponse.json();
+      setSuppliers(suppliersData);
+      
+      // Gauti įmones
+      const companiesResponse = await fetch('/api/companies');
+      if (!companiesResponse.ok) {
+        throw new Error('Nepavyko gauti įmonių duomenų');
+      }
+      const companiesData = await companiesResponse.json();
+      setCompanies(companiesData);
+      
+      setLoading(false);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+  
+  // Eksportuoti duomenis
+  const handleExport = async (format) => {
+    try {
+      // Sukurti URL su filtrais
+      let exportUrl = `/api/purchases/export/${format}`;
+      const params = new URLSearchParams();
+      
+      if (selectedYear) {
+        params.append('year', selectedYear);
+      }
+      
+      if (selectedMonth) {
+        params.append('month', selectedMonth);
+      }
+      
+      if (params.toString()) {
+        exportUrl += `?${params.toString()}`;
+      }
+      
+      const response = await axios.get(exportUrl, {
+        responseType: 'blob'
+      });
+      
+      // Nustatyti failo pavadinimą
+      let filename = 'purchases';
+      if (selectedYear) {
+        filename += `_${selectedYear}`;
+        if (selectedMonth) {
+          filename += `_${selectedMonth.toString().padStart(2, '0')}`;
+        }
+      }
+      filename += `.${format}`;
+      
+      // Sukurti laikinąją nuorodą ir atsisiųsti failą
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(`Klaida eksportuojant duomenis į ${format.toUpperCase()}:`, err);
+      setError(`Nepavyko eksportuoti duomenų į ${format.toUpperCase()}. Bandykite dar kartą vėliau.`);
+    }
+  };
+  
+  useEffect(() => {
+    fetchPurchases();
+  }, [selectedYear, selectedMonth]);
   
   // Formos įvesties keitimas
   const handleInputChange = (e) => {
@@ -192,12 +372,33 @@ function Purchases() {
   const handleEditPurchase = (purchase) => {
     setEditMode(true);
     setEditId(purchase.id);
+    
+    // Saugus datos apdorojimas
+    let formattedDate = '';
+    try {
+      // Patikriname, ar purchase.purchaseDate yra validus
+      if (purchase.purchaseDate) {
+        const purchaseDate = new Date(purchase.purchaseDate);
+        // Patikriname, ar data yra validi
+        if (!isNaN(purchaseDate.getTime())) {
+          formattedDate = purchaseDate.toISOString().split('T')[0];
+        } else {
+          formattedDate = new Date().toISOString().split('T')[0];
+        }
+      } else {
+        formattedDate = new Date().toISOString().split('T')[0];
+      }
+    } catch (error) {
+      console.error('Klaida formatuojant datą:', error);
+      formattedDate = new Date().toISOString().split('T')[0];
+    }
+    
     setNewPurchase({
       invoiceNumber: purchase.invoiceNumber,
       productId: purchase.productId,
       supplierId: purchase.supplierId,
       quantity: purchase.quantity,
-      purchaseDate: new Date(purchase.purchaseDate).toISOString().split('T')[0],
+      purchaseDate: formattedDate,
       unitPrice: purchase.unitPrice,
       companyId: purchase.companyId
     });
@@ -292,7 +493,10 @@ function Purchases() {
     <div className="purchases-container">
       <h1>{t('common.purchases.title')}</h1>
       
+      <FilterComponent />
+      
       <div className="action-buttons">
+        <ExportButtons />
         <button 
           className="btn-add-initial-stock" 
           onClick={() => setShowInitialStockForm(true)}
@@ -474,7 +678,25 @@ function Purchases() {
                     <td>{purchase.product?.name || t('common.messages.no_data')}</td>
                     <td>{purchase.supplier?.name || t('common.messages.no_data')}</td>
                     <td>{purchase.quantity}</td>
-                    <td>{new Date(purchase.purchaseDate).toLocaleDateString()}</td>
+                    <td>
+                      {purchase.purchaseDate ? 
+                        (() => {
+                          try {
+                            const date = new Date(purchase.purchaseDate);
+                            // Patikriname, ar data yra validi
+                            if (!isNaN(date.getTime())) {
+                              return date.toLocaleDateString();
+                            } else {
+                              return t('common.messages.no_data');
+                            }
+                          } catch (error) {
+                            console.error('Klaida formatuojant datą:', error);
+                            return t('common.messages.no_data');
+                          }
+                        })() : 
+                        t('common.messages.no_data')
+                      }
+                    </td>
                     <td>{Number(purchase.unitPrice).toFixed(2)}</td>
                     <td>{(Number(purchase.quantity) * Number(purchase.unitPrice)).toFixed(2)}</td>
                     <td>{purchase.company?.name || t('common.messages.no_data')}</td>

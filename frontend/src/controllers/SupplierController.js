@@ -7,18 +7,46 @@ import { safeApiCall, handleApiError, getNewSortDirection } from '../utils/commo
 class SupplierController {
   /**
    * Gauna visus tiekėjus
-   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną
-   * @param {Function} setSuppliers - Funkcija, kuri nustato tiekėjų sąrašą
-   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną
+   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną (optional)
+   * @param {Function} setSuppliers - Funkcija, kuri nustato tiekėjų sąrašą (optional)
+   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną (optional)
    * @returns {Promise} Pažadas su tiekėjų sąrašu
    */
   static async fetchSuppliers(setLoading, setSuppliers, setError) {
-    return safeApiCall(
-      () => SupplierModel.getAll(),
-      setLoading,
-      setError,
-      (data) => setSuppliers(data)
-    );
+    try {
+      // If setLoading is provided, set loading state to true
+      if (typeof setLoading === 'function') {
+        setLoading(true);
+      }
+      
+      const data = await SupplierModel.getAll();
+      
+      // If setError is provided, clear any previous errors
+      if (typeof setError === 'function') {
+        setError(null);
+      }
+      
+      // If setSuppliers is provided, update the suppliers state
+      if (typeof setSuppliers === 'function') {
+        setSuppliers(data);
+      }
+      
+      return data;
+    } catch (err) {
+      console.error('Error fetching suppliers:', err);
+      
+      // If setError is provided, set the error state
+      if (typeof setError === 'function') {
+        setError(err.message || 'Failed to fetch suppliers');
+      }
+      
+      return [];
+    } finally {
+      // If setLoading is provided, set loading state to false
+      if (typeof setLoading === 'function') {
+        setLoading(false);
+      }
+    }
   }
 
   /**

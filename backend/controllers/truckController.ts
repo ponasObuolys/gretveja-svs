@@ -6,20 +6,24 @@ export const getAllTrucks = async (req: Request, res: Response) => {
   try {
     const includeCompany = req.query.include === 'company';
     
-    let query = supabase
-      .from('trucks')
-      .select('*');
+    let query;
       
     if (includeCompany) {
       query = supabase
         .from('trucks')
         .select(`
           *,
-          companies (*)
-        `);
+          companies (id, name)
+        `)
+        .order('plate_number');
+    } else {
+      query = supabase
+        .from('trucks')
+        .select('*')
+        .order('plate_number');
     }
     
-    const { data, error } = await query.order('plate_number');
+    const { data, error } = await query;
     
     if (error) throw error;
     
@@ -39,7 +43,7 @@ export const getTruckById = async (req: Request, res: Response) => {
       .from('trucks')
       .select(`
         *,
-        companies (*)
+        companies (id, name)
       `)
       .eq('id', id)
       .single();
@@ -60,14 +64,14 @@ export const getTruckById = async (req: Request, res: Response) => {
 // Sukurti naują vilkiką
 export const createTruck = async (req: Request, res: Response) => {
   try {
-    const { plateNumber, companyId } = req.body;
+    const { plate_number, company_id } = req.body;
     
     const { data, error } = await supabase
       .from('trucks')
       .insert([
         { 
-          plate_number: plateNumber,
-          company_id: companyId 
+          plate_number,
+          company_id
         }
       ])
       .select()
@@ -86,13 +90,13 @@ export const createTruck = async (req: Request, res: Response) => {
 export const updateTruck = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { plateNumber, companyId } = req.body;
+    const { plate_number, company_id } = req.body;
     
     const { data, error } = await supabase
       .from('trucks')
       .update({ 
-        plate_number: plateNumber,
-        company_id: companyId,
+        plate_number,
+        company_id,
         updated_at: new Date()
       })
       .eq('id', id)

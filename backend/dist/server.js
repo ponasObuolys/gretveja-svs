@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const sequelize_typescript_1 = require("sequelize-typescript");
 const purchaseRoutes_1 = __importDefault(require("./routes/purchaseRoutes"));
 const issuanceRoutes_1 = __importDefault(require("./routes/issuanceRoutes"));
 const stockRoutes_1 = __importDefault(require("./routes/stockRoutes"));
@@ -23,6 +22,7 @@ const productRoutes_1 = __importDefault(require("./routes/productRoutes"));
 const supplierRoutes_1 = __importDefault(require("./routes/supplierRoutes"));
 const companyRoutes_1 = __importDefault(require("./routes/companyRoutes"));
 const truckRoutes_1 = __importDefault(require("./routes/truckRoutes"));
+const supabase_1 = require("./config/supabase");
 // Įkrauname aplinkos kintamuosius
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -30,17 +30,6 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-// Duomenų bazės konfigūracija
-const sequelize = new sequelize_typescript_1.Sequelize({
-    dialect: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    username: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_NAME || 'gretveja_svs',
-    logging: false,
-    models: [__dirname + '/models'],
-});
 // Pagrindinis maršrutas
 app.get('/', (req, res) => {
     res.json({ message: 'Sveiki atvykę į Gretvėja-SVS API!' });
@@ -56,16 +45,18 @@ app.use('/api/trucks', truckRoutes_1.default);
 // Serverio paleidimas
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield sequelize.authenticate();
-        console.log('Duomenų bazės ryšys sėkmingai sukurtas.');
-        yield sequelize.sync({ alter: true });
-        console.log('Duomenų bazės modeliai sinchronizuoti.');
+        // Test Supabase connection
+        const { data, error } = yield supabase_1.supabase.from('products').select('count');
+        if (error) {
+            throw error;
+        }
+        console.log('Supabase ryšys sėkmingai sukurtas.');
         app.listen(PORT, () => {
             console.log(`Serveris paleistas adresu: http://localhost:${PORT}`);
         });
     }
     catch (error) {
-        console.error('Nepavyko prisijungti prie duomenų bazės:', error);
+        console.error('Nepavyko prisijungti prie Supabase:', error);
     }
 });
 startServer();

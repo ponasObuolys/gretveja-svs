@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Vilkikų ištrynimo patvirtinimo modalas
@@ -13,25 +14,44 @@ const TruckDeleteModal = ({
   handleDeleteTruck,
   loading
 }) => {
+  const { t } = useTranslation();
+
   return (
-    <Modal show={showDeleteTruckModal} onHide={() => setShowDeleteTruckModal(false)} centered>
+    <Modal 
+      show={showDeleteTruckModal} 
+      onHide={() => setShowDeleteTruckModal(false)} 
+      centered
+    >
       <Modal.Header closeButton>
-        <Modal.Title>Patvirtinkite ištrynimą</Modal.Title>
+        <Modal.Title>{t('common.modals.confirmDelete')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>Ar tikrai norite ištrinti vilkiką <strong>{truckToDelete?.plateNumber}</strong>?</p>
-        <p className="text-danger">Šio veiksmo negalima atšaukti.</p>
+        <p>
+          {t('common.modals.deleteConfirmation', { 
+            entity: t('common.entities.truck'),
+            name: truckToDelete?.plateNumber || ''
+          })}
+        </p>
+        <p className="text-danger">{t('common.modals.cannotUndo')}</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowDeleteTruckModal(false)}>
-          Atšaukti
+        <Button 
+          variant="secondary" 
+          onClick={() => setShowDeleteTruckModal(false)}
+          disabled={loading}
+        >
+          {t('common.buttons.cancel')}
         </Button>
-        <Button variant="danger" onClick={handleDeleteTruck} disabled={loading}>
-          {loading ? 'Trinama...' : 'Ištrinti'}
+        <Button 
+          variant="danger" 
+          onClick={handleDeleteTruck} 
+          disabled={loading}
+        >
+          {loading ? t('common.buttons.deleting') : t('common.buttons.delete')}
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default TruckDeleteModal; 
+export default TruckDeleteModal;

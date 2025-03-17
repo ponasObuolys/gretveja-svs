@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Button, Table, Modal, Form, Alert } from 'react-bootstrap';
+import { Button, Table, Modal, Form, Alert, Row, Col, Dropdown, DropdownButton } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import './Issuances.css';
 import IssuanceForm from '../components/IssuanceForm';
@@ -14,12 +14,131 @@ function Issuances() {
   const [currentIssuance, setCurrentIssuance] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [issuanceToDelete, setIssuanceToDelete] = useState(null);
+  
+  // Filtravimo būsenos
+  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
+  
+  // Gauti metus filtravimui (nuo 2020 iki dabartinių metų)
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2019 }, (_, i) => currentYear - i);
+  
+  // Mėnesių sąrašas
+  const months = [
+    { value: 1, name: 'january' },
+    { value: 2, name: 'february' },
+    { value: 3, name: 'march' },
+    { value: 4, name: 'april' },
+    { value: 5, name: 'may' },
+    { value: 6, name: 'june' },
+    { value: 7, name: 'july' },
+    { value: 8, name: 'august' },
+    { value: 9, name: 'september' },
+    { value: 10, name: 'october' },
+    { value: 11, name: 'november' },
+    { value: 12, name: 'december' }
+  ];
+
+  // Filtravimo komponentas
+  const FilterComponent = () => {
+    return (
+      <div className="filter-container">
+        <Row>
+          <Col sm={3}>
+            <Form.Group>
+              <Form.Label>{t('common.filters.year')}</Form.Label>
+              <Form.Select
+                value={selectedYear || ''}
+                onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
+              >
+                <option value="">{t('common.filters.all_years')}</option>
+                {years.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col sm={3}>
+            <Form.Group>
+              <Form.Label>{t('common.filters.month')}</Form.Label>
+              <Form.Select
+                value={selectedMonth || ''}
+                onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!selectedYear}
+              >
+                <option value="">{t('common.filters.all_months')}</option>
+                {months.map(month => (
+                  <option key={month.value} value={month.value}>
+                    {t(`common.months.${month.name}`)}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col sm={3} className="d-flex align-items-end">
+            <Button 
+              variant="outline-secondary" 
+              onClick={clearFilters}
+              className="mb-3"
+            >
+              {t('common.filters.clear')}
+            </Button>
+          </Col>
+        </Row>
+      </div>
+    );
+  };
+
+  // Valyti filtrus
+  const clearFilters = () => {
+    setSelectedYear(null);
+    setSelectedMonth(null);
+  };
+
+  // Eksporto mygtukai
+  const ExportButtons = () => {
+    return (
+      <Dropdown className="export-dropdown">
+        <Dropdown.Toggle variant="success">
+          {t('common.buttons.export')}
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={() => handleExport('csv')}>
+            {t('common.issuances.export_csv')}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => handleExport('xlsx')}>
+            {t('common.issuances.export_xlsx')}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => handleExport('pdf')}>
+            {t('common.issuances.export_pdf')}
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+  };
 
   // Gauti visus išdavimus
   const fetchIssuances = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/issuances');
+      
+      // Sukurti URL su filtrais
+      let url = '/api/issuances';
+      const params = new URLSearchParams();
+      
+      if (selectedYear) {
+        params.append('year', selectedYear);
+      }
+      
+      if (selectedMonth) {
+        params.append('month', selectedMonth);
+      }
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+      
+      const response = await axios.get(url);
       setIssuances(response.data);
       setError(null);
     } catch (err) {
@@ -32,7 +151,7 @@ function Issuances() {
 
   useEffect(() => {
     fetchIssuances();
-  }, []);
+  }, [selectedYear, selectedMonth]);
 
   // Atidaryti formą naujo išdavimo sukūrimui
   const handleAddNew = () => {
@@ -85,7 +204,54 @@ function Issuances() {
       setError('Nepavyko atsisiųsti PDF. Bandykite dar kartą vėliau.');
     }
   };
-
+  
+  // Eksportuoti duomenis
+  const handleExport = async (format) => {
+    try {
+      // Sukurti URL su filtrais
+      let exportUrl = `/api/issuances/export/${format}`;
+      const params = new URLSearchParams();
+      
+      if (selectedYear) {
+        params.append('year', selectedYear);
+      }
+      
+      if (selectedMonth) {
+        params.append('month', selectedMonth);
+      }
+      
+      if (params.toString()) {
+        exportUrl += `?${params.toString()}`;
+      }
+      
+      const response = await axios.get(exportUrl, {
+        responseType: 'blob'
+      });
+      
+      // Nustatyti failo pavadinimą
+      let filename = 'issuances';
+      if (selectedYear) {
+        filename += `_${selectedYear}`;
+        if (selectedMonth) {
+          filename += `_${selectedMonth.toString().padStart(2, '0')}`;
+        }
+      }
+      filename += `.${format}`;
+      
+      // Sukurti laikinąją nuorodą ir atsisiųsti failą
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error(`Klaida eksportuojant duomenis į ${format.toUpperCase()}:`, err);
+      setError(`Nepavyko eksportuoti duomenų į ${format.toUpperCase()}. Bandykite dar kartą vėliau.`);
+    }
+  };
+  
   // Uždaryti formą ir atnaujinti duomenis
   const handleFormClose = (refreshData = false) => {
     setShowForm(false);
@@ -102,15 +268,18 @@ function Issuances() {
 
   return (
     <div className="issuances-container">
-      <h1>{t('common.issuances.title')}</h1>
+      <h1>{t('common.tables.issuances')}</h1>
+      
+      <FilterComponent />
       
       <div className="action-buttons">
-        <button 
+        <ExportButtons />
+        <Button 
           className="btn-add-issuance" 
           onClick={handleAddNew}
         >
           {t('common.issuances.new_issuance')}
-        </button>
+        </Button>
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}
@@ -121,7 +290,7 @@ function Issuances() {
         <>
           {issuances.length === 0 ? (
             <div className="no-data-message">
-              {t('common.issuances.no_data')}
+              {t('common.messages.no_data')}
             </div>
           ) : (
             <div className="table-responsive">
@@ -141,15 +310,15 @@ function Issuances() {
                 <tbody>
                   {issuances.map((issuance) => (
                     <tr key={issuance.id}>
-                      <td>{formatDate(issuance.issuanceDate)}</td>
-                      <td>{issuance.product?.name || t('common.messages.no_data')}</td>
-                      <td>{issuance.quantity}</td>
-                      <td>{issuance.driverName}</td>
-                      <td>{issuance.truck?.plateNumber || t('common.messages.no_data')}</td>
-                      <td>{issuance.truck?.company?.name || t('common.messages.no_data')}</td>
+                      <td>{formatDate(issuance.issuance_date)}</td>
+                      <td>{issuance.products?.name || t('common.messages.no_data')}</td>
+                      <td>{issuance.quantity} {issuance.products?.unit || ''}</td>
+                      <td>{issuance.driver_name}</td>
+                      <td>{issuance.trucks?.plate_number || t('common.messages.no_data')}</td>
+                      <td>{issuance.trucks?.companies?.name || t('common.messages.no_data')}</td>
                       <td>
-                        <span className={`status-badge ${issuance.isIssued ? 'issued' : 'not-issued'}`}>
-                          {issuance.isIssued ? t('common.issuances.is_issued') : t('common.issuances.not_issued')}
+                        <span className={`status-badge ${issuance.is_issued ? 'issued' : 'not-issued'}`}>
+                          {issuance.is_issued ? t('common.issuances.is_issued') : t('common.issuances.not_issued')}
                         </span>
                       </td>
                       <td className="actions-cell">
@@ -170,8 +339,8 @@ function Issuances() {
                           {t('common.buttons.delete')}
                         </Button>
                         <Button 
-                          variant="outline-success" 
-                          size="sm" 
+                          variant="info"
+                          size="sm"
                           onClick={() => handleDownloadPdf(issuance)}
                           className="action-button"
                         >
@@ -215,4 +384,4 @@ function Issuances() {
   );
 }
 
-export default Issuances; 
+export default Issuances;

@@ -15,7 +15,8 @@
       "edit": "Редактировать",
       "delete": "Удалить",
       "add": "Добавить",
-      "new": "Новый"
+      "new": "Новый",
+      "export": "Экспорт"
     },
     "labels": {
       "code": "Код",
@@ -86,13 +87,22 @@
       "stock_overview": "Обзор запасов"
     },
     "purchases": {
-      "new_purchase": "Добавить новую закупку",
-      "invoice_number": "Номер счета:",
+      "title": "Закупки",
+      "new_purchase": "Новая закупка",
+      "edit_purchase": "Редактировать закупку",
+      "delete_purchase": "Удалить закупку",
+      "invoice_number": "Номер счета",
+      "purchase_date": "Дата закупки",
+      "unit_price": "Цена за единицу",
+      "total_price": "Общая сумма",
+      "confirm_delete": "Вы уверены, что хотите удалить эту закупку?",
       "select_product": "Выберите продукт",
       "select_supplier": "Выберите поставщика",
       "select_company": "Выберите компанию",
-      "unit_price": "Цена за единицу:",
-      "total_amount": "Общая сумма"
+      "export_csv": "Экспорт CSV",
+      "export_xlsx": "Экспорт Excel",
+      "export_pdf": "Экспорт PDF",
+      "export_title": "Экспорт закупок"
     },
     "inventory": {
       "quantity": "количество",
@@ -117,6 +127,31 @@
       "contact_person": "Контактное лицо",
       "phone": "Телефон",
       "email": "Эл. почта"
+    },
+    "filters": {
+      "year": "Год",
+      "month": "Месяц",
+      "all_years": "Все годы",
+      "all_months": "Все месяцы",
+      "clear": "Очистить фильтры"
+    },
+    "issuances": {
+      "title": "Выдачи",
+      "new_issuance": "Новая выдача",
+      "edit_issuance": "Редактировать выдачу",
+      "delete_issuance": "Удалить выдачу",
+      "issuance_date": "Дата выдачи",
+      "driver_name": "Имя водителя",
+      "plate_number": "Гос. номер",
+      "company": "Компания",
+      "is_issued": "Выдано",
+      "not_issued": "Не выдано",
+      "confirm_delete": "Вы уверены, что хотите удалить эту выдачу?",
+      "download_pdf": "Скачать PDF",
+      "export_csv": "Экспорт CSV",
+      "export_xlsx": "Экспорт Excel",
+      "export_pdf": "Экспорт PDF",
+      "export_title": "Экспорт выдач"
     }
   }
-} 
+}

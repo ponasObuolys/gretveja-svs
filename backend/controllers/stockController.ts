@@ -1,56 +1,108 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 
+// Define interfaces for type safety
+interface StockReportItem {
+  productId: number;
+  productName: string;
+  totalPurchased: number;
+  totalIssued: number;
+  stockInHand: number;
+  unit: string;
+}
+
+interface StockCache {
+  data: StockReportItem[] | null;
+  timestamp: number;
+  expirationMs: number;
+}
+
+// Cache mechanism to store stock report with expiration
+let stockReportCache: StockCache = {
+  data: null,
+  timestamp: 0,
+  expirationMs: 5 * 60 * 1000 // 5 minutes cache
+};
+
 // Gauti atsargų ataskaitą
 export const getStockReport = async (req: Request, res: Response) => {
   try {
-    // Gauti visus produktus
+    // Check if we have a valid cache
+    const now = Date.now();
+    if (stockReportCache.data && (now - stockReportCache.timestamp) < stockReportCache.expirationMs) {
+      console.log('Returning cached stock report');
+      return res.status(200).json(stockReportCache.data);
+    }
+
+    console.log('Generating new stock report...');
+    
+    // Get all products in a single query
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('*')
+      .select('id, name, unit')
       .order('name');
     
     if (productsError) throw productsError;
     
-    // Sukurti ataskaitos masyvą
-    const stockReport = [];
+    // Get all purchase quantities in a single query
+    const { data: purchases, error: purchasesError } = await supabase
+      .from('purchases')
+      .select('product_id, quantity');
     
-    // Įtraukti kiekvieną produktą į ataskaitą
-    for (const product of products) {
-      // Gauti bendrą įsigytą kiekį
-      const { data: purchasesData, error: purchasesError } = await supabase
-        .from('purchases')
-        .select('quantity')
-        .eq('product_id', product.id);
-      
-      if (purchasesError) throw purchasesError;
-      
-      const totalPurchased = purchasesData.reduce((sum, item) => sum + (item.quantity || 0), 0);
-      
-      // Gauti bendrą išduotą kiekį
-      const { data: issuancesData, error: issuancesError } = await supabase
-        .from('issuances')
-        .select('quantity')
-        .eq('product_id', product.id)
-        .eq('is_issued', true);
-      
-      if (issuancesError) throw issuancesError;
-      
-      const totalIssued = issuancesData.reduce((sum, item) => sum + (item.quantity || 0), 0);
-      
-      // Apskaičiuoti likusias atsargas
+    if (purchasesError) throw purchasesError;
+    
+    // Get all issuance quantities in a single query
+    const { data: issuances, error: issuancesError } = await supabase
+      .from('issuances')
+      .select('product_id, quantity')
+      .eq('is_issued', true);
+    
+    if (issuancesError) throw issuancesError;
+    
+    // Process the data in memory (much faster than multiple DB queries)
+    const purchasesByProduct: Record<number, number> = {};
+    const issuancesByProduct: Record<number, number> = {};
+    
+    // Group purchases by product_id
+    purchases.forEach(purchase => {
+      const productId = purchase.product_id;
+      if (!purchasesByProduct[productId]) {
+        purchasesByProduct[productId] = 0;
+      }
+      purchasesByProduct[productId] += (purchase.quantity || 0);
+    });
+    
+    // Group issuances by product_id
+    issuances.forEach(issuance => {
+      const productId = issuance.product_id;
+      if (!issuancesByProduct[productId]) {
+        issuancesByProduct[productId] = 0;
+      }
+      issuancesByProduct[productId] += (issuance.quantity || 0);
+    });
+    
+    // Create the stock report
+    const stockReport: StockReportItem[] = products.map(product => {
+      const totalPurchased = purchasesByProduct[product.id] || 0;
+      const totalIssued = issuancesByProduct[product.id] || 0;
       const stockInHand = totalPurchased - totalIssued;
       
-      // Pridėti į ataskaitą
-      stockReport.push({
+      return {
         productId: product.id,
         productName: product.name,
-        totalPurchased: totalPurchased,
-        totalIssued: totalIssued,
-        stockInHand: stockInHand,
-        unit: product.unit
-      });
-    }
+        totalPurchased,
+        totalIssued,
+        stockInHand,
+        unit: product.unit || 'vnt.'
+      };
+    });
+    
+    // Update cache
+    stockReportCache = {
+      data: stockReport,
+      timestamp: now,
+      expirationMs: 5 * 60 * 1000
+    };
     
     return res.status(200).json(stockReport);
   } catch (error) {

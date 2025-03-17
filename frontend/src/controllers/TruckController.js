@@ -8,34 +8,28 @@ import { safeApiCall, handleApiError, getNewSortDirection } from '../utils/commo
 class TruckController {
   /**
    * Gauna visus vilkikus su įmonėmis
-   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną
-   * @param {Function} setTrucks - Funkcija, kuri nustato vilkikų sąrašą
-   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną
    * @returns {Promise} Pažadas su vilkikų sąrašu
    */
-  static async fetchTrucksWithCompanies(setLoading, setTrucks, setError) {
-    return safeApiCall(
-      () => TruckModel.getAll({ include: 'company' }),
-      setLoading,
-      setError,
-      (data) => setTrucks(data)
-    );
+  static async fetchTrucksWithCompanies() {
+    try {
+      return await TruckModel.getAll({ include: 'company' });
+    } catch (error) {
+      console.error('Error fetching trucks with companies:', error);
+      return [];
+    }
   }
 
   /**
    * Gauna visas įmones
-   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną
-   * @param {Function} setCompanies - Funkcija, kuri nustato įmonių sąrašą
-   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną
    * @returns {Promise} Pažadas su įmonių sąrašu
    */
-  static async fetchCompanies(setLoading, setCompanies, setError) {
-    return safeApiCall(
-      () => CompanyModel.getAll(),
-      setLoading,
-      setError,
-      (data) => setCompanies(data)
-    );
+  static async fetchCompanies() {
+    try {
+      return await CompanyModel.getAll();
+    } catch (error) {
+      console.error('Error fetching companies:', error);
+      return [];
+    }
   }
 
   /**
@@ -45,12 +39,12 @@ class TruckController {
    * @returns {Array} Filtruotas vilkikų masyvas
    */
   static filterTrucks(trucks, searchText) {
-    if (!searchText) return trucks;
+    if (!searchText || !trucks || !Array.isArray(trucks)) return trucks || [];
     
     const searchLower = searchText.toLowerCase();
     return trucks.filter(truck => 
-      truck.plateNumber.toLowerCase().includes(searchLower) ||
-      (truck.company && truck.company.name.toLowerCase().includes(searchLower))
+      (truck.plateNumber && truck.plateNumber.toLowerCase().includes(searchLower)) ||
+      (truck.company && truck.company.name && truck.company.name.toLowerCase().includes(searchLower))
     );
   }
 
@@ -68,53 +62,44 @@ class TruckController {
   /**
    * Sukuria naują vilkiką
    * @param {Object} truckData - Naujo vilkiko duomenys
-   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną
-   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną
-   * @param {Function} onSuccess - Funkcija, kuri iškviečiama sėkmės atveju
    * @returns {Promise} Pažadas su sukurto vilkiko duomenimis
    */
-  static async createTruck(truckData, setLoading, setError, onSuccess) {
-    return safeApiCall(
-      () => TruckModel.create(truckData),
-      setLoading,
-      setError,
-      onSuccess
-    );
+  static async createTruck(truckData) {
+    try {
+      return await TruckModel.create(truckData);
+    } catch (error) {
+      console.error('Error creating truck:', error);
+      throw error;
+    }
   }
 
   /**
    * Atnaujina esamą vilkiką
    * @param {number} id - Vilkiko ID
    * @param {Object} truckData - Atnaujinti vilkiko duomenys
-   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną
-   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną
-   * @param {Function} onSuccess - Funkcija, kuri iškviečiama sėkmės atveju
    * @returns {Promise} Pažadas su atnaujinto vilkiko duomenimis
    */
-  static async updateTruck(id, truckData, setLoading, setError, onSuccess) {
-    return safeApiCall(
-      () => TruckModel.update(id, truckData),
-      setLoading,
-      setError,
-      onSuccess
-    );
+  static async updateTruck(id, truckData) {
+    try {
+      return await TruckModel.update(id, truckData);
+    } catch (error) {
+      console.error('Error updating truck:', error);
+      throw error;
+    }
   }
 
   /**
    * Ištrina vilkiką
    * @param {number} id - Vilkiko ID
-   * @param {Function} setLoading - Funkcija, kuri nustato krovimo būseną
-   * @param {Function} setError - Funkcija, kuri nustato klaidos būseną
-   * @param {Function} onSuccess - Funkcija, kuri iškviečiama sėkmės atveju
    * @returns {Promise} Pažadas su ištrynimo rezultatu
    */
-  static async deleteTruck(id, setLoading, setError, onSuccess) {
-    return safeApiCall(
-      () => TruckModel.delete(id),
-      setLoading,
-      setError,
-      onSuccess
-    );
+  static async deleteTruck(id) {
+    try {
+      return await TruckModel.delete(id);
+    } catch (error) {
+      console.error('Error deleting truck:', error);
+      throw error;
+    }
   }
 }
 

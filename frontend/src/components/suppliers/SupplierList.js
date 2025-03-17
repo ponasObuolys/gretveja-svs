@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, Button, Table, InputGroup, Form } from 'react-bootstrap';
+import { Card, Button, Table, InputGroup, Form, Spinner } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 import { getSortIcon } from '../../utils/common';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Tiekėjų sąrašo komponentas
@@ -14,19 +15,17 @@ const SupplierList = ({
   setSupplierSearch,
   supplierSort,
   handleSort,
-  handleAddSupplier,
   handleEditSupplier,
   handleDeleteSupplierClick,
   loading,
   filteredSuppliers
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Card className="mb-4">
       <Card.Header className="d-flex justify-content-between align-items-center">
-        <h3 className="mb-0">Tiekėjų sąrašas</h3>
-        <Button variant="primary" onClick={handleAddSupplier}>
-          Naujas tiekėjas
-        </Button>
+        <h3 className="mb-0">{t('common.tables.suppliers')}</h3>
       </Card.Header>
       <Card.Body>
         <InputGroup className="mb-3">
@@ -34,36 +33,43 @@ const SupplierList = ({
             <FaSearch />
           </InputGroup.Text>
           <Form.Control
-            placeholder="Ieškoti pagal pavadinimą, kontaktinį asmenį, telefoną ar el. paštą..."
+            placeholder={t('common.search.by_name_contact_phone_email')}
             value={supplierSearch}
             onChange={(e) => setSupplierSearch(e.target.value)}
+            disabled={loading}
           />
         </InputGroup>
 
-        {loading && <p>Kraunama...</p>}
-        
-        {!loading && suppliers.length === 0 && (
-          <p className="text-center">Nėra įvestų tiekėjų.</p>
+        {loading && (
+          <div className="text-center my-4">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">{t('common.loading')}</span>
+            </Spinner>
+          </div>
         )}
         
-        {!loading && suppliers.length > 0 && (
+        {!loading && (!suppliers || suppliers.length === 0) && (
+          <p className="text-center">{t('common.messages.no_data')}</p>
+        )}
+        
+        {!loading && suppliers && suppliers.length > 0 && (
           <div className="table-responsive">
             <Table striped bordered hover>
               <thead>
                 <tr>
                   <th onClick={() => handleSort('suppliers', 'name')} style={{ cursor: 'pointer' }}>
-                    Pavadinimas {getSortIcon(supplierSort, 'name')}
+                    {t('common.labels.name')} {getSortIcon(supplierSort, 'name')}
                   </th>
                   <th onClick={() => handleSort('suppliers', 'contactPerson')} style={{ cursor: 'pointer' }}>
-                    Kontaktinis asmuo {getSortIcon(supplierSort, 'contactPerson')}
+                    {t('common.labels.supplier')} {getSortIcon(supplierSort, 'contactPerson')}
                   </th>
                   <th onClick={() => handleSort('suppliers', 'phone')} style={{ cursor: 'pointer' }}>
-                    Telefonas {getSortIcon(supplierSort, 'phone')}
+                    {t('common.labels.phone')} {getSortIcon(supplierSort, 'phone')}
                   </th>
                   <th onClick={() => handleSort('suppliers', 'email')} style={{ cursor: 'pointer' }}>
-                    El. paštas {getSortIcon(supplierSort, 'email')}
+                    {t('common.labels.email')} {getSortIcon(supplierSort, 'email')}
                   </th>
-                  <th>Veiksmai</th>
+                  <th>{t('common.labels.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -80,14 +86,14 @@ const SupplierList = ({
                         className="me-2"
                         onClick={() => handleEditSupplier(supplier)}
                       >
-                        Redaguoti
+                        {t('common.buttons.edit')}
                       </Button>
                       <Button 
                         variant="outline-danger" 
                         size="sm"
                         onClick={() => handleDeleteSupplierClick(supplier)}
                       >
-                        Ištrinti
+                        {t('common.buttons.delete')}
                       </Button>
                     </td>
                   </tr>
@@ -101,4 +107,4 @@ const SupplierList = ({
   );
 };
 
-export default SupplierList; 
+export default SupplierList;

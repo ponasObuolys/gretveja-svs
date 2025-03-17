@@ -11,11 +11,15 @@
     },
     "buttons": {
       "save": "Išsaugoti",
+      "saving": "Saugoma...",
       "cancel": "Atšaukti",
       "edit": "Redaguoti",
       "delete": "Ištrinti",
+      "deleting": "Trinama...",
       "add": "Pridėti",
-      "new": "Naujas"
+      "new": "Naujas",
+      "export": "Eksportuoti",
+      "refresh": "Atnaujinti"
     },
     "labels": {
       "code": "Kodas",
@@ -37,6 +41,14 @@
       "in_stock_only": "Tik turintys atsargų",
       "out_of_stock_only": "Tik neturintys atsargų",
       "products": "Prekės"
+    },
+    "fields": {
+      "plateNumber": "Valstybinis numeris",
+      "company": "Įmonė",
+      "actions": "Veiksmai"
+    },
+    "entities": {
+      "truck": "vilkiką"
     },
     "tables": {
       "products": "Produktų sąrašas",
@@ -101,7 +113,11 @@
       "confirm_delete": "Ar tikrai norite ištrinti šį pirkimą?",
       "select_product": "Pasirinkite produktą",
       "select_supplier": "Pasirinkite tiekėją",
-      "select_company": "Pasirinkite įmonę"
+      "select_company": "Pasirinkite įmonę",
+      "export_csv": "Eksportuoti CSV",
+      "export_xlsx": "Eksportuoti Excel",
+      "export_pdf": "Eksportuoti PDF",
+      "export_title": "Eksportuoti pirkimus"
     },
     "issuances": {
       "title": "Išdavimai",
@@ -109,14 +125,17 @@
       "edit_issuance": "Redaguoti išdavimą",
       "delete_issuance": "Ištrinti išdavimą",
       "issuance_date": "Išdavimo data",
-      "driver_name": "Vairuotojas",
+      "driver_name": "Vairuotojo vardas",
       "plate_number": "Valst. numeris",
       "company": "Įmonė",
       "is_issued": "Išduota",
       "not_issued": "Neišduota",
       "confirm_delete": "Ar tikrai norite ištrinti šį išdavimą?",
       "download_pdf": "Atsisiųsti PDF",
-      "no_data": "Nėra įrašytų išdavimų. Sukurkite naują išdavimą paspaudę mygtuką \"Naujas išdavimas\"."
+      "export_csv": "Eksportuoti CSV",
+      "export_xlsx": "Eksportuoti Excel",
+      "export_pdf": "Eksportuoti PDF",
+      "export_title": "Eksportuoti išdavimus"
     },
     "admin": {
       "title": "Administravimas",
@@ -131,7 +150,34 @@
       "role": "Rolė",
       "active": "Aktyvus",
       "inactive": "Neaktyvus",
-      "confirm_delete": "Ar tikrai norite ištrinti šį vartotoją?"
+      "confirm_delete": "Ar tikrai norite ištrinti šį vartotoją?",
+      "trucks": "Vilkikų administravimas"
+    },
+    "lists": {
+      "trucks": "Vilkikų sąrašas"
+    },
+    "search": {
+      "by_name_id": "Ieškoti pagal pavadinimą arba ID...",
+      "by_plate_model_company": "Ieškoti pagal valst. numerį, modelį ar įmonę...",
+      "by_name_contact_phone_email": "Ieškoti pagal pavadinimą, kontaktinį asmenį, telefoną ar el. paštą...",
+      "truckPlaceholder": "Ieškoti pagal valst. numerį ar įmonę..."
+    },
+    "select": {
+      "company": "Pasirinkite įmonę"
+    },
+    "noData": {
+      "trucks": "Nėra įvestų vilkikų."
+    },
+    "loading": "Kraunama...",
+    "errors": {
+      "fetchFailed": "Nepavyko gauti duomenų. Bandykite dar kartą vėliau.",
+      "saveFailed": "Nepavyko išsaugoti. Bandykite dar kartą vėliau.",
+      "deleteFailed": "Nepavyko ištrinti. Bandykite dar kartą vėliau."
+    },
+    "modals": {
+      "confirmDelete": "Patvirtinkite ištrynimą",
+      "deleteConfirmation": "Ar tikrai norite ištrinti {{entity}} {{name}}?",
+      "cannotUndo": "Šio veiksmo negalima atšaukti."
     },
     "inventory": {
       "quantity": "kiekis",
@@ -143,11 +189,6 @@
       "purchases_units": "Pirkimai (vnt.)",
       "issuances_units": "Išdavimai (vnt.)"
     },
-    "search": {
-      "by_name_id": "Ieškoti pagal pavadinimą arba ID...",
-      "by_plate_model_company": "Ieškoti pagal valst. numerį, modelį ar įmonę...",
-      "by_name_contact_phone_email": "Ieškoti pagal pavadinimą, kontaktinį asmenį, telefoną ar el. paštą..."
-    },
     "vehicle": {
       "plate_number": "Valst. numeris",
       "model": "Modelis"
@@ -156,6 +197,24 @@
       "contact_person": "Kontaktinis asmuo",
       "phone": "Telefonas",
       "email": "El. paštas"
+    },
+    "filters": {
+      "year": "Metai",
+      "month": "Mėnuo",
+      "all_years": "Visi metai",
+      "all_months": "Visi mėnesiai",
+      "clear": "Išvalyti filtrus"
+    },
+    "trucks": {
+      "new": "Naujas vilkikas",
+      "edit": "Redaguoti vilkiką",
+      "delete": "Ištrinti vilkiką",
+      "list": "Vilkikų sąrašas",
+      "details": "Vilkiko informacija",
+      "form": {
+        "plateNumber": "Valstybinis numeris",
+        "company": "Įmonė"
+      }
     }
   }
-} 
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Vilkikų formos komponentas
@@ -10,23 +11,25 @@ const TruckForm = ({
   showTruckForm,
   setShowTruckForm,
   currentTruck,
-  truckFormData,
+  truckFormData = { plateNumber: '', companyId: '' }, 
   handleTruckInputChange,
   handleSaveTruck,
-  companies,
+  companies = [], 
   loading
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Modal show={showTruckForm} onHide={() => setShowTruckForm(false)} centered>
       <Modal.Header closeButton>
         <Modal.Title>
-          {currentTruck ? 'Redaguoti vilkiką' : 'Naujas vilkikas'}
+          {currentTruck ? t('trucks.edit') : t('trucks.new')}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSaveTruck}>
           <Form.Group className="mb-3">
-            <Form.Label>Valstybinis numeris *</Form.Label>
+            <Form.Label>{t('common.fields.plateNumber')} *</Form.Label>
             <Form.Control
               type="text"
               name="plateNumber"
@@ -37,14 +40,14 @@ const TruckForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Įmonė *</Form.Label>
+            <Form.Label>{t('common.fields.company')} *</Form.Label>
             <Form.Select
               name="companyId"
               value={truckFormData.companyId}
               onChange={handleTruckInputChange}
               required
             >
-              <option value="">Pasirinkite įmonę</option>
+              <option value="">{t('common.select.company')}</option>
               {companies.map(company => (
                 <option key={company.id} value={company.id}>
                   {company.name}
@@ -55,10 +58,10 @@ const TruckForm = ({
           
           <div className="d-flex justify-content-end">
             <Button variant="secondary" className="me-2" onClick={() => setShowTruckForm(false)}>
-              Atšaukti
+              {t('common.buttons.cancel')}
             </Button>
             <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? 'Saugoma...' : 'Išsaugoti'}
+              {loading ? t('common.buttons.saving') : t('common.buttons.save')}
             </Button>
           </div>
         </Form>

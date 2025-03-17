@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Alert, Tab } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Alert, Row, Col, Button } from 'react-bootstrap';
 import TruckList from '../components/trucks/TruckList';
 import TruckForm from '../components/trucks/TruckForm';
 import TruckDeleteModal from '../components/trucks/TruckDeleteModal';
 import TruckController from '../controllers/TruckController';
 import { sortItems } from '../utils/common';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Vilkikų administravimo puslapis
  * @returns {JSX.Element} Vilkikų administravimo puslapio komponentas
  */
 function Vilkikai() {
+  const { t } = useTranslation();
   // Būsenos kintamieji
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -31,32 +33,30 @@ function Vilkikai() {
   const [showDeleteTruckModal, setShowDeleteTruckModal] = useState(false);
   const [truckToDelete, setTruckToDelete] = useState(null);
   
-  // Duomenų užkrovimas
-  useEffect(() => {
-    fetchData();
-  }, []);
-  
-  /**
-   * Užkrauna vilkikų ir įmonių duomenis
-   */
-  const fetchData = async () => {
+  // Duomenų užkrovimo funkcija su useCallback
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // Užkrauna duomenis lygiagrečiai
-      await Promise.all([
-        TruckController.fetchTrucksWithCompanies(setLoading, setTrucks, setError),
-        TruckController.fetchCompanies(setLoading, setCompanies, setError)
-      ]);
+      const trucksResult = await TruckController.fetchTrucksWithCompanies();
+      const companiesResult = await TruckController.fetchCompanies();
       
-      setError(null);
+      setTrucks(Array.isArray(trucksResult) ? trucksResult : []);
+      setCompanies(Array.isArray(companiesResult) ? companiesResult : []);
     } catch (err) {
-      console.error('Klaida gaunant duomenis:', err);
-      setError('Nepavyko gauti duomenų. Bandykite dar kartą vėliau.');
+      console.error('Error fetching data:', err);
+      setError(t('common.errors.fetchFailed'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+  
+  // Duomenų užkrovimas
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
   
   /**
    * Tvarko rūšiavimo keitimą
@@ -74,7 +74,7 @@ function Vilkikai() {
     setCurrentTruck(null);
     setTruckFormData({
       plateNumber: '',
-      companyId: ''
+      companyId: companies.length > 0 ? companies[0].id.toString() : ''
     });
     setShowTruckForm(true);
   };
@@ -84,10 +84,12 @@ function Vilkikai() {
    * @param {Object} truck - Vilkiko objektas
    */
   const handleEditTruck = (truck) => {
+    if (!truck) return;
+    
     setCurrentTruck(truck);
     setTruckFormData({
-      plateNumber: truck.plateNumber,
-      companyId: truck.companyId
+      plateNumber: truck.plateNumber || '',
+      companyId: truck.companyId ? truck.companyId.toString() : ''
     });
     setShowTruckForm(true);
   };
@@ -98,10 +100,10 @@ function Vilkikai() {
    */
   const handleTruckInputChange = (e) => {
     const { name, value } = e.target;
-    setTruckFormData({
-      ...truckFormData,
+    setTruckFormData(prevData => ({
+      ...prevData,
       [name]: value
-    });
+    }));
   };
   
   /**
@@ -113,34 +115,21 @@ function Vilkikai() {
     
     try {
       setLoading(true);
+      setError(null);
       
       if (currentTruck) {
         // Atnaujinti esamą vilkiką
-        await TruckController.updateTruck(
-          currentTruck.id, 
-          truckFormData, 
-          setLoading, 
-          setError,
-          () => {
-            fetchData();
-            setShowTruckForm(false);
-          }
-        );
+        await TruckController.updateTruck(currentTruck.id, truckFormData);
       } else {
         // Sukurti naują vilkiką
-        await TruckController.createTruck(
-          truckFormData, 
-          setLoading, 
-          setError,
-          () => {
-            fetchData();
-            setShowTruckForm(false);
-          }
-        );
+        await TruckController.createTruck(truckFormData);
       }
+      
+      await fetchData();
+      setShowTruckForm(false);
     } catch (err) {
-      console.error('Klaida išsaugant vilkiką:', err);
-      setError('Nepavyko išsaugoti vilkiko. Bandykite dar kartą vėliau.');
+      console.error('Error saving truck:', err);
+      setError(t('common.errors.saveFailed'));
     } finally {
       setLoading(false);
     }
@@ -151,6 +140,8 @@ function Vilkikai() {
    * @param {Object} truck - Vilkiko objektas
    */
   const handleDeleteTruckClick = (truck) => {
+    if (!truck) return;
+    
     setTruckToDelete(truck);
     setShowDeleteTruckModal(true);
   };
@@ -159,22 +150,19 @@ function Vilkikai() {
    * Ištrina vilkiką
    */
   const handleDeleteTruck = async () => {
+    if (!truckToDelete) return;
+    
     try {
       setLoading(true);
+      setError(null);
       
-      await TruckController.deleteTruck(
-        truckToDelete.id,
-        setLoading,
-        setError,
-        () => {
-          setTrucks(trucks.filter(t => t.id !== truckToDelete.id));
-          setShowDeleteTruckModal(false);
-          setTruckToDelete(null);
-        }
-      );
+      await TruckController.deleteTruck(truckToDelete.id);
+      setTrucks(trucks.filter(t => t.id !== truckToDelete.id));
+      setShowDeleteTruckModal(false);
+      setTruckToDelete(null);
     } catch (err) {
-      console.error('Klaida ištrinant vilkiką:', err);
-      setError('Nepavyko ištrinti vilkiko. Bandykite dar kartą vėliau.');
+      console.error('Error deleting truck:', err);
+      setError(t('common.errors.deleteFailed'));
     } finally {
       setLoading(false);
     }
@@ -188,25 +176,42 @@ function Vilkikai() {
   
   return (
     <Container className="admin-container">
-      <h1 className="text-center my-4">Vilkikų administravimas</h1>
+      <h1 className="text-center my-4">{t('common.admin.trucks')}</h1>
       
       {error && <Alert variant="danger">{error}</Alert>}
       
-      {/* Vilkikų sąrašas */}
+      <Row className="mb-3">
+        <Col>
+          <Button 
+            variant="primary" 
+            onClick={handleAddTruck}
+            disabled={loading}
+          >
+            {t('common.buttons.add')} {t('common.entities.truck')}
+          </Button>
+        </Col>
+        <Col className="text-end">
+          <Button 
+            variant="secondary" 
+            onClick={fetchData}
+            disabled={loading}
+          >
+            {t('common.buttons.refresh')}
+          </Button>
+        </Col>
+      </Row>
+      
       <TruckList
-        trucks={trucks}
+        trucks={filteredTrucks}
         truckSearch={truckSearch}
         setTruckSearch={setTruckSearch}
         truckSort={truckSort}
         handleSort={handleSort}
-        handleAddTruck={handleAddTruck}
         handleEditTruck={handleEditTruck}
         handleDeleteTruckClick={handleDeleteTruckClick}
         loading={loading}
-        filteredTrucks={filteredTrucks}
       />
       
-      {/* Vilkiko forma */}
       <TruckForm
         showTruckForm={showTruckForm}
         setShowTruckForm={setShowTruckForm}
@@ -218,7 +223,6 @@ function Vilkikai() {
         loading={loading}
       />
       
-      {/* Vilkiko ištrynimo modalas */}
       <TruckDeleteModal
         showDeleteTruckModal={showDeleteTruckModal}
         setShowDeleteTruckModal={setShowDeleteTruckModal}

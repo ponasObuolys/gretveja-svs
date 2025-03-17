@@ -13,13 +13,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const Supplier_1 = require("../models/Supplier");
+const supabase_1 = require("../config/supabase");
 const router = express_1.default.Router();
 // Gauti visus tiekėjus
 router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const suppliers = yield Supplier_1.Supplier.findAll();
-        return res.status(200).json(suppliers);
+        const { data, error } = yield supabase_1.supabase
+            .from('suppliers')
+            .select('*')
+            .order('name');
+        if (error) {
+            console.error('Klaida gaunant tiekėjus:', error);
+            return res.status(500).json({ message: 'Serverio klaida gaunant tiekėjus' });
+        }
+        // Jei nėra duomenų, grąžinti tuščią masyvą vietoj null
+        if (!data || data.length === 0) {
+            return res.status(200).json([]);
+        }
+        return res.status(200).json(data);
     }
     catch (error) {
         console.error('Klaida gaunant tiekėjus:', error);
@@ -30,11 +41,17 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const supplier = yield Supplier_1.Supplier.findByPk(id);
-        if (!supplier) {
+        const { data, error } = yield supabase_1.supabase
+            .from('suppliers')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (error)
+            throw error;
+        if (!data) {
             return res.status(404).json({ message: 'Tiekėjas nerastas' });
         }
-        return res.status(200).json(supplier);
+        return res.status(200).json(data);
     }
     catch (error) {
         console.error(`Klaida gaunant tiekėją ID ${id}:`, error);
@@ -45,13 +62,21 @@ router.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 router.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, contactPerson, phone, email } = req.body;
     try {
-        const supplier = yield Supplier_1.Supplier.create({
-            name,
-            contactPerson,
-            phone,
-            email
-        });
-        return res.status(201).json(supplier);
+        const { data, error } = yield supabase_1.supabase
+            .from('suppliers')
+            .insert([
+            {
+                name,
+                contact_person: contactPerson,
+                phone,
+                email
+            }
+        ])
+            .select()
+            .single();
+        if (error)
+            throw error;
+        return res.status(201).json(data);
     }
     catch (error) {
         console.error('Klaida kuriant tiekėją:', error);
@@ -63,17 +88,24 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const { id } = req.params;
     const { name, contactPerson, phone, email } = req.body;
     try {
-        const supplier = yield Supplier_1.Supplier.findByPk(id);
-        if (!supplier) {
+        const { data, error } = yield supabase_1.supabase
+            .from('suppliers')
+            .update({
+            name,
+            contact_person: contactPerson,
+            phone,
+            email,
+            updated_at: new Date()
+        })
+            .eq('id', id)
+            .select()
+            .single();
+        if (error)
+            throw error;
+        if (!data) {
             return res.status(404).json({ message: 'Tiekėjas nerastas' });
         }
-        yield supplier.update({
-            name,
-            contactPerson,
-            phone,
-            email
-        });
-        return res.status(200).json(supplier);
+        return res.status(200).json(data);
     }
     catch (error) {
         console.error(`Klaida atnaujinant tiekėją ID ${id}:`, error);
@@ -84,11 +116,12 @@ router.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 router.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const supplier = yield Supplier_1.Supplier.findByPk(id);
-        if (!supplier) {
-            return res.status(404).json({ message: 'Tiekėjas nerastas' });
-        }
-        yield supplier.destroy();
+        const { error } = yield supabase_1.supabase
+            .from('suppliers')
+            .delete()
+            .eq('id', id);
+        if (error)
+            throw error;
         return res.status(200).json({ message: 'Tiekėjas sėkmingai ištrintas' });
     }
     catch (error) {

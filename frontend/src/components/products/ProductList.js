@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Button, Table, InputGroup, Form } from 'react-bootstrap';
+import { Card, Button, Table, InputGroup, Form, Spinner } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { getSortIcon } from '../../utils/common';
@@ -15,7 +15,6 @@ const ProductList = ({
   setProductSearch,
   productSort,
   handleSort,
-  handleAddProduct,
   handleEditProduct,
   handleDeleteProductClick,
   loading,
@@ -27,9 +26,6 @@ const ProductList = ({
     <Card className="mb-4">
       <Card.Header className="d-flex justify-content-between align-items-center">
         <h3 className="mb-0">{t('common.tables.products')}</h3>
-        <Button variant="primary" onClick={handleAddProduct}>
-          {t('common.buttons.new')} {t('common.labels.product')}
-        </Button>
       </Card.Header>
       <Card.Body>
         <InputGroup className="mb-3">
@@ -37,19 +33,26 @@ const ProductList = ({
             <FaSearch />
           </InputGroup.Text>
           <Form.Control
-            placeholder={t('common.labels.search')}
+            placeholder={t('common.search.by_name_id')}
             value={productSearch}
             onChange={(e) => setProductSearch(e.target.value)}
+            disabled={loading}
           />
         </InputGroup>
 
-        {loading && <p>{t('common.messages.loading')}</p>}
+        {loading && (
+          <div className="text-center my-4">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">{t('common.loading')}</span>
+            </Spinner>
+          </div>
+        )}
         
-        {!loading && products.length === 0 && (
+        {!loading && (!products || products.length === 0) && (
           <p className="text-center">{t('common.messages.no_data')}</p>
         )}
         
-        {!loading && products.length > 0 && (
+        {!loading && products && products.length > 0 && (
           <div className="table-responsive">
             <Table striped bordered hover>
               <thead>
