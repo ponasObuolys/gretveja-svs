@@ -37,16 +37,6 @@ const TruckForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>Modelis</Form.Label>
-            <Form.Control
-              type="text"
-              name="model"
-              value={truckFormData.model}
-              onChange={handleTruckInputChange}
-            />
-          </Form.Group>
-          
-          <Form.Group className="mb-3">
             <Form.Label>Įmonė *</Form.Label>
             <Form.Select
               name="companyId"
@@ -77,4 +67,4 @@ const TruckForm = ({
   );
 };
 
-export default TruckForm; 
+export default TruckForm;

@@ -24,7 +24,6 @@ function Vilkikai() {
   const [currentTruck, setCurrentTruck] = useState(null);
   const [truckFormData, setTruckFormData] = useState({
     plateNumber: '',
-    model: '',
     companyId: ''
   });
   
@@ -75,7 +74,6 @@ function Vilkikai() {
     setCurrentTruck(null);
     setTruckFormData({
       plateNumber: '',
-      model: '',
       companyId: ''
     });
     setShowTruckForm(true);
@@ -89,7 +87,6 @@ function Vilkikai() {
     setCurrentTruck(truck);
     setTruckFormData({
       plateNumber: truck.plateNumber,
-      model: truck.model || '',
       companyId: truck.companyId
     });
     setShowTruckForm(true);
@@ -221,7 +218,7 @@ function Vilkikai() {
         loading={loading}
       />
       
-      {/* Vilkiko ištrynimo patvirtinimo modalas */}
+      {/* Vilkiko ištrynimo modalas */}
       <TruckDeleteModal
         showDeleteTruckModal={showDeleteTruckModal}
         setShowDeleteTruckModal={setShowDeleteTruckModal}
@@ -233,4 +230,4 @@ function Vilkikai() {
   );
 }
 
-export default Vilkikai; 
+export default Vilkikai;

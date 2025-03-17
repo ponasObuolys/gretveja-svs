@@ -50,8 +50,7 @@ class TruckController {
     const searchLower = searchText.toLowerCase();
     return trucks.filter(truck => 
       truck.plateNumber.toLowerCase().includes(searchLower) ||
-      truck.model?.toLowerCase().includes(searchLower) ||
-      truck.company?.name.toLowerCase().includes(searchLower)
+      (truck.company && truck.company.name.toLowerCase().includes(searchLower))
     );
   }
 
@@ -119,4 +118,4 @@ class TruckController {
   }
 }
 
-export default TruckController; 
+export default TruckController;

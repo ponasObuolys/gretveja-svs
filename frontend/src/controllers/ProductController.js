@@ -32,10 +32,11 @@ class ProductController {
     
     const searchLower = searchText.toLowerCase();
     return products.filter(product => 
-      product.code.toLowerCase().includes(searchLower) ||
+      // Remove code from filtering criteria since it's no longer available
       product.name.toLowerCase().includes(searchLower) ||
-      product.nameEn?.toLowerCase().includes(searchLower) ||
-      product.nameRu?.toLowerCase().includes(searchLower)
+      (product.nameEn && product.nameEn.toLowerCase().includes(searchLower)) ||
+      (product.nameRu && product.nameRu.toLowerCase().includes(searchLower)) ||
+      (product.nameDe && product.nameDe.toLowerCase().includes(searchLower))
     );
   }
 
@@ -103,4 +104,4 @@ class ProductController {
   }
 }
 
-export default ProductController; 
+export default ProductController;

@@ -28,17 +28,6 @@ const ProductForm = ({
       <Modal.Body>
         <Form onSubmit={handleSaveProduct}>
           <Form.Group className="mb-3">
-            <Form.Label>{t('common.labels.code')} *</Form.Label>
-            <Form.Control
-              type="text"
-              name="code"
-              value={productFormData.code}
-              onChange={handleProductInputChange}
-              required
-            />
-          </Form.Group>
-          
-          <Form.Group className="mb-3">
             <Form.Label>{t('common.labels.name')} (LT) *</Form.Label>
             <Form.Control
               type="text"
@@ -104,4 +93,4 @@ const ProductForm = ({
   );
 };
 
-export default ProductForm; 
+export default ProductForm;

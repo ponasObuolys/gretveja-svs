@@ -54,9 +54,6 @@ const ProductList = ({
             <Table striped bordered hover>
               <thead>
                 <tr>
-                  <th onClick={() => handleSort('products', 'code')} style={{ cursor: 'pointer' }}>
-                    {t('common.labels.code')} {getSortIcon(productSort, 'code')}
-                  </th>
                   <th onClick={() => handleSort('products', 'name')} style={{ cursor: 'pointer' }}>
                     {t('common.labels.name')} (LT) {getSortIcon(productSort, 'name')}
                   </th>
@@ -75,7 +72,6 @@ const ProductList = ({
               <tbody>
                 {filteredProducts.map(product => (
                   <tr key={product.id}>
-                    <td>{product.code}</td>
                     <td>{product.name}</td>
                     <td>{product.nameEn || '-'}</td>
                     <td>{product.nameRu || '-'}</td>
@@ -108,4 +104,4 @@ const ProductList = ({
   );
 };
 
-export default ProductList; 
+export default ProductList;

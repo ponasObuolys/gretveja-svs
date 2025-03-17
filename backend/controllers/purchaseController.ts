@@ -1,20 +1,22 @@
 import { Request, Response } from 'express';
-import { Purchase } from '../models/Purchase';
-import { Product } from '../models/Product';
-import { Supplier } from '../models/Supplier';
-import { Company } from '../models/Company';
+import { supabase } from '../config/supabase';
 
 // Gauti visus pirkimus
 export const getAllPurchases = async (req: Request, res: Response) => {
   try {
-    const purchases = await Purchase.findAll({
-      include: [
-        { model: Product },
-        { model: Supplier },
-        { model: Company }
-      ]
-    });
-    return res.status(200).json(purchases);
+    const { data, error } = await supabase
+      .from('purchases')
+      .select(`
+        *,
+        products (*),
+        suppliers (*),
+        companies (*)
+      `)
+      .order('purchase_date', { ascending: false });
+    
+    if (error) throw error;
+    
+    return res.status(200).json(data);
   } catch (error) {
     console.error('Klaida gaunant pirkimus:', error);
     return res.status(500).json({ message: 'Serverio klaida gaunant pirkimus' });
@@ -26,19 +28,24 @@ export const getPurchaseById = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
-    const purchase = await Purchase.findByPk(id, {
-      include: [
-        { model: Product },
-        { model: Supplier },
-        { model: Company }
-      ]
-    });
+    const { data, error } = await supabase
+      .from('purchases')
+      .select(`
+        *,
+        products (*),
+        suppliers (*),
+        companies (*)
+      `)
+      .eq('id', id)
+      .single();
     
-    if (!purchase) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Pirkimas nerastas' });
     }
     
-    return res.status(200).json(purchase);
+    return res.status(200).json(data);
   } catch (error) {
     console.error(`Klaida gaunant pirkimą ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida gaunant pirkimą' });
@@ -61,24 +68,38 @@ export const createPurchase = async (req: Request, res: Response) => {
     // Apskaičiuoti bendrą sumą
     const totalAmount = quantity * unitPrice;
     
-    const purchase = await Purchase.create({
-      invoiceNumber,
-      productId,
-      supplierId,
-      quantity,
-      purchaseDate,
-      unitPrice,
-      companyId,
-      totalAmount
-    });
+    const { data, error } = await supabase
+      .from('purchases')
+      .insert([
+        {
+          invoice_number: invoiceNumber,
+          product_id: productId,
+          supplier_id: supplierId,
+          quantity,
+          purchase_date: purchaseDate,
+          unit_price: unitPrice,
+          company_id: companyId,
+          total_amount: totalAmount
+        }
+      ])
+      .select()
+      .single();
     
-    const newPurchase = await Purchase.findByPk(purchase.id, {
-      include: [
-        { model: Product },
-        { model: Supplier },
-        { model: Company }
-      ]
-    });
+    if (error) throw error;
+    
+    // Fetch the complete purchase with related data
+    const { data: newPurchase, error: fetchError } = await supabase
+      .from('purchases')
+      .select(`
+        *,
+        products (*),
+        suppliers (*),
+        companies (*)
+      `)
+      .eq('id', data.id)
+      .single();
+    
+    if (fetchError) throw fetchError;
     
     return res.status(201).json(newPurchase);
   } catch (error) {
@@ -101,33 +122,45 @@ export const updatePurchase = async (req: Request, res: Response) => {
   } = req.body;
   
   try {
-    const purchase = await Purchase.findByPk(id);
-    
-    if (!purchase) {
-      return res.status(404).json({ message: 'Pirkimas nerastas' });
-    }
-    
     // Apskaičiuoti bendrą sumą
     const totalAmount = quantity * unitPrice;
     
-    await purchase.update({
-      invoiceNumber,
-      productId,
-      supplierId,
-      quantity,
-      purchaseDate,
-      unitPrice,
-      companyId,
-      totalAmount
-    });
+    const { data, error } = await supabase
+      .from('purchases')
+      .update({
+        invoice_number: invoiceNumber,
+        product_id: productId,
+        supplier_id: supplierId,
+        quantity,
+        purchase_date: purchaseDate,
+        unit_price: unitPrice,
+        company_id: companyId,
+        total_amount: totalAmount,
+        updated_at: new Date()
+      })
+      .eq('id', id)
+      .select()
+      .single();
     
-    const updatedPurchase = await Purchase.findByPk(id, {
-      include: [
-        { model: Product },
-        { model: Supplier },
-        { model: Company }
-      ]
-    });
+    if (error) throw error;
+    
+    if (!data) {
+      return res.status(404).json({ message: 'Pirkimas nerastas' });
+    }
+    
+    // Fetch the complete updated purchase with related data
+    const { data: updatedPurchase, error: fetchError } = await supabase
+      .from('purchases')
+      .select(`
+        *,
+        products (*),
+        suppliers (*),
+        companies (*)
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (fetchError) throw fetchError;
     
     return res.status(200).json(updatedPurchase);
   } catch (error) {
@@ -141,17 +174,16 @@ export const deletePurchase = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
-    const purchase = await Purchase.findByPk(id);
+    const { error } = await supabase
+      .from('purchases')
+      .delete()
+      .eq('id', id);
     
-    if (!purchase) {
-      return res.status(404).json({ message: 'Pirkimas nerastas' });
-    }
-    
-    await purchase.destroy();
+    if (error) throw error;
     
     return res.status(200).json({ message: 'Pirkimas sėkmingai ištrintas' });
   } catch (error) {
     console.error(`Klaida ištrinant pirkimą ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida ištrinant pirkimą' });
   }
-}; 
+};

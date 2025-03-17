@@ -1,18 +1,29 @@
 import { Request, Response } from 'express';
-import { Truck } from '../models/Truck';
-import { Company } from '../models/Company';
+import { supabase } from '../config/supabase';
 
 // Gauti visus vilkikus
 export const getAllTrucks = async (req: Request, res: Response) => {
   try {
-    const include = req.query.include === 'company' ? [Company] : [];
+    const includeCompany = req.query.include === 'company';
     
-    const trucks = await Truck.findAll({
-      include,
-      order: [['plateNumber', 'ASC']]
-    });
+    let query = supabase
+      .from('trucks')
+      .select('*');
+      
+    if (includeCompany) {
+      query = supabase
+        .from('trucks')
+        .select(`
+          *,
+          companies (*)
+        `);
+    }
     
-    res.json(trucks);
+    const { data, error } = await query.order('plate_number');
+    
+    if (error) throw error;
+    
+    res.json(data);
   } catch (error) {
     console.error('Klaida gaunant vilkikus:', error);
     res.status(500).json({ message: 'Serverio klaida gaunant vilkikus' });
@@ -24,15 +35,22 @@ export const getTruckById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
-    const truck = await Truck.findByPk(id, {
-      include: [Company]
-    });
+    const { data, error } = await supabase
+      .from('trucks')
+      .select(`
+        *,
+        companies (*)
+      `)
+      .eq('id', id)
+      .single();
     
-    if (!truck) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Vilkikas nerastas' });
     }
     
-    res.json(truck);
+    res.json(data);
   } catch (error) {
     console.error('Klaida gaunant vilkiką:', error);
     res.status(500).json({ message: 'Serverio klaida gaunant vilkiką' });
@@ -42,15 +60,22 @@ export const getTruckById = async (req: Request, res: Response) => {
 // Sukurti naują vilkiką
 export const createTruck = async (req: Request, res: Response) => {
   try {
-    const { plateNumber, model, companyId } = req.body;
+    const { plateNumber, companyId } = req.body;
     
-    const truck = await Truck.create({
-      plateNumber,
-      model,
-      companyId
-    });
+    const { data, error } = await supabase
+      .from('trucks')
+      .insert([
+        { 
+          plate_number: plateNumber,
+          company_id: companyId 
+        }
+      ])
+      .select()
+      .single();
     
-    res.status(201).json(truck);
+    if (error) throw error;
+    
+    res.status(201).json(data);
   } catch (error) {
     console.error('Klaida kuriant vilkiką:', error);
     res.status(500).json({ message: 'Serverio klaida kuriant vilkiką' });
@@ -61,21 +86,26 @@ export const createTruck = async (req: Request, res: Response) => {
 export const updateTruck = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { plateNumber, model, companyId } = req.body;
+    const { plateNumber, companyId } = req.body;
     
-    const truck = await Truck.findByPk(id);
+    const { data, error } = await supabase
+      .from('trucks')
+      .update({ 
+        plate_number: plateNumber,
+        company_id: companyId,
+        updated_at: new Date()
+      })
+      .eq('id', id)
+      .select()
+      .single();
     
-    if (!truck) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Vilkikas nerastas' });
     }
     
-    await truck.update({
-      plateNumber,
-      model,
-      companyId
-    });
-    
-    res.json(truck);
+    res.json(data);
   } catch (error) {
     console.error('Klaida atnaujinant vilkiką:', error);
     res.status(500).json({ message: 'Serverio klaida atnaujinant vilkiką' });
@@ -87,17 +117,16 @@ export const deleteTruck = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     
-    const truck = await Truck.findByPk(id);
+    const { error } = await supabase
+      .from('trucks')
+      .delete()
+      .eq('id', id);
     
-    if (!truck) {
-      return res.status(404).json({ message: 'Vilkikas nerastas' });
-    }
-    
-    await truck.destroy();
+    if (error) throw error;
     
     res.status(204).send();
   } catch (error) {
     console.error('Klaida ištrinant vilkiką:', error);
     res.status(500).json({ message: 'Serverio klaida ištrinant vilkiką' });
   }
-}; 
+};

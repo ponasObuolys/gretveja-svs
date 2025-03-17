@@ -2,24 +2,26 @@ import { Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import PDFDocument from 'pdfkit';
-import { Issuance } from '../models/Issuance';
-import { Product } from '../models/Product';
-import { Truck } from '../models/Truck';
-import { Company } from '../models/Company';
+import { supabase } from '../config/supabase';
 
 // Gauti visus išdavimus
 export const getAllIssuances = async (req: Request, res: Response) => {
   try {
-    const issuances = await Issuance.findAll({
-      include: [
-        { model: Product },
-        { 
-          model: Truck,
-          include: [{ model: Company }]
-        }
-      ]
-    });
-    return res.status(200).json(issuances);
+    const { data, error } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+      .order('issuance_date', { ascending: false });
+    
+    if (error) throw error;
+    
+    return res.status(200).json(data);
   } catch (error) {
     console.error('Klaida gaunant išdavimus:', error);
     return res.status(500).json({ message: 'Serverio klaida gaunant išdavimus' });
@@ -31,21 +33,26 @@ export const getIssuanceById = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
-    const issuance = await Issuance.findByPk(id, {
-      include: [
-        { model: Product },
-        { 
-          model: Truck,
-          include: [{ model: Company }]
-        }
-      ]
-    });
+    const { data, error } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+      .eq('id', id)
+      .single();
     
-    if (!issuance) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Išdavimas nerastas' });
     }
     
-    return res.status(200).json(issuance);
+    return res.status(200).json(data);
   } catch (error) {
     console.error(`Klaida gaunant išdavimą ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida gaunant išdavimą' });
@@ -65,25 +72,39 @@ export const createIssuance = async (req: Request, res: Response) => {
   } = req.body;
   
   try {
-    const issuance = await Issuance.create({
-      productId,
-      isIssued,
-      issuanceDate,
-      quantity,
-      driverName,
-      truckId,
-      notes
-    });
-    
-    const newIssuance = await Issuance.findByPk(issuance.id, {
-      include: [
-        { model: Product },
-        { 
-          model: Truck,
-          include: [{ model: Company }]
+    const { data, error } = await supabase
+      .from('issuances')
+      .insert([
+        {
+          product_id: productId,
+          is_issued: isIssued,
+          issuance_date: issuanceDate,
+          quantity,
+          driver_name: driverName,
+          truck_id: truckId,
+          notes
         }
-      ]
-    });
+      ])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    // Fetch the complete issuance with related data
+    const { data: newIssuance, error: fetchError } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+      .eq('id', data.id)
+      .single();
+    
+    if (fetchError) throw fetchError;
     
     return res.status(201).json(newIssuance);
   } catch (error) {
@@ -106,31 +127,43 @@ export const updateIssuance = async (req: Request, res: Response) => {
   } = req.body;
   
   try {
-    const issuance = await Issuance.findByPk(id);
+    const { data, error } = await supabase
+      .from('issuances')
+      .update({
+        product_id: productId,
+        is_issued: isIssued,
+        issuance_date: issuanceDate,
+        quantity,
+        driver_name: driverName,
+        truck_id: truckId,
+        notes,
+        updated_at: new Date()
+      })
+      .eq('id', id)
+      .select()
+      .single();
     
-    if (!issuance) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Išdavimas nerastas' });
     }
     
-    await issuance.update({
-      productId,
-      isIssued,
-      issuanceDate,
-      quantity,
-      driverName,
-      truckId,
-      notes
-    });
+    // Fetch the complete updated issuance with related data
+    const { data: updatedIssuance, error: fetchError } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+      .eq('id', id)
+      .single();
     
-    const updatedIssuance = await Issuance.findByPk(id, {
-      include: [
-        { model: Product },
-        { 
-          model: Truck,
-          include: [{ model: Company }]
-        }
-      ]
-    });
+    if (fetchError) throw fetchError;
     
     return res.status(200).json(updatedIssuance);
   } catch (error) {
@@ -144,13 +177,12 @@ export const deleteIssuance = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
-    const issuance = await Issuance.findByPk(id);
+    const { error } = await supabase
+      .from('issuances')
+      .delete()
+      .eq('id', id);
     
-    if (!issuance) {
-      return res.status(404).json({ message: 'Išdavimas nerastas' });
-    }
-    
-    await issuance.destroy();
+    if (error) throw error;
     
     return res.status(200).json({ message: 'Išdavimas sėkmingai ištrintas' });
   } catch (error) {
@@ -164,15 +196,20 @@ export const generatePdf = async (req: Request, res: Response) => {
   const { id } = req.params;
   
   try {
-    const issuance = await Issuance.findByPk(id, {
-      include: [
-        { model: Product },
-        { 
-          model: Truck,
-          include: [{ model: Company }]
-        }
-      ]
-    });
+    const { data: issuance, error } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
     
     if (!issuance) {
       return res.status(404).json({ message: 'Išdavimas nerastas' });
@@ -201,36 +238,41 @@ export const generatePdf = async (req: Request, res: Response) => {
     doc.fontSize(20).text('Prekių perdavimo aktas', { align: 'center' });
     doc.moveDown();
     
-    const issuanceDate = new Date(issuance.issuanceDate).toLocaleDateString('lt-LT');
-    
-    doc.fontSize(12).text(`Data: ${issuanceDate}`);
+    doc.fontSize(12).text(`Išdavimo data: ${new Date(issuance.issuance_date).toLocaleDateString('lt-LT')}`);
     doc.moveDown();
     
-    doc.text(`Produktas: ${issuance.product?.name || 'Nenurodyta'}`);
-    doc.text(`Kiekis: ${issuance.quantity} vnt.`);
-    doc.text(`Vairuotojas: ${issuance.driverName}`);
-    doc.text(`Vilkikas: ${issuance.truck?.plateNumber || 'Nenurodyta'}`);
-    doc.text(`Įmonė: ${issuance.truck?.company?.name || 'Nenurodyta'}`);
-    if (issuance.notes) {
-      doc.text(`Pastabos: ${issuance.notes}`);
+    doc.text(`Produktas: ${issuance.products.name}`);
+    doc.text(`Kiekis: ${issuance.quantity} ${issuance.products.unit}`);
+    doc.moveDown();
+    
+    doc.text(`Vairuotojas: ${issuance.driver_name}`);
+    doc.text(`Vilkikas: ${issuance.trucks.plate_number}`);
+    
+    if (issuance.trucks.companies) {
+      doc.text(`Įmonė: ${issuance.trucks.companies.name}`);
     }
     
-    doc.moveDown(2);
-    
-    // Parašai
-    doc.text('Perdavė: ____________________');
     doc.moveDown();
-    doc.text('Priėmė: ____________________');
+    
+    if (issuance.notes) {
+      doc.text(`Pastabos: ${issuance.notes}`);
+      doc.moveDown();
+    }
+    
+    doc.text('Išdavė: _______________________', { align: 'left' });
+    doc.moveDown();
+    doc.text('Priėmė: _______________________', { align: 'left' });
     
     // Užbaigti dokumentą
     doc.end();
     
+    // Grąžinti atsakymą tik kai dokumentas bus pilnai sukurtas
     fileStream.on('finish', () => {
-      console.log(`PDF sukurtas: ${filePath}`);
+      console.log(`PDF dokumentas sukurtas: ${filePath}`);
     });
     
   } catch (error) {
     console.error(`Klaida generuojant PDF išdavimui ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida generuojant PDF' });
   }
-}; 
+};

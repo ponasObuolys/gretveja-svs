@@ -2,6 +2,41 @@ import axios from 'axios';
 import { handleApiError } from '../utils/common';
 
 /**
+ * Transforms truck data from backend (snake_case) to frontend (camelCase) format
+ * @param {Object} truck - Truck data from backend
+ * @returns {Object} Transformed truck data for frontend
+ */
+const transformTruckFromBackend = (truck) => {
+  if (!truck) return null;
+  
+  return {
+    id: truck.id,
+    plateNumber: truck.plate_number,
+    companyId: truck.company_id,
+    company: truck.companies ? {
+      id: truck.companies.id,
+      name: truck.companies.name
+    } : null,
+    createdAt: truck.created_at,
+    updatedAt: truck.updated_at
+  };
+};
+
+/**
+ * Transforms truck data from frontend (camelCase) to backend (snake_case) format
+ * @param {Object} truck - Truck data from frontend
+ * @returns {Object} Transformed truck data for backend
+ */
+const transformTruckToBackend = (truck) => {
+  const { model, ...rest } = truck;
+  
+  return {
+    plate_number: rest.plateNumber,
+    company_id: rest.companyId
+  };
+};
+
+/**
  * TruckModel - Klasė, valdanti vilkikų duomenis
  */
 class TruckModel {
@@ -18,7 +53,7 @@ class TruckModel {
     
     try {
       const response = await axios.get(`/api/trucks?${params.toString()}`);
-      return response.data;
+      return response.data.map(transformTruckFromBackend);
     } catch (error) {
       throw error;
     }
@@ -32,7 +67,7 @@ class TruckModel {
   static async getById(id) {
     try {
       const response = await axios.get(`/api/trucks/${id}?include=company`);
-      return response.data;
+      return transformTruckFromBackend(response.data);
     } catch (error) {
       throw error;
     }
@@ -45,8 +80,9 @@ class TruckModel {
    */
   static async create(truckData) {
     try {
-      const response = await axios.post('/api/trucks', truckData);
-      return response.data;
+      const backendData = transformTruckToBackend(truckData);
+      const response = await axios.post('/api/trucks', backendData);
+      return transformTruckFromBackend(response.data);
     } catch (error) {
       throw error;
     }
@@ -60,8 +96,9 @@ class TruckModel {
    */
   static async update(id, truckData) {
     try {
-      const response = await axios.put(`/api/trucks/${id}`, truckData);
-      return response.data;
+      const backendData = transformTruckToBackend(truckData);
+      const response = await axios.put(`/api/trucks/${id}`, backendData);
+      return transformTruckFromBackend(response.data);
     } catch (error) {
       throw error;
     }
@@ -82,4 +119,4 @@ class TruckModel {
   }
 }
 
-export default TruckModel; 
+export default TruckModel;

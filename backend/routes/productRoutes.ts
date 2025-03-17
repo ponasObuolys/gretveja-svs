@@ -1,13 +1,19 @@
 import express from 'express';
-import { Product } from '../models/Product';
+import { supabase } from '../config/supabase';
 
 const router = express.Router();
 
 // Gauti visus produktus
 router.get('/', async (req, res) => {
   try {
-    const products = await Product.findAll();
-    return res.status(200).json(products);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .order('name');
+      
+    if (error) throw error;
+    
+    return res.status(200).json(data);
   } catch (error) {
     console.error('Klaida gaunant produktus:', error);
     return res.status(500).json({ message: 'Serverio klaida gaunant produktus' });
@@ -19,13 +25,19 @@ router.get('/:id', async (req, res) => {
   const { id } = req.params;
   
   try {
-    const product = await Product.findByPk(id);
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
     
-    if (!product) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Produktas nerastas' });
     }
     
-    return res.status(200).json(product);
+    return res.status(200).json(data);
   } catch (error) {
     console.error(`Klaida gaunant produktą ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida gaunant produktą' });
@@ -34,19 +46,26 @@ router.get('/:id', async (req, res) => {
 
 // Sukurti naują produktą
 router.post('/', async (req, res) => {
-  const { code, name, nameEn, nameRu, description, unit } = req.body;
+  const { name, nameEn, nameRu, description, unit } = req.body;
   
   try {
-    const product = await Product.create({
-      code,
-      name,
-      nameEn,
-      nameRu,
-      description,
-      unit
-    });
+    const { data, error } = await supabase
+      .from('products')
+      .insert([
+        { 
+          name, 
+          name_en: nameEn, 
+          name_ru: nameRu, 
+          description, 
+          unit 
+        }
+      ])
+      .select()
+      .single();
     
-    return res.status(201).json(product);
+    if (error) throw error;
+    
+    return res.status(201).json(data);
   } catch (error) {
     console.error('Klaida kuriant produktą:', error);
     return res.status(500).json({ message: 'Serverio klaida kuriant produktą' });
@@ -56,21 +75,30 @@ router.post('/', async (req, res) => {
 // Atnaujinti produktą
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, unit } = req.body;
+  const { name, nameEn, nameRu, description, unit } = req.body;
   
   try {
-    const product = await Product.findByPk(id);
+    const { data, error } = await supabase
+      .from('products')
+      .update({ 
+        name, 
+        name_en: nameEn, 
+        name_ru: nameRu, 
+        description, 
+        unit,
+        updated_at: new Date()
+      })
+      .eq('id', id)
+      .select()
+      .single();
     
-    if (!product) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Produktas nerastas' });
     }
     
-    await product.update({
-      name,
-      unit
-    });
-    
-    return res.status(200).json(product);
+    return res.status(200).json(data);
   } catch (error) {
     console.error(`Klaida atnaujinant produktą ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida atnaujinant produktą' });
@@ -82,13 +110,12 @@ router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   
   try {
-    const product = await Product.findByPk(id);
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
     
-    if (!product) {
-      return res.status(404).json({ message: 'Produktas nerastas' });
-    }
-    
-    await product.destroy();
+    if (error) throw error;
     
     return res.status(200).json({ message: 'Produktas sėkmingai ištrintas' });
   } catch (error) {
@@ -97,4 +124,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

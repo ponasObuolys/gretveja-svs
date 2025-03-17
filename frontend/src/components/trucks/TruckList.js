@@ -34,7 +34,7 @@ const TruckList = ({
             <FaSearch />
           </InputGroup.Text>
           <Form.Control
-            placeholder="Ieškoti pagal valst. numerį, modelį ar įmonę..."
+            placeholder="Ieškoti pagal valst. numerį ar įmonę..."
             value={truckSearch}
             onChange={(e) => setTruckSearch(e.target.value)}
           />
@@ -54,9 +54,6 @@ const TruckList = ({
                   <th onClick={() => handleSort('trucks', 'plateNumber')} style={{ cursor: 'pointer' }}>
                     Valst. numeris {getSortIcon(truckSort, 'plateNumber')}
                   </th>
-                  <th onClick={() => handleSort('trucks', 'model')} style={{ cursor: 'pointer' }}>
-                    Modelis {getSortIcon(truckSort, 'model')}
-                  </th>
                   <th onClick={() => handleSort('trucks', 'company.name')} style={{ cursor: 'pointer' }}>
                     Įmonė {getSortIcon(truckSort, 'company.name')}
                   </th>
@@ -67,7 +64,6 @@ const TruckList = ({
                 {filteredTrucks.map(truck => (
                   <tr key={truck.id}>
                     <td>{truck.plateNumber}</td>
-                    <td>{truck.model || '-'}</td>
                     <td>{truck.company?.name || '-'}</td>
                     <td>
                       <Button 
@@ -97,4 +93,4 @@ const TruckList = ({
   );
 };
 
-export default TruckList; 
+export default TruckList;

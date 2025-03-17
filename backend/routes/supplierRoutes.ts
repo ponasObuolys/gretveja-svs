@@ -1,13 +1,19 @@
 import express from 'express';
-import { Supplier } from '../models/Supplier';
+import { supabase } from '../config/supabase';
 
 const router = express.Router();
 
 // Gauti visus tiekėjus
 router.get('/', async (req, res) => {
   try {
-    const suppliers = await Supplier.findAll();
-    return res.status(200).json(suppliers);
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .order('name');
+      
+    if (error) throw error;
+    
+    return res.status(200).json(data);
   } catch (error) {
     console.error('Klaida gaunant tiekėjus:', error);
     return res.status(500).json({ message: 'Serverio klaida gaunant tiekėjus' });
@@ -19,13 +25,19 @@ router.get('/:id', async (req, res) => {
   const { id } = req.params;
   
   try {
-    const supplier = await Supplier.findByPk(id);
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .eq('id', id)
+      .single();
     
-    if (!supplier) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Tiekėjas nerastas' });
     }
     
-    return res.status(200).json(supplier);
+    return res.status(200).json(data);
   } catch (error) {
     console.error(`Klaida gaunant tiekėją ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida gaunant tiekėją' });
@@ -37,14 +49,22 @@ router.post('/', async (req, res) => {
   const { name, contactPerson, phone, email } = req.body;
   
   try {
-    const supplier = await Supplier.create({
-      name,
-      contactPerson,
-      phone,
-      email
-    });
+    const { data, error } = await supabase
+      .from('suppliers')
+      .insert([
+        { 
+          name,
+          contact_person: contactPerson,
+          phone,
+          email
+        }
+      ])
+      .select()
+      .single();
     
-    return res.status(201).json(supplier);
+    if (error) throw error;
+    
+    return res.status(201).json(data);
   } catch (error) {
     console.error('Klaida kuriant tiekėją:', error);
     return res.status(500).json({ message: 'Serverio klaida kuriant tiekėją' });
@@ -57,20 +77,26 @@ router.put('/:id', async (req, res) => {
   const { name, contactPerson, phone, email } = req.body;
   
   try {
-    const supplier = await Supplier.findByPk(id);
+    const { data, error } = await supabase
+      .from('suppliers')
+      .update({ 
+        name,
+        contact_person: contactPerson,
+        phone,
+        email,
+        updated_at: new Date()
+      })
+      .eq('id', id)
+      .select()
+      .single();
     
-    if (!supplier) {
+    if (error) throw error;
+    
+    if (!data) {
       return res.status(404).json({ message: 'Tiekėjas nerastas' });
     }
     
-    await supplier.update({
-      name,
-      contactPerson,
-      phone,
-      email
-    });
-    
-    return res.status(200).json(supplier);
+    return res.status(200).json(data);
   } catch (error) {
     console.error(`Klaida atnaujinant tiekėją ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida atnaujinant tiekėją' });
@@ -82,13 +108,12 @@ router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   
   try {
-    const supplier = await Supplier.findByPk(id);
+    const { error } = await supabase
+      .from('suppliers')
+      .delete()
+      .eq('id', id);
     
-    if (!supplier) {
-      return res.status(404).json({ message: 'Tiekėjas nerastas' });
-    }
-    
-    await supplier.destroy();
+    if (error) throw error;
     
     return res.status(200).json({ message: 'Tiekėjas sėkmingai ištrintas' });
   } catch (error) {
@@ -97,4 +122,4 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;
