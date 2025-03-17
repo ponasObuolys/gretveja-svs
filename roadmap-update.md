@@ -1,0 +1,14 @@
+### 2025-03-17
+- ✅ Sukurti duomenų importavimo skriptai:
+  - ✅ Sukurtas `seedCompanies.ts` skriptas keturių įmonių importavimui (UAB Gretvėja, Gwind, Gretveja DE, Neve Trans)
+  - ✅ Sukurtas `seedTrucks.ts` skriptas vilkikų importavimui iš Vilkikai.csv
+  - ✅ Sukurtas `seedProducts.ts` skriptas prekių importavimui iš produktai.csv
+  - ✅ Sukurtas `seedSuppliers.ts` skriptas tiekėjų importavimui iš Tiekejai.csv
+- ✅ Duomenų bazė papildyta:
+  - ✅ Įkeltos 4 įmonės su tiksliais įmonių kodais ir PVM kodais
+  - ✅ Įkelti 438 vilkikai, susieti su atitinkamomis įmonėmis
+  - ✅ Įkelti 188 produktai su pavadinimais lietuvių, anglų ir rusų kalbomis
+  - ✅ Įkelti 13 tiekėjų su kontaktine informacija (telefonais ir el. paštais)
+- ✅ Duomenų tvarkymas:
+  - ✅ Pakeisti visi "Parme Trans" įrašai į "Neve Trans" tiek CSV faile, tiek duomenų bazėje
+  - ✅ Sukurta logiška sąsaja tarp vilkikų ir įmonių, kad pasirenkant vilkiką "issuances" sekcijoje automatiškai būtų parenkama atitinkama įmonė
