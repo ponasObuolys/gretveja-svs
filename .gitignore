@@ -7,7 +7,7 @@ frontend/build/
 backend/dist/
 
 # Environment files
-.env
+# .env            # Išimta, kad galėtume sekti .env failą
 .env.local
 .env.development.local
 .env.test.local
@@ -40,4 +40,4 @@ data/
 # Išsaugome svarbius CSV failus
 !produktai.csv
 !Vilkikai.csv
-!suppliers.json 
+!suppliers.json
