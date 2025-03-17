@@ -5,6 +5,7 @@ import PDFDocument from 'pdfkit';
 import { supabase } from '../config/supabase';
 import { stringify } from 'csv-stringify';
 import * as ExcelJS from 'exceljs';
+import { createRussianPdf, createEnglishPdf } from '../utils/pdfUtils';
 
 // Gauti visus išdavimus
 export const getAllIssuances = async (req: Request, res: Response) => {
@@ -309,6 +310,144 @@ export const generatePdf = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(`Klaida generuojant PDF išdavimui ID ${id}:`, error);
     return res.status(500).json({ message: 'Serverio klaida generuojant PDF' });
+  }
+};
+
+// Generuoti PDF anglų kalba
+export const generatePdfEnglish = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  
+  try {
+    const { data: issuance, error } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    
+    if (!issuance) {
+      return res.status(404).json({ message: 'Issuance not found' });
+    }
+    
+    // Create PDF document
+    const doc = new PDFDocument({
+      size: 'A4',
+      margin: 50,
+      info: {
+        Title: 'Product Transfer Document',
+        Author: 'Gretveja SVS',
+        Subject: `Issuance ID: ${id}`
+      }
+    });
+    
+    const filename = `issuance_en_${id}_${Date.now()}.pdf`;
+    const filePath = path.join(__dirname, '..', 'pdfs', filename);
+    
+    // Check if directory exists, if not - create it
+    if (!fs.existsSync(path.join(__dirname, '..', 'pdfs'))) {
+      fs.mkdirSync(path.join(__dirname, '..', 'pdfs'), { recursive: true });
+    }
+    
+    // Set response headers
+    res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+    res.setHeader('Content-type', 'application/pdf');
+    
+    // Create write streams
+    const fileStream = fs.createWriteStream(filePath);
+    doc.pipe(fileStream);
+    doc.pipe(res);
+    
+    // Generate English PDF content
+    createEnglishPdf(doc, issuance);
+    
+    // Finish document
+    doc.end();
+    
+    // Return response only when document is fully created
+    fileStream.on('finish', () => {
+      console.log(`PDF document created: ${filePath}`);
+    });
+    
+  } catch (error) {
+    console.error(`Error generating English PDF for issuance ID ${id}:`, error);
+    return res.status(500).json({ message: 'Server error generating PDF' });
+  }
+};
+
+// Generuoti PDF rusų kalba
+export const generatePdfRussian = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  
+  try {
+    const { data: issuance, error } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    
+    if (!issuance) {
+      return res.status(404).json({ message: 'Issuance not found' });
+    }
+    
+    // Create PDF document
+    const doc = new PDFDocument({
+      size: 'A4',
+      margin: 50,
+      info: {
+        Title: 'Dokument o peredache produkcii',
+        Author: 'Gretveja SVS',
+        Subject: `Issuance ID: ${id}`
+      }
+    });
+    
+    const filename = `issuance_ru_${id}_${Date.now()}.pdf`;
+    const filePath = path.join(__dirname, '..', 'pdfs', filename);
+    
+    // Check if directory exists, if not - create it
+    if (!fs.existsSync(path.join(__dirname, '..', 'pdfs'))) {
+      fs.mkdirSync(path.join(__dirname, '..', 'pdfs'), { recursive: true });
+    }
+    
+    // Set response headers
+    res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+    res.setHeader('Content-type', 'application/pdf');
+    
+    // Create write streams
+    const fileStream = fs.createWriteStream(filePath);
+    doc.pipe(fileStream);
+    doc.pipe(res);
+    
+    // Generate Russian PDF content
+    createRussianPdf(doc, issuance);
+    
+    // Finish document
+    doc.end();
+    
+    // Return response only when document is fully created
+    fileStream.on('finish', () => {
+      console.log(`PDF document created: ${filePath}`);
+    });
+    
+  } catch (error) {
+    console.error(`Error generating Russian PDF for issuance ID ${id}:`, error);
+    return res.status(500).json({ message: 'Server error generating PDF' });
   }
 };
 

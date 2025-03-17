@@ -6,6 +6,8 @@ import {
   updateIssuance, 
   deleteIssuance, 
   generatePdf,
+  generatePdfEnglish,
+  generatePdfRussian,
   exportIssuancesToCsv,
   exportIssuancesToXlsx,
   exportIssuancesToPdf
@@ -31,9 +33,15 @@ router.delete('/:id', deleteIssuance);
 // Generuoti PDF
 router.get('/:id/pdf', generatePdf);
 
+// Generuoti PDF anglų kalba
+router.get('/:id/pdf/en', generatePdfEnglish);
+
+// Generuoti PDF rusų kalba
+router.get('/:id/pdf/ru', generatePdfRussian);
+
 // Export routes
 router.get('/export/csv', exportIssuancesToCsv);
 router.get('/export/xlsx', exportIssuancesToXlsx);
 router.get('/export/pdf', exportIssuancesToPdf);
 
-export default router; 
+export default router;

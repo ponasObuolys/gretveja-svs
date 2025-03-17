@@ -184,10 +184,10 @@ function Issuances() {
     }
   };
 
-  // Atsisiųsti PDF
-  const handleDownloadPdf = async (issuance) => {
+  // Atsisiųsti PDF anglų kalba
+  const handleDownloadPdfEnglish = async (issuance) => {
     try {
-      const response = await axios.get(`/api/issuances/${issuance.id}/pdf`, {
+      const response = await axios.get(`/api/issuances/${issuance.id}/pdf/en`, {
         responseType: 'blob'
       });
       
@@ -195,7 +195,7 @@ function Issuances() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `issuance_${issuance.id}.pdf`);
+      link.setAttribute('download', `issuance_en_${issuance.id}.pdf`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -204,7 +204,28 @@ function Issuances() {
       setError('Nepavyko atsisiųsti PDF. Bandykite dar kartą vėliau.');
     }
   };
-  
+
+  // Atsisiųsti PDF rusų kalba
+  const handleDownloadPdfRussian = async (issuance) => {
+    try {
+      const response = await axios.get(`/api/issuances/${issuance.id}/pdf/ru`, {
+        responseType: 'blob'
+      });
+      
+      // Sukurti laikinąją nuorodą ir atsisiųsti failą
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `issuance_ru_${issuance.id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Klaida atsisiunčiant PDF:', err);
+      setError('Nepavyko atsisiųsti PDF. Bandykite dar kartą vėliau.');
+    }
+  };
+
   // Eksportuoti duomenis
   const handleExport = async (format) => {
     try {
@@ -341,10 +362,19 @@ function Issuances() {
                         <Button 
                           variant="info"
                           size="sm"
-                          onClick={() => handleDownloadPdf(issuance)}
+                          onClick={() => handleDownloadPdfEnglish(issuance)}
+                          className="action-button"
+                          style={{ marginRight: '5px' }}
+                        >
+                          PDF Eng
+                        </Button>
+                        <Button 
+                          variant="info"
+                          size="sm"
+                          onClick={() => handleDownloadPdfRussian(issuance)}
                           className="action-button"
                         >
-                          {t('common.issuances.download_pdf')}
+                          PDF Rus
                         </Button>
                       </td>
                     </tr>
