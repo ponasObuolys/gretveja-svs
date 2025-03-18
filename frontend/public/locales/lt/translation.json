@@ -35,12 +35,14 @@
       "driver": "Vairuotojas",
       "notes": "Pastabos",
       "status": "Būsena",
-      "search": "Ieškoti",
-      "product": "produktas",
+      "search": "Paieška",
+      "product": "Produktas",
       "all_products": "Visi produktai",
-      "in_stock_only": "Tik turintys atsargų",
-      "out_of_stock_only": "Tik neturintys atsargų",
-      "products": "Prekės"
+      "in_stock_only": "Tik turintys likutį",
+      "out_of_stock_only": "Tik neturintys likučio",
+      "products": "Produktai",
+      "plateNumber": "Valst. numeris",
+      "count": "Kiekis"
     },
     "fields": {
       "plateNumber": "Valstybinis numeris",
@@ -99,6 +101,7 @@
       "stock": "Sandėlio atsargos",
       "initial_balance": "Pridėti pradinį likutį",
       "logistics_companies": "Logistikos įmonės",
+      "trucks_count": "Vilkikų skaičius",
       "stock_overview": "Sandėlio atsargos"
     },
     "purchases": {

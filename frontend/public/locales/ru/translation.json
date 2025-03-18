@@ -33,7 +33,8 @@
       "notes": "Примечания",
       "status": "Статус",
       "search": "Поиск",
-      "product": "продукт"
+      "product": "Продукт",
+      "count": "Количество"
     },
     "tables": {
       "products": "Список продуктов",
@@ -84,6 +85,7 @@
       "stock": "Складские запасы",
       "initial_balance": "Добавить начальный остаток",
       "logistics_companies": "Логистические компании",
+      "trucks_count": "Количество грузовиков",
       "stock_overview": "Обзор запасов"
     },
     "purchases": {

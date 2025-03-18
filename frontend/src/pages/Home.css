@@ -131,6 +131,11 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.chart-wrapper.full-width {
+  flex: 0 0 100%;
+  width: 100%;
+}
+
 .chart-wrapper h3 {
   text-align: center;
   margin-bottom: 15px;

@@ -36,12 +36,13 @@
       "notes": "Notes",
       "status": "Status",
       "search": "Search",
-      "product": "product",
+      "product": "Product",
       "all_products": "All Products",
       "in_stock_only": "In Stock Only",
       "out_of_stock_only": "Out of Stock Only",
       "products": "Products",
-      "plateNumber": "License Plate"
+      "plateNumber": "License Plate",
+      "count": "Count"
     },
     "fields": {
       "company": "Company"
@@ -129,6 +130,7 @@
       "stock": "Warehouse Stock",
       "initial_balance": "Add Initial Balance",
       "logistics_companies": "Logistics Companies",
+      "trucks_count": "Trucks",
       "stock_overview": "Stock Overview"
     },
     "purchases": {
