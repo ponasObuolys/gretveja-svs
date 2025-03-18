@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
+import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import './IssuanceForm.css';
 
 function IssuanceForm({ show, onHide, issuance }) {
   const { t, i18n } = useTranslation();
-  const initialFormState = {
+  
+  // Use useMemo to memoize the initialFormState
+  const initialFormState = useMemo(() => ({
     productId: '',
     isIssued: false,
     issuanceDate: new Date().toISOString().split('T')[0],
@@ -14,7 +16,7 @@ function IssuanceForm({ show, onHide, issuance }) {
     driverName: '',
     truckId: '',
     notes: ''
-  };
+  }), []);
 
   const [formData, setFormData] = useState(initialFormState);
   const [products, setProducts] = useState([]);
@@ -28,6 +30,30 @@ function IssuanceForm({ show, onHide, issuance }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [stockData, setStockData] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
+
+  // Define getLocalizedProductName function before it's used in useEffect
+  const getLocalizedProductName = (product) => {
+    if (!product) return '';
+    
+    const currentLanguage = i18n.language;
+    
+    // Check if product has the nameEn or nameRu properties directly
+    if (currentLanguage === 'en' && product.nameEn) {
+      return product.nameEn;
+    } else if (currentLanguage === 'ru' && product.nameRu) {
+      return product.nameRu;
+    }
+    
+    // Check if product has name_en or name_ru (snake_case format from API)
+    if (currentLanguage === 'en' && product.name_en) {
+      return product.name_en;
+    } else if (currentLanguage === 'ru' && product.name_ru) {
+      return product.name_ru;
+    }
+    
+    // Default to Lithuanian name
+    return product.name || '';
+  };
 
   // Gauti produktus ir vilkikus
   useEffect(() => {
@@ -67,7 +93,7 @@ function IssuanceForm({ show, onHide, issuance }) {
     if (show) {
       fetchData();
     }
-  }, [show]);
+  }, [show, t]);
 
   // Nustatyti formos duomenis, kai atidaroma redagavimo forma
   useEffect(() => {
@@ -206,29 +232,6 @@ function IssuanceForm({ show, onHide, issuance }) {
     const stockQuantity = productStock ? productStock.stockInHand : 0;
     
     return `${getLocalizedProductName(product)} (${t('common.inventory.balance')} ${stockQuantity} ${product.unit || t('common.inventory.unit')})`;
-  };
-
-  const getLocalizedProductName = (product) => {
-    if (!product) return '';
-    
-    const currentLanguage = i18n.language;
-    
-    // Check if product has the nameEn or nameRu properties directly
-    if (currentLanguage === 'en' && product.nameEn) {
-      return product.nameEn;
-    } else if (currentLanguage === 'ru' && product.nameRu) {
-      return product.nameRu;
-    }
-    
-    // Check if product has name_en or name_ru (snake_case format from API)
-    if (currentLanguage === 'en' && product.name_en) {
-      return product.name_en;
-    } else if (currentLanguage === 'ru' && product.name_ru) {
-      return product.name_ru;
-    }
-    
-    // Default to Lithuanian name
-    return product.name || '';
   };
 
   const handleProductSearch = (e) => {

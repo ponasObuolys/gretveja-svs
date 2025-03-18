@@ -10,13 +10,9 @@ function Home() {
   const [issuanceStats, setIssuanceStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [topProducts, setTopProducts] = useState([]);
   const [truckCount, setTruckCount] = useState(0);
   const [purchaseCount, setPurchaseCount] = useState(0);
   const [issuanceCount, setIssuanceCount] = useState(0);
-
-  // Spalvos grafikams
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#8dd1e1'];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,10 +73,6 @@ function Home() {
         ];
         setIssuanceStats(hardcodedIssuanceStats);
         
-        // Nustatyti populiariausias prekes pagal likutį
-        const topProductsData = getTopProducts(stockData, 10);
-        setTopProducts(topProductsData);
-        
         // Gauti paskutinio mėnesio pirkimų skaičių
         getCurrentMonthPurchases();
         
@@ -96,70 +88,7 @@ function Home() {
     };
     
     fetchData();
-  }, []);
-  
-  // Create chart data directly from API data
-  const createChartData = (data, dateField) => {
-    console.log('Creating chart data for field:', dateField, 'with data:', data);
-    
-    // Get current month and create data for the last 6 months
-    const months = [];
-    const today = new Date();
-    
-    // Create month buckets for the last 6 months
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      months.push({
-        month: t(`common.months.${date.toLocaleString('en-US', { month: 'long' }).toLowerCase()}`),
-        year: date.getFullYear(),
-        count: 0,
-        quantity: 0
-      });
-    }
-    
-    console.log('Month buckets created:', months);
-    
-    // Process each data item
-    data.forEach(item => {
-      const itemDate = new Date(item[dateField]);
-      console.log('Processing item with date:', itemDate, 'Month:', itemDate.getMonth(), 'Year:', itemDate.getFullYear());
-      
-      // Find matching month
-      for (let i = 0; i < months.length; i++) {
-        const monthData = months[i];
-        
-        // Get month index from translated month name
-        let monthIndex;
-        switch(monthData.month.toLowerCase()) {
-          case t('common.months.january').toLowerCase(): monthIndex = 0; break;
-          case t('common.months.february').toLowerCase(): monthIndex = 1; break;
-          case t('common.months.march').toLowerCase(): monthIndex = 2; break;
-          case t('common.months.april').toLowerCase(): monthIndex = 3; break;
-          case t('common.months.may').toLowerCase(): monthIndex = 4; break;
-          case t('common.months.june').toLowerCase(): monthIndex = 5; break;
-          case t('common.months.july').toLowerCase(): monthIndex = 6; break;
-          case t('common.months.august').toLowerCase(): monthIndex = 7; break;
-          case t('common.months.september').toLowerCase(): monthIndex = 8; break;
-          case t('common.months.october').toLowerCase(): monthIndex = 9; break;
-          case t('common.months.november').toLowerCase(): monthIndex = 10; break;
-          case t('common.months.december').toLowerCase(): monthIndex = 11; break;
-          default: monthIndex = -1;
-        }
-        
-        // Check if item belongs to this month
-        if (itemDate.getMonth() === monthIndex && 
-            itemDate.getFullYear() === monthData.year) {
-          console.log('Found match for item in month:', monthData.month, monthData.year);
-          monthData.count += 1;
-          monthData.quantity += Number(item.quantity) || 0;
-          break;
-        }
-      }
-    });
-    
-    console.log('Final chart data:', months);
-    return months;
-  };
+  }, [t]);
   
   // Gauti populiariausias prekes pagal likutį
   const getTopProducts = (stockData, limit) => {
@@ -171,11 +100,6 @@ function Home() {
         name: item.productName.length > 25 ? item.productName.substring(0, 25) + '...' : item.productName,
         value: item.stockInHand
       }));
-  };
-
-  // Gauti dabartinį metus
-  const getCurrentYear = () => {
-    return new Date().getFullYear();
   };
 
   // Gauti paskutinio mėnesio pirkimų skaičių

@@ -88,120 +88,6 @@ function Purchases() {
     return product.name || '';
   };
   
-  // Update selectedProductName when language changes
-  useEffect(() => {
-    if (!newPurchase.productId) {
-      setSelectedProductName(t('common.purchases.select_product'));
-    } else {
-      // Update the selected product name when language changes
-      const selectedProduct = products.find(product => product.id === parseInt(newPurchase.productId));
-      if (selectedProduct) {
-        const productCode = selectedProduct.code || '';
-        const productName = getLocalizedProductName(selectedProduct);
-        setSelectedProductName(`${productCode} ${productName}`);
-      }
-    }
-  }, [t, newPurchase.productId, i18n.language, products]);
-  
-  // Uždaryti dropdown, kai paspaudžiama už jo ribų
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (productDropdownRef.current && !productDropdownRef.current.contains(event.target)) {
-        setShowProductDropdown(false);
-      }
-    }
-    
-    // Pridėti event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    
-    // Pašalinti event listener, kai komponentas išmontuojamas
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [productDropdownRef]);
-  
-  useEffect(() => {
-    fetchPurchases();
-  }, [selectedYear, selectedMonth]);
-  
-  // Filtravimo komponentas
-  const FilterComponent = () => {
-    return (
-      <div className="filter-container">
-        <Row>
-          <Col sm={3}>
-            <Form.Group>
-              <Form.Label>{t('common.filters.year')}</Form.Label>
-              <Form.Select
-                value={selectedYear || ''}
-                onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
-              >
-                <option value="">{t('common.filters.all_years')}</option>
-                {years.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col sm={3}>
-            <Form.Group>
-              <Form.Label>{t('common.filters.month')}</Form.Label>
-              <Form.Select
-                value={selectedMonth || ''}
-                onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
-                disabled={!selectedYear}
-              >
-                <option value="">{t('common.filters.all_months')}</option>
-                {months.map(month => (
-                  <option key={month.value} value={month.value}>
-                    {t(`common.months.${month.name}`)}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col sm={3} className="d-flex align-items-end">
-            <Button 
-              variant="outline-secondary" 
-              onClick={clearFilters}
-              className="mb-3"
-            >
-              {t('common.filters.clear')}
-            </Button>
-          </Col>
-        </Row>
-      </div>
-    );
-  };
-
-  // Valyti filtrus
-  const clearFilters = () => {
-    setSelectedYear(null);
-    setSelectedMonth(null);
-  };
-
-  // Eksporto mygtukai
-  const ExportButtons = () => {
-    return (
-      <Dropdown className="export-dropdown">
-        <Dropdown.Toggle variant="success">
-          {t('common.buttons.export')}
-        </Dropdown.Toggle>
-        <Dropdown.Menu>
-          <Dropdown.Item onClick={() => handleExport('csv')}>
-            {t('common.purchases.export_csv')}
-          </Dropdown.Item>
-          <Dropdown.Item onClick={() => handleExport('xlsx')}>
-            {t('common.purchases.export_xlsx')}
-          </Dropdown.Item>
-          <Dropdown.Item onClick={() => handleExport('pdf')}>
-            {t('common.purchases.export_pdf')}
-          </Dropdown.Item>
-        </Dropdown.Menu>
-      </Dropdown>
-    );
-  };
-  
   // Gauti visus pirkimus
   const fetchPurchases = async () => {
     try {
@@ -277,6 +163,71 @@ function Purchases() {
       setError(err.message);
       setLoading(false);
     }
+  };
+  
+  // Update selectedProductName when language changes
+  useEffect(() => {
+    if (!newPurchase.productId) {
+      setSelectedProductName(t('common.purchases.select_product'));
+    } else {
+      // Update the selected product name when language changes
+      const selectedProduct = products.find(product => product.id === parseInt(newPurchase.productId));
+      if (selectedProduct) {
+        const productCode = selectedProduct.code || '';
+        const productName = getLocalizedProductName(selectedProduct);
+        setSelectedProductName(`${productCode} ${productName}`);
+      }
+    }
+  }, [t, newPurchase.productId, i18n.language, products, getLocalizedProductName]);
+  
+  // Uždaryti dropdown, kai paspaudžiama už jo ribų
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (productDropdownRef.current && !productDropdownRef.current.contains(event.target)) {
+        setShowProductDropdown(false);
+      }
+    }
+    
+    // Pridėti event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    
+    // Pašalinti event listener, kai komponentas išmontuojamas
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [productDropdownRef]);
+  
+  // Load purchases when filters change
+  useEffect(() => {
+    fetchPurchases();
+  }, [selectedYear, selectedMonth]);
+  
+  // Clear filters function
+  const clearFilters = () => {
+    setSelectedYear('');
+    setSelectedMonth('');
+  };
+  
+  // Eksporto mygtukai
+  const ExportButtons = () => {
+    return (
+      <Dropdown className="export-dropdown">
+        <Dropdown.Toggle variant="success">
+          {t('common.buttons.export')}
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={() => handleExport('csv')}>
+            {t('common.purchases.export_csv')}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => handleExport('xlsx')}>
+            {t('common.purchases.export_xlsx')}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => handleExport('pdf')}>
+            {t('common.purchases.export_pdf')}
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    );
   };
   
   // Eksportuoti duomenis
@@ -536,7 +487,50 @@ function Purchases() {
     <div className="purchases-container">
       <h1>{t('common.purchases.title')}</h1>
       
-      <FilterComponent />
+      <div className="filter-container">
+        <Row>
+          <Col sm={3}>
+            <Form.Group>
+              <Form.Label>{t('common.filters.year')}</Form.Label>
+              <Form.Select
+                value={selectedYear || ''}
+                onChange={(e) => setSelectedYear(e.target.value ? parseInt(e.target.value) : null)}
+              >
+                <option value="">{t('common.filters.all_years')}</option>
+                {years.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col sm={3}>
+            <Form.Group>
+              <Form.Label>{t('common.filters.month')}</Form.Label>
+              <Form.Select
+                value={selectedMonth || ''}
+                onChange={(e) => setSelectedMonth(e.target.value ? parseInt(e.target.value) : null)}
+                disabled={!selectedYear}
+              >
+                <option value="">{t('common.filters.all_months')}</option>
+                {months.map(month => (
+                  <option key={month.value} value={month.value}>
+                    {t(`common.months.${month.name}`)}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col sm={3} className="d-flex align-items-end">
+            <Button 
+              variant="outline-secondary" 
+              onClick={clearFilters}
+              className="mb-3"
+            >
+              {t('common.filters.clear')}
+            </Button>
+          </Col>
+        </Row>
+      </div>
       
       <div className="action-buttons">
         <ExportButtons />

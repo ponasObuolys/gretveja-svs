@@ -53,7 +53,8 @@
       "phone": "Telefonas",
       "email": "El. paštas",
       "issued": "Taip, prekės išduotos",
-      "contactPerson": "Kontaktinis asmuo"
+      "contactPerson": "Kontaktinis asmuo",
+      "contact": "Kontaktas"
     },
     "fields": {
       "plateNumber": "Valstybinis numeris",

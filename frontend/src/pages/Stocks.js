@@ -99,7 +99,7 @@ function Stocks() {
     }
     
     setFilteredStocks(result);
-  }, [searchTerm, filterOption, stocks, i18n.language]);
+  }, [searchTerm, filterOption, stocks, i18n.language, getLocalizedProductName]);
 
   // Tvarkyti paieškos įvesties pakeitimus
   const handleSearchChange = (e) => {

@@ -62,15 +62,28 @@ export const handleApiError = (error, setError) => {
  */
 export const safeApiCall = async (apiCall, setLoading, setError, onSuccess) => {
   try {
-    setLoading(true);
+    if (typeof setLoading === 'function') {
+      setLoading(true);
+    }
     const response = await apiCall();
-    setError(null);
-    if (onSuccess) onSuccess(response);
+    if (typeof setError === 'function') {
+      setError(null);
+    }
+    if (typeof onSuccess === 'function') {
+      onSuccess(response);
+    }
     return response;
   } catch (err) {
-    return handleApiError(err, setError);
+    if (typeof setError === 'function') {
+      return handleApiError(err, setError);
+    } else {
+      console.error('API klaida:', err);
+      return null;
+    }
   } finally {
-    setLoading(false);
+    if (typeof setLoading === 'function') {
+      setLoading(false);
+    }
   }
 };
 

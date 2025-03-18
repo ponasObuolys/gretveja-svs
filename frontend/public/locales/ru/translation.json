@@ -48,7 +48,8 @@
       "phone": "Телефон",
       "email": "Эл. почта",
       "issued": "Да, товары выданы",
-      "contactPerson": "Контактное лицо"
+      "contactPerson": "Контактное лицо",
+      "contact": "Контакт"
     },
     "tables": {
       "products": "Список продуктов",

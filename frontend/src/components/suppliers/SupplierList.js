@@ -60,8 +60,8 @@ const SupplierList = ({
                   <th onClick={() => handleSort('suppliers', 'name')} style={{ cursor: 'pointer' }}>
                     {t('common.labels.name')} {getSortIcon(supplierSort, 'name')}
                   </th>
-                  <th onClick={() => handleSort('suppliers', 'contactPerson')} style={{ cursor: 'pointer' }}>
-                    {t('common.labels.supplier')} {getSortIcon(supplierSort, 'contactPerson')}
+                  <th onClick={() => handleSort('suppliers', 'contact_person')} style={{ cursor: 'pointer' }}>
+                    Kontaktas {getSortIcon(supplierSort, 'contact_person')}
                   </th>
                   <th onClick={() => handleSort('suppliers', 'phone')} style={{ cursor: 'pointer' }}>
                     {t('common.labels.phone')} {getSortIcon(supplierSort, 'phone')}
@@ -76,7 +76,7 @@ const SupplierList = ({
                 {filteredSuppliers.map(supplier => (
                   <tr key={supplier.id}>
                     <td>{supplier.name}</td>
-                    <td>{supplier.contactPerson || '-'}</td>
+                    <td>{supplier.contact_person || '-'}</td>
                     <td>{supplier.phone || '-'}</td>
                     <td>{supplier.email || '-'}</td>
                     <td>

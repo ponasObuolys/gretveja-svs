@@ -53,7 +53,8 @@
       "phone": "Phone",
       "email": "Email",
       "issued": "Yes, items issued",
-      "contactPerson": "Contact Person"
+      "contactPerson": "Contact Person",
+      "contact": "Contact"
     },
     "fields": {
       "company": "Company"
