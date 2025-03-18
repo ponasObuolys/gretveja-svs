@@ -45,13 +45,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.exportIssuancesToPdf = exports.exportIssuancesToXlsx = exports.exportIssuancesToCsv = exports.generatePdf = exports.deleteIssuance = exports.updateIssuance = exports.createIssuance = exports.getIssuanceById = exports.getAllIssuances = void 0;
+exports.exportIssuancesToPdf = exports.exportIssuancesToXlsx = exports.exportIssuancesToCsv = exports.generatePdfRussian = exports.generatePdfEnglish = exports.generatePdf = exports.deleteIssuance = exports.updateIssuance = exports.createIssuance = exports.getIssuanceById = exports.getAllIssuances = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const supabase_1 = require("../config/supabase");
 const csv_stringify_1 = require("csv-stringify");
 const ExcelJS = __importStar(require("exceljs"));
+const pdfUtils_1 = require("../utils/pdfUtils");
 // Gauti visus išdavimus
 const getAllIssuances = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -311,6 +312,124 @@ const generatePdf = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.generatePdf = generatePdf;
+// Generuoti PDF anglų kalba
+const generatePdfEnglish = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        const { data: issuance, error } = yield supabase_1.supabase
+            .from('issuances')
+            .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+            .eq('id', id)
+            .single();
+        if (error)
+            throw error;
+        if (!issuance) {
+            return res.status(404).json({ message: 'Issuance not found' });
+        }
+        // Create PDF document
+        const doc = new pdfkit_1.default({
+            size: 'A4',
+            margin: 50,
+            info: {
+                Title: 'Product Transfer Document',
+                Author: 'Gretveja SVS',
+                Subject: `Issuance ID: ${id}`
+            }
+        });
+        const filename = `issuance_en_${id}_${Date.now()}.pdf`;
+        const filePath = path.join(__dirname, '..', 'pdfs', filename);
+        // Check if directory exists, if not - create it
+        if (!fs.existsSync(path.join(__dirname, '..', 'pdfs'))) {
+            fs.mkdirSync(path.join(__dirname, '..', 'pdfs'), { recursive: true });
+        }
+        // Set response headers
+        res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+        res.setHeader('Content-type', 'application/pdf');
+        // Create write streams
+        const fileStream = fs.createWriteStream(filePath);
+        doc.pipe(fileStream);
+        doc.pipe(res);
+        // Generate English PDF content
+        (0, pdfUtils_1.createEnglishPdf)(doc, issuance);
+        // Finish document
+        doc.end();
+        // Return response only when document is fully created
+        fileStream.on('finish', () => {
+            console.log(`PDF document created: ${filePath}`);
+        });
+    }
+    catch (error) {
+        console.error(`Error generating English PDF for issuance ID ${id}:`, error);
+        return res.status(500).json({ message: 'Server error generating PDF' });
+    }
+});
+exports.generatePdfEnglish = generatePdfEnglish;
+// Generuoti PDF rusų kalba
+const generatePdfRussian = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        const { data: issuance, error } = yield supabase_1.supabase
+            .from('issuances')
+            .select(`
+        *,
+        products (*),
+        trucks (
+          *,
+          companies (*)
+        )
+      `)
+            .eq('id', id)
+            .single();
+        if (error)
+            throw error;
+        if (!issuance) {
+            return res.status(404).json({ message: 'Issuance not found' });
+        }
+        // Create PDF document
+        const doc = new pdfkit_1.default({
+            size: 'A4',
+            margin: 50,
+            info: {
+                Title: 'Dokument o peredache produkcii',
+                Author: 'Gretveja SVS',
+                Subject: `Issuance ID: ${id}`
+            }
+        });
+        const filename = `issuance_ru_${id}_${Date.now()}.pdf`;
+        const filePath = path.join(__dirname, '..', 'pdfs', filename);
+        // Check if directory exists, if not - create it
+        if (!fs.existsSync(path.join(__dirname, '..', 'pdfs'))) {
+            fs.mkdirSync(path.join(__dirname, '..', 'pdfs'), { recursive: true });
+        }
+        // Set response headers
+        res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+        res.setHeader('Content-type', 'application/pdf');
+        // Create write streams
+        const fileStream = fs.createWriteStream(filePath);
+        doc.pipe(fileStream);
+        doc.pipe(res);
+        // Generate Russian PDF content
+        (0, pdfUtils_1.createRussianPdf)(doc, issuance);
+        // Finish document
+        doc.end();
+        // Return response only when document is fully created
+        fileStream.on('finish', () => {
+            console.log(`PDF document created: ${filePath}`);
+        });
+    }
+    catch (error) {
+        console.error(`Error generating Russian PDF for issuance ID ${id}:`, error);
+        return res.status(500).json({ message: 'Server error generating PDF' });
+    }
+});
+exports.generatePdfRussian = generatePdfRussian;
 // Eksportuoti išdavimus į CSV formatą
 const exportIssuancesToCsv = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

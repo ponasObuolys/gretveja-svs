@@ -6,13 +6,30 @@ import { Card, InputGroup, Form } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 
 function Stocks() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [stocks, setStocks] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOption, setFilterOption] = useState('all');
+
+  // Helper function to get product name based on current language
+  const getLocalizedProductName = (stock) => {
+    if (!stock) return '';
+    
+    const currentLanguage = i18n.language;
+    
+    // Check if stock has the productNameEn or productNameRu properties
+    if (currentLanguage === 'en' && stock.productNameEn) {
+      return stock.productNameEn;
+    } else if (currentLanguage === 'ru' && stock.productNameRu) {
+      return stock.productNameRu;
+    }
+    
+    // Default to Lithuanian name
+    return stock.productName || '';
+  };
 
   // Gauti atsargų duomenis
   useEffect(() => {
@@ -26,8 +43,29 @@ function Stocks() {
         }
         
         const data = await response.json();
-        setStocks(data);
-        setFilteredStocks(data);
+        
+        // Fetch additional product data to get multilingual names
+        const productsResponse = await fetch('/api/products');
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          
+          // Map product data to stocks
+          const enhancedData = data.map(stock => {
+            const product = productsData.find(p => p.id === stock.productId);
+            return {
+              ...stock,
+              productNameEn: product?.nameEn || product?.name_en,
+              productNameRu: product?.nameRu || product?.name_ru
+            };
+          });
+          
+          setStocks(enhancedData);
+          setFilteredStocks(enhancedData);
+        } else {
+          setStocks(data);
+          setFilteredStocks(data);
+        }
+        
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -36,7 +74,7 @@ function Stocks() {
     };
     
     fetchStocks();
-  }, []);
+  }, [t]);
 
   // Filtruoti atsargas pagal paiešką
   useEffect(() => {
@@ -46,10 +84,11 @@ function Stocks() {
     
     // Filtruoti pagal paieškos terminą
     if (searchTerm) {
-      result = result.filter(stock => 
-        stock.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        stock.productId.toString().includes(searchTerm)
-      );
+      result = result.filter(stock => {
+        const localizedName = getLocalizedProductName(stock).toLowerCase();
+        return localizedName.includes(searchTerm.toLowerCase()) ||
+               stock.productId.toString().includes(searchTerm);
+      });
     }
     
     // Filtruoti pagal pasirinkimą
@@ -60,7 +99,7 @@ function Stocks() {
     }
     
     setFilteredStocks(result);
-  }, [searchTerm, filterOption, stocks]);
+  }, [searchTerm, filterOption, stocks, i18n.language]);
 
   // Tvarkyti paieškos įvesties pakeitimus
   const handleSearchChange = (e) => {
@@ -114,4 +153,4 @@ function Stocks() {
   );
 }
 
-export default Stocks; 
+export default Stocks;

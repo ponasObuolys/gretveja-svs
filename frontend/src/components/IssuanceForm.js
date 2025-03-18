@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import './IssuanceForm.css';
 
 function IssuanceForm({ show, onHide, issuance }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const initialFormState = {
     productId: '',
     isIssued: false,
@@ -100,12 +100,13 @@ function IssuanceForm({ show, onHide, issuance }) {
       setFilteredProducts(products);
     } else {
       const searchTermLower = productSearchTerm.toLowerCase();
-      const filtered = products.filter(product => 
-        product.name.toLowerCase().includes(searchTermLower)
-      );
+      const filtered = products.filter(product => {
+        const productName = getLocalizedProductName(product).toLowerCase();
+        return productName.includes(searchTermLower);
+      });
       setFilteredProducts(filtered);
     }
-  }, [productSearchTerm, products]);
+  }, [productSearchTerm, products, i18n.language]);
 
   // Uždaryti produktų išskleidžiamąjį sąrašą, kai paspaudžiama kitur
   useEffect(() => {
@@ -204,7 +205,30 @@ function IssuanceForm({ show, onHide, issuance }) {
     const productStock = stockData.find(item => item.productId === product.id);
     const stockQuantity = productStock ? productStock.stockInHand : 0;
     
-    return `${product.name} (${t('common.inventory.balance')} ${stockQuantity} ${product.unit || t('common.inventory.unit')})`;
+    return `${getLocalizedProductName(product)} (${t('common.inventory.balance')} ${stockQuantity} ${product.unit || t('common.inventory.unit')})`;
+  };
+
+  const getLocalizedProductName = (product) => {
+    if (!product) return '';
+    
+    const currentLanguage = i18n.language;
+    
+    // Check if product has the nameEn or nameRu properties directly
+    if (currentLanguage === 'en' && product.nameEn) {
+      return product.nameEn;
+    } else if (currentLanguage === 'ru' && product.nameRu) {
+      return product.nameRu;
+    }
+    
+    // Check if product has name_en or name_ru (snake_case format from API)
+    if (currentLanguage === 'en' && product.name_en) {
+      return product.name_en;
+    } else if (currentLanguage === 'ru' && product.name_ru) {
+      return product.name_ru;
+    }
+    
+    // Default to Lithuanian name
+    return product.name || '';
   };
 
   const handleProductSearch = (e) => {
@@ -291,7 +315,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                               className="dropdown-item"
                               onClick={() => handleProductSelect(product.id)}
                             >
-                              <span className="product-name">{product.name}</span>
+                              <span className="product-name">{getLocalizedProductName(product)}</span>
                               <span className="product-stock"> ({t('common.inventory.balance')} {stockData.find(item => item.productId === product.id)?.stockInHand || 0} {product.unit || t('common.inventory.unit')})</span>
                             </div>
                           ))

@@ -6,7 +6,7 @@ import { Row, Col, Form, Button, Dropdown } from 'react-bootstrap';
 import axios from 'axios';
 
 function Purchases() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [purchases, setPurchases] = useState([]);
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -34,7 +34,7 @@ function Purchases() {
   
   // Produktų pasirinkimo laukelio būsena
   const [showProductDropdown, setShowProductDropdown] = useState(false);
-  const [selectedProductName, setSelectedProductName] = useState('Pasirinkite produktą');
+  const [selectedProductName, setSelectedProductName] = useState(() => t('common.purchases.select_product'));
   const [productSearchTerm, setProductSearchTerm] = useState('');
   
   // Filtravimo būsenos
@@ -64,6 +64,45 @@ function Purchases() {
   // Ref produktų dropdown elementui
   const productDropdownRef = useRef(null);
   
+  // Helper function to get product name based on current language
+  const getLocalizedProductName = (product) => {
+    if (!product) return '';
+    
+    const currentLanguage = i18n.language;
+    
+    // Check if product has the nameEn or nameRu properties directly
+    if (currentLanguage === 'en' && product.nameEn) {
+      return product.nameEn;
+    } else if (currentLanguage === 'ru' && product.nameRu) {
+      return product.nameRu;
+    }
+    
+    // Check if product has name_en or name_ru (snake_case format from API)
+    if (currentLanguage === 'en' && product.name_en) {
+      return product.name_en;
+    } else if (currentLanguage === 'ru' && product.name_ru) {
+      return product.name_ru;
+    }
+    
+    // Default to Lithuanian name (could be either name or name_lt)
+    return product.name || '';
+  };
+  
+  // Update selectedProductName when language changes
+  useEffect(() => {
+    if (!newPurchase.productId) {
+      setSelectedProductName(t('common.purchases.select_product'));
+    } else {
+      // Update the selected product name when language changes
+      const selectedProduct = products.find(product => product.id === parseInt(newPurchase.productId));
+      if (selectedProduct) {
+        const productCode = selectedProduct.code || '';
+        const productName = getLocalizedProductName(selectedProduct);
+        setSelectedProductName(`${productCode} ${productName}`);
+      }
+    }
+  }, [t, newPurchase.productId, i18n.language, products]);
+  
   // Uždaryti dropdown, kai paspaudžiama už jo ribų
   useEffect(() => {
     function handleClickOutside(event) {
@@ -80,6 +119,10 @@ function Purchases() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [productDropdownRef]);
+  
+  useEffect(() => {
+    fetchPurchases();
+  }, [selectedYear, selectedMonth]);
   
   // Filtravimo komponentas
   const FilterComponent = () => {
@@ -203,15 +246,19 @@ function Purchases() {
       // Gauti produktus
       const productsResponse = await fetch('/api/products');
       if (!productsResponse.ok) {
-        throw new Error('Nepavyko gauti produktų duomenų');
+        throw new Error(t('common.errors.fetchFailed'));
       }
       const productsData = await productsResponse.json();
+      
+      // Log product data structure to understand the fields
+      console.log('Product data structure:', productsData.length > 0 ? productsData[0] : 'No products');
+      
       setProducts(productsData);
       
       // Gauti tiekėjus
       const suppliersResponse = await fetch('/api/suppliers');
       if (!suppliersResponse.ok) {
-        throw new Error('Nepavyko gauti tiekėjų duomenų');
+        throw new Error(t('common.errors.fetchFailed'));
       }
       const suppliersData = await suppliersResponse.json();
       setSuppliers(suppliersData);
@@ -219,7 +266,7 @@ function Purchases() {
       // Gauti įmones
       const companiesResponse = await fetch('/api/companies');
       if (!companiesResponse.ok) {
-        throw new Error('Nepavyko gauti įmonių duomenų');
+        throw new Error(t('common.errors.fetchFailed'));
       }
       const companiesData = await companiesResponse.json();
       setCompanies(companiesData);
@@ -274,14 +321,10 @@ function Purchases() {
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      console.error(`Klaida eksportuojant duomenis į ${format.toUpperCase()}:`, err);
-      setError(`Nepavyko eksportuoti duomenų į ${format.toUpperCase()}. Bandykite dar kartą vėliau.`);
+      console.error(`${t('common.messages.error')} ${format.toUpperCase()}:`, err);
+      setError(t('common.errors.fetchFailed'));
     }
   };
-  
-  useEffect(() => {
-    fetchPurchases();
-  }, [selectedYear, selectedMonth]);
   
   // Formos įvesties keitimas
   const handleInputChange = (e) => {
@@ -296,10 +339,10 @@ function Purchases() {
       const selectedProduct = products.find(product => product.id === parseInt(value));
       if (selectedProduct) {
         const productCode = selectedProduct.code || '';
-        const productName = selectedProduct.name || '';
+        const productName = getLocalizedProductName(selectedProduct);
         setSelectedProductName(`${productCode} ${productName}`);
       } else {
-        setSelectedProductName('Pasirinkite produktą');
+        setSelectedProductName(t('common.purchases.select_product'));
       }
     }
   };
@@ -314,7 +357,7 @@ function Purchases() {
     });
     
     const productCode = product.code || '';
-    const productName = product.name || '';
+    const productName = getLocalizedProductName(product);
     setSelectedProductName(`${productCode} ${productName}`);
     setShowProductDropdown(false);
   };
@@ -347,7 +390,7 @@ function Purchases() {
       });
       
       if (!response.ok) {
-        throw new Error('Nepavyko pridėti pirkimo');
+        throw new Error(t('common.errors.saveFailed'));
       }
       
       const addedPurchase = await response.json();
@@ -424,7 +467,7 @@ function Purchases() {
       });
       
       if (!response.ok) {
-        throw new Error('Nepavyko atnaujinti pirkimo');
+        throw new Error(t('common.errors.saveFailed'));
       }
       
       const updatedPurchase = await response.json();
@@ -449,14 +492,14 @@ function Purchases() {
   
   // Pirkimo ištrynimas
   const handleDeletePurchase = async (id) => {
-    if (window.confirm('Ar tikrai norite ištrinti šį pirkimą?')) {
+    if (window.confirm(t('common.purchases.confirm_delete'))) {
       try {
         const response = await fetch(`/api/purchases/${id}`, {
           method: 'DELETE'
         });
         
         if (!response.ok) {
-          throw new Error('Nepavyko ištrinti pirkimo');
+          throw new Error(t('common.errors.deleteFailed'));
         }
         
         setPurchases(purchases.filter(p => p.id !== id));
@@ -486,8 +529,8 @@ function Purchases() {
     setPurchases([...purchases, newStock]);
   };
   
-  if (loading) return <div className="loading">Kraunama...</div>;
-  if (error) return <div className="error">Klaida: {error}</div>;
+  if (loading) return <div className="loading">{t('common.loading')}</div>;
+  if (error) return <div className="error">{t('common.messages.error')}: {error}</div>;
   
   return (
     <div className="purchases-container">
@@ -501,15 +544,15 @@ function Purchases() {
           className="btn-add-initial-stock" 
           onClick={() => setShowInitialStockForm(true)}
         >
-          Pridėti pradinį likutį
+          {t('common.inventory.initialStock')}
         </button>
       </div>
       
       <div className="purchase-form-container">
-        <h2>{editMode ? 'Redaguoti pirkimą' : 'Pridėti naują pirkimą'}</h2>
+        <h2>{editMode ? t('common.purchases.edit_purchase') : t('common.purchases.new_purchase')}</h2>
         <form onSubmit={editMode ? handleUpdatePurchase : handleAddPurchase}>
           <div className="form-group">
-            <label htmlFor="invoiceNumber">Sąskaitos numeris:</label>
+            <label htmlFor="invoiceNumber">{t('common.purchases.invoice_number')}:</label>
             <input
               type="text"
               id="invoiceNumber"
@@ -521,7 +564,7 @@ function Purchases() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="productId">Produktas:</label>
+            <label htmlFor="productId">{t('common.labels.product')}:</label>
             <div className="custom-dropdown" ref={productDropdownRef}>
               <div 
                 className="custom-dropdown-header" 
@@ -534,7 +577,7 @@ function Purchases() {
                 <div className="custom-dropdown-content">
                   <input
                     type="text"
-                    placeholder="Ieškoti produkto..."
+                    placeholder={t('common.search.by_name_id')}
                     value={productSearchTerm}
                     onChange={(e) => setProductSearchTerm(e.target.value)}
                     onClick={(e) => e.stopPropagation()}
@@ -547,7 +590,7 @@ function Purchases() {
                         className="custom-dropdown-item"
                         onClick={() => handleProductSelect(product)}
                       >
-                        {product.code || ''} {product.name || ''}
+                        {product.code || ''} {getLocalizedProductName(product)}
                       </div>
                     ))}
                   </div>
@@ -564,7 +607,7 @@ function Purchases() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="supplierId">Tiekėjas:</label>
+            <label htmlFor="supplierId">{t('common.labels.supplier')}:</label>
             <select
               id="supplierId"
               name="supplierId"
@@ -572,7 +615,7 @@ function Purchases() {
               onChange={handleInputChange}
               required
             >
-              <option value="">Pasirinkite tiekėją</option>
+              <option value="">{t('common.purchases.select_supplier')}</option>
               {suppliers.map(supplier => (
                 <option key={supplier.id} value={supplier.id}>
                   {supplier.name}
@@ -582,7 +625,7 @@ function Purchases() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="quantity">Kiekis:</label>
+            <label htmlFor="quantity">{t('common.labels.quantity')}:</label>
             <input
               type="number"
               id="quantity"
@@ -595,7 +638,7 @@ function Purchases() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="purchaseDate">Pirkimo data:</label>
+            <label htmlFor="purchaseDate">{t('common.purchases.purchase_date')}:</label>
             <input
               type="date"
               id="purchaseDate"
@@ -607,7 +650,7 @@ function Purchases() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="unitPrice">Vieneto kaina:</label>
+            <label htmlFor="unitPrice">{t('common.purchases.unit_price')}:</label>
             <input
               type="number"
               id="unitPrice"
@@ -621,7 +664,7 @@ function Purchases() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="companyId">Įmonė:</label>
+            <label htmlFor="companyId">{t('common.labels.company')}:</label>
             <select
               id="companyId"
               name="companyId"
@@ -629,7 +672,7 @@ function Purchases() {
               onChange={handleInputChange}
               required
             >
-              <option value="">Pasirinkite įmonę</option>
+              <option value="">{t('common.purchases.select_company')}</option>
               {companies.map(company => (
                 <option key={company.id} value={company.id}>
                   {company.name}
@@ -640,11 +683,11 @@ function Purchases() {
           
           <div className="form-buttons">
             <button type="submit" className="btn-primary">
-              {editMode ? 'Atnaujinti' : 'Pridėti'}
+              {editMode ? t('common.buttons.update') : t('common.buttons.add')}
             </button>
             {editMode && (
               <button type="button" className="btn-secondary" onClick={handleCancelEdit}>
-                Atšaukti
+                {t('common.buttons.cancel')}
               </button>
             )}
           </div>
@@ -652,9 +695,9 @@ function Purchases() {
       </div>
       
       <div className="purchases-list">
-        <h2>Pirkimų sąrašas</h2>
+        <h2>{t('common.tables.purchases')}</h2>
         {purchases.length === 0 ? (
-          <p>Nėra pirkimų įrašų.</p>
+          <p>{t('common.messages.no_data')}</p>
         ) : (
           <div className="table-responsive">
             <table className="purchases-table">
@@ -675,17 +718,22 @@ function Purchases() {
                 {purchases.map((purchase) => (
                   <tr key={purchase.id}>
                     <td>{purchase.invoiceNumber}</td>
-                    <td>{purchase.product?.name || t('common.messages.no_data')}</td>
+                    <td>{getLocalizedProductName(purchase.product) || t('common.messages.no_data')}</td>
                     <td>{purchase.supplier?.name || t('common.messages.no_data')}</td>
                     <td>{purchase.quantity}</td>
                     <td>
                       {purchase.purchaseDate ? 
                         (() => {
                           try {
-                            const date = new Date(purchase.purchaseDate);
-                            // Patikriname, ar data yra validi
-                            if (!isNaN(date.getTime())) {
-                              return date.toLocaleDateString();
+                            // Patikriname, ar purchase.purchaseDate yra validus
+                            if (purchase.purchaseDate) {
+                              const purchaseDate = new Date(purchase.purchaseDate);
+                              // Patikriname, ar data yra validi
+                              if (!isNaN(purchaseDate.getTime())) {
+                                return purchaseDate.toLocaleDateString();
+                              } else {
+                                return t('common.messages.no_data');
+                              }
                             } else {
                               return t('common.messages.no_data');
                             }
@@ -732,4 +780,4 @@ function Purchases() {
   );
 }
 
-export default Purchases; 
+export default Purchases;

@@ -3,7 +3,24 @@ import './StockTable.css';
 import { useTranslation } from 'react-i18next';
 
 function StockTable({ stocks, loading, error }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Helper function to get product name based on current language
+  const getLocalizedProductName = (stock) => {
+    if (!stock) return '';
+    
+    const currentLanguage = i18n.language;
+    
+    // Check if stock has the productNameEn or productNameRu properties
+    if (currentLanguage === 'en' && stock.productNameEn) {
+      return stock.productNameEn;
+    } else if (currentLanguage === 'ru' && stock.productNameRu) {
+      return stock.productNameRu;
+    }
+    
+    // Default to Lithuanian name
+    return stock.productName || '';
+  };
 
   if (loading) {
     return <div className="loading">{t('common.loading')}</div>;
@@ -33,7 +50,7 @@ function StockTable({ stocks, loading, error }) {
           {stocks.map((stock) => (
             <tr key={stock.productId} className={stock.stockInHand <= 0 ? 'out-of-stock' : ''}>
               <td>{stock.productId}</td>
-              <td>{stock.productName}</td>
+              <td>{getLocalizedProductName(stock)}</td>
               <td>{stock.totalPurchased}</td>
               <td>{stock.totalIssued}</td>
               <td className={stock.stockInHand <= 0 ? 'out-of-stock-cell' : ''}>{stock.stockInHand}</td>
