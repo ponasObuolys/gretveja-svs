@@ -23,7 +23,7 @@ const TruckForm = ({
     <Modal show={showTruckForm} onHide={() => setShowTruckForm(false)} centered>
       <Modal.Header closeButton>
         <Modal.Title>
-          {currentTruck ? t('trucks.edit') : t('trucks.new')}
+          {currentTruck ? t('common.buttons.edit') : t('common.buttons.new')} {t('common.entities.truck')}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

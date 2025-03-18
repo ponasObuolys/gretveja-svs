@@ -19,22 +19,35 @@ const ProductDeleteModal = ({
   return (
     <Modal show={showDeleteProductModal} onHide={() => setShowDeleteProductModal(false)} centered>
       <Modal.Header closeButton>
-        <Modal.Title>{t('common.messages.confirm_delete')}</Modal.Title>
+        <Modal.Title>{t('common.modals.confirmDelete')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>{t('common.messages.confirm_delete')} <strong>{productToDelete?.name}</strong> ({productToDelete?.code})?</p>
+        <p>
+          {t('common.modals.deleteConfirmation', { 
+            entity: t('common.labels.product'),
+            name: `${productToDelete?.name} (${productToDelete?.code})` || ''
+          })}
+        </p>
         <p className="text-danger">{t('common.messages.cannot_undo')}</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowDeleteProductModal(false)}>
+        <Button 
+          variant="secondary" 
+          onClick={() => setShowDeleteProductModal(false)}
+          disabled={loading}
+        >
           {t('common.buttons.cancel')}
         </Button>
-        <Button variant="danger" onClick={handleDeleteProduct} disabled={loading}>
-          {loading ? t('common.messages.loading') : t('common.buttons.delete')}
+        <Button 
+          variant="danger" 
+          onClick={handleDeleteProduct} 
+          disabled={loading}
+        >
+          {loading ? t('common.buttons.deleting') : t('common.buttons.delete')}
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default ProductDeleteModal; 
+export default ProductDeleteModal;

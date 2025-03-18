@@ -1,17 +1,20 @@
 import React from 'react';
 import './StockTable.css';
+import { useTranslation } from 'react-i18next';
 
 function StockTable({ stocks, loading, error }) {
+  const { t } = useTranslation();
+
   if (loading) {
-    return <div className="loading">Kraunami duomenys...</div>;
+    return <div className="loading">{t('common.loading')}</div>;
   }
 
   if (error) {
-    return <div className="error">Klaida: {error}</div>;
+    return <div className="error">{t('common.errors.fetchFailed')}: {error}</div>;
   }
 
   if (!stocks || stocks.length === 0) {
-    return <div className="no-data">Nėra duomenų apie atsargas.</div>;
+    return <div className="no-data">{t('common.messages.no_data')}</div>;
   }
 
   return (
@@ -19,11 +22,11 @@ function StockTable({ stocks, loading, error }) {
       <table className="stock-table">
         <thead>
           <tr>
-            <th>Produkto ID</th>
-            <th>Produkto pavadinimas</th>
-            <th>Iš viso įsigyta (VNT)</th>
-            <th>Iš viso išduota (VNT)</th>
-            <th>Likutis (VNT)</th>
+            <th>{t('common.labels.product')} ID</th>
+            <th>{t('common.labels.name')}</th>
+            <th>{t('common.inventory.total_purchased')}</th>
+            <th>{t('common.inventory.total_issued')}</th>
+            <th>{t('common.inventory.current_balance')}</th>
           </tr>
         </thead>
         <tbody>
@@ -42,4 +45,4 @@ function StockTable({ stocks, loading, error }) {
   );
 }
 
-export default StockTable; 
+export default StockTable;

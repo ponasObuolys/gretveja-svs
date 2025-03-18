@@ -22,7 +22,7 @@ function Stocks() {
         const response = await fetch('/api/stocks');
         
         if (!response.ok) {
-          throw new Error('Nepavyko gauti atsargų duomenų');
+          throw new Error(t('common.errors.fetchFailed'));
         }
         
         const data = await response.json();

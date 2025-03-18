@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Tiekėjų ištrynimo patvirtinimo modalas
@@ -13,25 +14,40 @@ const SupplierDeleteModal = ({
   handleDeleteSupplier,
   loading
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Modal show={showDeleteSupplierModal} onHide={() => setShowDeleteSupplierModal(false)} centered>
       <Modal.Header closeButton>
-        <Modal.Title>Patvirtinkite ištrynimą</Modal.Title>
+        <Modal.Title>{t('common.modals.confirmDelete')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>Ar tikrai norite ištrinti tiekėją <strong>{supplierToDelete?.name}</strong>?</p>
-        <p className="text-danger">Šio veiksmo negalima atšaukti.</p>
+        <p>
+          {t('common.modals.deleteConfirmation', { 
+            entity: t('common.labels.supplier'),
+            name: supplierToDelete?.name || ''
+          })}
+        </p>
+        <p className="text-danger">{t('common.messages.cannot_undo')}</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowDeleteSupplierModal(false)}>
-          Atšaukti
+        <Button 
+          variant="secondary" 
+          onClick={() => setShowDeleteSupplierModal(false)}
+          disabled={loading}
+        >
+          {t('common.buttons.cancel')}
         </Button>
-        <Button variant="danger" onClick={handleDeleteSupplier} disabled={loading}>
-          {loading ? 'Trinama...' : 'Ištrinti'}
+        <Button 
+          variant="danger" 
+          onClick={handleDeleteSupplier} 
+          disabled={loading}
+        >
+          {loading ? t('common.buttons.deleting') : t('common.buttons.delete')}
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default SupplierDeleteModal; 
+export default SupplierDeleteModal;

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Modal, Button, Form, Row, Col, Alert } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import './IssuanceForm.css';
 
 function IssuanceForm({ show, onHide, issuance }) {
+  const { t } = useTranslation();
   const initialFormState = {
     productId: '',
     isIssued: false,
@@ -55,8 +57,8 @@ function IssuanceForm({ show, onHide, issuance }) {
         setStockData(stockResponse.data);
         setError(null);
       } catch (err) {
-        console.error('Klaida gaunant duomenis:', err);
-        setError('Nepavyko gauti duomenų. Bandykite dar kartą vėliau.');
+        console.error(t('common.errors.fetchFailed'), err);
+        setError(t('common.errors.fetchFailed'));
       } finally {
         setDataLoading(false);
       }
@@ -184,8 +186,8 @@ function IssuanceForm({ show, onHide, issuance }) {
 
       onHide(true); // Uždaryti formą ir atnaujinti duomenis
     } catch (err) {
-      console.error('Klaida išsaugant išdavimą:', err);
-      setError('Nepavyko išsaugoti išdavimo. Bandykite dar kartą vėliau.');
+      console.error(t('common.errors.saveFailed'), err);
+      setError(t('common.errors.saveFailed'));
     } finally {
       setLoading(false);
     }
@@ -193,16 +195,16 @@ function IssuanceForm({ show, onHide, issuance }) {
 
   // Gauti pasirinkto produkto pavadinimą
   const getSelectedProductName = () => {
-    if (!formData.productId) return 'Pasirinkite produktą';
+    if (!formData.productId) return t('common.purchases.select_product');
     
     const product = products.find(p => p.id === parseInt(formData.productId));
-    if (!product) return 'Pasirinkite produktą';
+    if (!product) return t('common.purchases.select_product');
     
     // Find stock information for the selected product
     const productStock = stockData.find(item => item.productId === product.id);
     const stockQuantity = productStock ? productStock.stockInHand : 0;
     
-    return `${product.name} (Likutis: ${stockQuantity} ${product.unit || 'vnt.'})`;
+    return `${product.name} (${t('common.inventory.balance')} ${stockQuantity} ${product.unit || t('common.inventory.unit')})`;
   };
 
   const handleProductSearch = (e) => {
@@ -224,7 +226,7 @@ function IssuanceForm({ show, onHide, issuance }) {
       className="issuance-modal"
     >
       <Modal.Header closeButton>
-        <Modal.Title>{issuance ? 'Redaguoti išdavimą' : 'Naujas išdavimas'}</Modal.Title>
+        <Modal.Title>{issuance ? t('common.issuances.edit_issuance') : t('common.issuances.new_issuance')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {error && (
@@ -241,13 +243,13 @@ function IssuanceForm({ show, onHide, issuance }) {
                     setDataLoading(false);
                   })
                   .catch(err => {
-                    console.error('Klaida gaunant atsargų duomenis:', err);
-                    setError('Nepavyko gauti atsargų duomenų. Bandykite dar kartą.');
+                    console.error(t('common.errors.fetchFailed'), err);
+                    setError(t('common.errors.fetchFailed'));
                     setDataLoading(false);
                   });
               }}
             >
-              Bandyti dar kartą
+              {t('common.buttons.refresh')}
             </button>
           </div>
         )}
@@ -256,7 +258,7 @@ function IssuanceForm({ show, onHide, issuance }) {
           <Row>
             <Col md={12} className="mb-3">
               <Form.Group>
-                <Form.Label>Produktas *</Form.Label>
+                <Form.Label>{t('common.labels.product')} *</Form.Label>
                 <div className="custom-dropdown" id="product-dropdown">
                   <div 
                     className="custom-dropdown-header" 
@@ -271,7 +273,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                       <div className="dropdown-search">
                         <input
                           type="text"
-                          placeholder="Ieškoti produkto..."
+                          placeholder={t('common.search.by_name_id')}
                           value={productSearchTerm}
                           onChange={handleProductSearch}
                         />
@@ -280,7 +282,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                       <div className="products-list">
                         {dataLoading ? (
                           <div className="dropdown-loading">
-                            <p>Kraunami produktai...</p>
+                            <p>{t('common.messages.loading')}</p>
                           </div>
                         ) : filteredProducts.length > 0 ? (
                           filteredProducts.map(product => (
@@ -290,12 +292,12 @@ function IssuanceForm({ show, onHide, issuance }) {
                               onClick={() => handleProductSelect(product.id)}
                             >
                               <span className="product-name">{product.name}</span>
-                              <span className="product-stock"> (Likutis: {stockData.find(item => item.productId === product.id)?.stockInHand || 0} {product.unit || 'vnt.'})</span>
+                              <span className="product-stock"> ({t('common.inventory.balance')} {stockData.find(item => item.productId === product.id)?.stockInHand || 0} {product.unit || t('common.inventory.unit')})</span>
                             </div>
                           ))
                         ) : (
                           <div className="no-products">
-                            <p>Produktų nerasta. Pabandykite kitą paieškos frazę.</p>
+                            <p>{t('common.messages.no_data')}</p>
                           </div>
                         )}
                       </div>
@@ -309,7 +311,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Pasirinkite produktą
+                  {t('common.purchases.select_product')}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -318,7 +320,7 @@ function IssuanceForm({ show, onHide, issuance }) {
           <Row>
             <Col md={6} className="mb-3">
               <Form.Group>
-                <Form.Label>Išdavimo data *</Form.Label>
+                <Form.Label>{t('common.issuances.issuance_date')} *</Form.Label>
                 <Form.Control
                   type="date"
                   name="issuanceDate"
@@ -327,13 +329,13 @@ function IssuanceForm({ show, onHide, issuance }) {
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Įveskite išdavimo datą
+                  {t('common.errors.required')}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col md={6} className="mb-3">
               <Form.Group>
-                <Form.Label>Kiekis (VNT) *</Form.Label>
+                <Form.Label>{t('common.labels.quantity')} ({t('common.inventory.unit')}) *</Form.Label>
                 <Form.Control
                   type="number"
                   name="quantity"
@@ -343,7 +345,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Įveskite teigiamą kiekį
+                  {t('common.errors.positiveNumber')}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -352,7 +354,7 @@ function IssuanceForm({ show, onHide, issuance }) {
           <Row>
             <Col md={6} className="mb-3">
               <Form.Group>
-                <Form.Label>Vairuotojas *</Form.Label>
+                <Form.Label>{t('common.labels.driver')} *</Form.Label>
                 <Form.Control
                   type="text"
                   name="driverName"
@@ -361,20 +363,20 @@ function IssuanceForm({ show, onHide, issuance }) {
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  Įveskite vairuotojo vardą
+                  {t('common.errors.required')}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
             <Col md={6} className="mb-3">
               <Form.Group>
-                <Form.Label>Vilkikas *</Form.Label>
+                <Form.Label>{t('common.labels.truck')} *</Form.Label>
                 <Form.Select
                   name="truckId"
                   value={formData.truckId}
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="">Pasirinkite vilkiką</option>
+                  <option value="">{t('common.select.truck')}</option>
                   {trucks.map(truck => (
                     <option key={truck.id} value={truck.id}>
                       {truck.plateNumber} {truck.model ? `(${truck.model})` : ''}
@@ -382,7 +384,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                   ))}
                 </Form.Select>
                 <Form.Control.Feedback type="invalid">
-                  Pasirinkite vilkiką
+                  {t('common.errors.required')}
                 </Form.Control.Feedback>
               </Form.Group>
             </Col>
@@ -391,7 +393,7 @@ function IssuanceForm({ show, onHide, issuance }) {
           <Row>
             <Col md={6} className="mb-3">
               <Form.Group>
-                <Form.Label>Įmonė</Form.Label>
+                <Form.Label>{t('common.labels.company')}</Form.Label>
                 <Form.Control
                   type="text"
                   value={selectedCompany}
@@ -399,18 +401,18 @@ function IssuanceForm({ show, onHide, issuance }) {
                   readOnly
                 />
                 <Form.Text className="text-muted">
-                  Įmonė nustatoma automatiškai pagal pasirinktą vilkiką
+                  {t('common.labels.company')} {t('common.messages.autoGenerated')}
                 </Form.Text>
               </Form.Group>
             </Col>
             <Col md={6} className="mb-3">
               <Form.Group>
-                <Form.Label>Išduota?</Form.Label>
+                <Form.Label>{t('common.labels.issued')}</Form.Label>
                 <div>
                   <Form.Check
                     type="checkbox"
                     name="isIssued"
-                    label="Taip, prekės išduotos"
+                    label={t('common.labels.issued')}
                     checked={formData.isIssued}
                     onChange={handleInputChange}
                   />
@@ -422,7 +424,7 @@ function IssuanceForm({ show, onHide, issuance }) {
           <Row>
             <Col md={12} className="mb-3">
               <Form.Group>
-                <Form.Label>Pastabos</Form.Label>
+                <Form.Label>{t('common.labels.notes')}</Form.Label>
                 <Form.Control
                   as="textarea"
                   name="notes"
@@ -437,10 +439,10 @@ function IssuanceForm({ show, onHide, issuance }) {
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose} disabled={loading}>
-          Atšaukti
+          {t('common.buttons.cancel')}
         </Button>
         <Button variant="primary" onClick={handleSubmit} disabled={loading}>
-          {loading ? 'Saugoma...' : (issuance ? 'Atnaujinti' : 'Išsaugoti')}
+          {loading ? t('common.buttons.saving') : (issuance ? t('common.buttons.update') : t('common.buttons.save'))}
         </Button>
       </Modal.Footer>
     </Modal>

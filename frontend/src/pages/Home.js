@@ -26,7 +26,7 @@ function Home() {
         // Gauti atsargų duomenis
         const stockResponse = await fetch('/api/stocks');
         if (!stockResponse.ok) {
-          throw new Error('Nepavyko gauti atsargų duomenų');
+          throw new Error(t('common.errors.fetchFailed'));
         }
         const stockData = await stockResponse.json();
         setStockData(stockData);
@@ -34,7 +34,7 @@ function Home() {
         // Gauti pirkimų duomenis
         const purchasesResponse = await fetch('/api/purchases');
         if (!purchasesResponse.ok) {
-          throw new Error('Nepavyko gauti pirkimų duomenų');
+          throw new Error(t('common.errors.fetchFailed'));
         }
         const purchasesData = await purchasesResponse.json();
         console.log('Raw purchases data:', purchasesData);
@@ -42,7 +42,7 @@ function Home() {
         // Gauti išdavimų duomenis
         const issuancesResponse = await fetch('/api/issuances');
         if (!issuancesResponse.ok) {
-          throw new Error('Nepavyko gauti išdavimų duomenų');
+          throw new Error(t('common.errors.fetchFailed'));
         }
         const issuancesData = await issuancesResponse.json();
         console.log('Raw issuances data:', issuancesData);
@@ -50,7 +50,7 @@ function Home() {
         // Gauti vilkikų duomenis
         const trucksResponse = await fetch('/api/trucks');
         if (!trucksResponse.ok) {
-          throw new Error('Nepavyko gauti vilkikų duomenų');
+          throw new Error(t('common.errors.fetchFailed'));
         }
         const trucksData = await trucksResponse.json();
         setTruckCount(trucksData.length);
@@ -89,7 +89,7 @@ function Home() {
         
         setLoading(false);
       } catch (err) {
-        console.error('Klaida gaunant duomenis:', err);
+        console.error('Error fetching data:', err);
         setError(err.message);
         setLoading(false);
       }
@@ -110,7 +110,7 @@ function Home() {
     for (let i = 5; i >= 0; i--) {
       const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
       months.push({
-        month: date.toLocaleString('lt-LT', { month: 'long' }),
+        month: t(`common.months.${date.toLocaleString('en-US', { month: 'long' }).toLowerCase()}`),
         year: date.getFullYear(),
         count: 0,
         quantity: 0
@@ -128,21 +128,21 @@ function Home() {
       for (let i = 0; i < months.length; i++) {
         const monthData = months[i];
         
-        // Get month index from Lithuanian month name
+        // Get month index from translated month name
         let monthIndex;
         switch(monthData.month.toLowerCase()) {
-          case 'sausis': monthIndex = 0; break;
-          case 'vasaris': monthIndex = 1; break;
-          case 'kovas': monthIndex = 2; break;
-          case 'balandis': monthIndex = 3; break;
-          case 'gegužė': monthIndex = 4; break;
-          case 'birželis': monthIndex = 5; break;
-          case 'liepa': monthIndex = 6; break;
-          case 'rugpjūtis': monthIndex = 7; break;
-          case 'rugsėjis': monthIndex = 8; break;
-          case 'spalis': monthIndex = 9; break;
-          case 'lapkritis': monthIndex = 10; break;
-          case 'gruodis': monthIndex = 11; break;
+          case t('common.months.january').toLowerCase(): monthIndex = 0; break;
+          case t('common.months.february').toLowerCase(): monthIndex = 1; break;
+          case t('common.months.march').toLowerCase(): monthIndex = 2; break;
+          case t('common.months.april').toLowerCase(): monthIndex = 3; break;
+          case t('common.months.may').toLowerCase(): monthIndex = 4; break;
+          case t('common.months.june').toLowerCase(): monthIndex = 5; break;
+          case t('common.months.july').toLowerCase(): monthIndex = 6; break;
+          case t('common.months.august').toLowerCase(): monthIndex = 7; break;
+          case t('common.months.september').toLowerCase(): monthIndex = 8; break;
+          case t('common.months.october').toLowerCase(): monthIndex = 9; break;
+          case t('common.months.november').toLowerCase(): monthIndex = 10; break;
+          case t('common.months.december').toLowerCase(): monthIndex = 11; break;
           default: monthIndex = -1;
         }
         

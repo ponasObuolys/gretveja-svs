@@ -84,7 +84,7 @@ const ProductForm = ({
               {t('common.buttons.cancel')}
             </Button>
             <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? t('common.messages.loading') : t('common.buttons.save')}
+              {loading ? t('common.buttons.saving') : t('common.buttons.save')}
             </Button>
           </div>
         </Form>

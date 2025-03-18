@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './InitialStockForm.css';
+import { useTranslation } from 'react-i18next';
 
 function InitialStockForm({ onClose, onSave }) {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ function InitialStockForm({ onClose, onSave }) {
         // Gauti produktus
         const productsResponse = await fetch('/api/products');
         if (!productsResponse.ok) {
-          throw new Error('Nepavyko gauti produktų duomenų');
+          throw new Error(t('common.errors.fetchFailed'));
         }
         const productsData = await productsResponse.json();
         setProducts(productsData);
@@ -33,7 +35,7 @@ function InitialStockForm({ onClose, onSave }) {
         // Gauti įmones
         const companiesResponse = await fetch('/api/companies');
         if (!companiesResponse.ok) {
-          throw new Error('Nepavyko gauti įmonių duomenų');
+          throw new Error(t('common.errors.fetchFailed'));
         }
         const companiesData = await companiesResponse.json();
         setCompanies(companiesData);
@@ -46,7 +48,7 @@ function InitialStockForm({ onClose, onSave }) {
     };
     
     fetchData();
-  }, []);
+  }, [t]);
   
   // Formos įvesties keitimas
   const handleInputChange = (e) => {
@@ -65,12 +67,12 @@ function InitialStockForm({ onClose, onSave }) {
       // Gauti tiekėją (naudosime pirmą tiekėją iš sąrašo)
       const suppliersResponse = await fetch('/api/suppliers');
       if (!suppliersResponse.ok) {
-        throw new Error('Nepavyko gauti tiekėjų duomenų');
+        throw new Error(t('common.errors.fetchFailed'));
       }
       const suppliersData = await suppliersResponse.json();
       
       if (suppliersData.length === 0) {
-        throw new Error('Nėra tiekėjų sistemoje. Pirmiausia pridėkite bent vieną tiekėją.');
+        throw new Error(t('common.errors.noSuppliers'));
       }
       
       const supplierId = suppliersData[0].id;
@@ -91,7 +93,7 @@ function InitialStockForm({ onClose, onSave }) {
       });
       
       if (!response.ok) {
-        throw new Error('Nepavyko pridėti pradinio likučio');
+        throw new Error(t('common.errors.saveFailed'));
       }
       
       const addedPurchase = await response.json();
@@ -108,17 +110,17 @@ function InitialStockForm({ onClose, onSave }) {
     }
   };
   
-  if (loading) return <div className="loading">Kraunama...</div>;
+  if (loading) return <div className="loading">{t('common.messages.loading')}</div>;
   
   return (
     <div className="initial-stock-form-overlay">
       <div className="initial-stock-form-container">
-        <h2>Įvesti pradinį likutį</h2>
+        <h2>{t('common.inventory.initialStock')}</h2>
         {error && <div className="error">{error}</div>}
         
         <form onSubmit={handleSaveInitialStock}>
           <div className="form-group">
-            <label htmlFor="productId">Produktas:</label>
+            <label htmlFor="productId">{t('common.labels.product')}:</label>
             <select
               id="productId"
               name="productId"
@@ -128,7 +130,7 @@ function InitialStockForm({ onClose, onSave }) {
               className="product-select"
               size="1"
             >
-              <option value="">Pasirinkite produktą</option>
+              <option value="">{t('common.select.product')}</option>
               {products.map(product => (
                 <option key={product.id} value={product.id}>
                   {product.code} {product.name}
@@ -138,7 +140,7 @@ function InitialStockForm({ onClose, onSave }) {
           </div>
           
           <div className="form-group">
-            <label htmlFor="companyId">Įmonė:</label>
+            <label htmlFor="companyId">{t('common.labels.company')}:</label>
             <select
               id="companyId"
               name="companyId"
@@ -146,7 +148,7 @@ function InitialStockForm({ onClose, onSave }) {
               onChange={handleInputChange}
               required
             >
-              <option value="">Pasirinkite įmonę</option>
+              <option value="">{t('common.select.company')}</option>
               {companies.map(company => (
                 <option key={company.id} value={company.id}>
                   {company.name}
@@ -156,7 +158,7 @@ function InitialStockForm({ onClose, onSave }) {
           </div>
           
           <div className="form-group">
-            <label htmlFor="quantity">Kiekis:</label>
+            <label htmlFor="quantity">{t('common.labels.quantity')}:</label>
             <input
               type="number"
               id="quantity"
@@ -169,7 +171,7 @@ function InitialStockForm({ onClose, onSave }) {
           </div>
           
           <div className="form-group">
-            <label htmlFor="purchaseDate">Data:</label>
+            <label htmlFor="purchaseDate">{t('common.labels.date')}:</label>
             <input
               type="date"
               id="purchaseDate"
@@ -181,7 +183,7 @@ function InitialStockForm({ onClose, onSave }) {
           </div>
           
           <div className="form-group">
-            <label htmlFor="unitPrice">Vieneto kaina:</label>
+            <label htmlFor="unitPrice">{t('common.labels.price')}:</label>
             <input
               type="number"
               id="unitPrice"
@@ -196,10 +198,10 @@ function InitialStockForm({ onClose, onSave }) {
           
           <div className="form-buttons">
             <button type="submit" className="btn-primary">
-              Išsaugoti
+              {t('common.buttons.save')}
             </button>
             <button type="button" className="btn-secondary" onClick={onClose}>
-              Atšaukti
+              {t('common.buttons.cancel')}
             </button>
           </div>
         </form>
@@ -208,4 +210,4 @@ function InitialStockForm({ onClose, onSave }) {
   );
 }
 
-export default InitialStockForm; 
+export default InitialStockForm;
