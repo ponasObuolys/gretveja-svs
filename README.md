@@ -1,38 +1,70 @@
-# gretveja-svs
- Gretveja sandelio valdymo sistema
+# Gretvėja-SVS
+Gretvėja sandėlio valdymo sistema
 
 ## Projekto paleidimas
 
-### Paleidimas naudojant Docker
+### Reikalavimai
 
-1. Įsitikinkite, kad turite įdiegtą Docker.
-2. Projekto kataloge paleiskite komandą:
+1. Įsitikinkite, kad turite įdiegtą Node.js (rekomenduojama 16.x versija arba naujesnė).
+2. Įsitikinkite, kad turite įdiegtą PostgreSQL duomenų bazę.
+3. Sukurkite duomenų bazę `gretveja_svs`.
+
+### Projekto paruošimas
+
+1. Sukonfigūruokite `.env` failą `backend` kataloge (žr. `.env.example`).
+2. Įdiekite visas reikalingas priklausomybes:
 
 ```bash
-docker-compose up --build
+# Įdiegti visas priklausomybes (pagrindiniame projekto kataloge)
+npm run install:all
 ```
 
-### Paleidimas be Docker
-
-1. Įsitikinkite, kad turite įdiegtą PostgreSQL duomenų bazę.
-2. Sukurkite duomenų bazę `gretveja_svs`.
-3. Sukonfigūruokite .env failą backend kataloge (žr. .env.example).
-4. Įdiekite priklausomybes ir paleiskite visas paslaugas:
+Jei `install:all` komanda nesuveikė tinkamai, galite įdiegti priklausomybes rankiniu būdu:
 
 ```bash
-# Įdiegti visas priklausomybes
-npm run install:all
+# Pagrindiniame kataloge
+npm install
 
-# Paleisti vienu metu backend ir frontend
+# Frontend kataloge
+cd frontend
+npm install
+cd ..
+
+# Backend kataloge
+cd backend
+npm install
+cd ..
+```
+
+### Projekto paleidimas
+
+Paleiskite projektą naudodami šią komandą pagrindiniame projekto kataloge:
+
+```bash
 npm run dev:all
 ```
 
-## Atskiros paslaugos:
+Ši komanda paleis tiek backend, tiek frontend serverius vienu metu.
+
+Jei paleidžiant gaunate klaidą `command not found`, įdiekite trūkstamas priklausomybes globaliai:
 
 ```bash
-# Tik frontend
+npm install -g nodemon
+npm install -g concurrently
+```
+
+### Atskiros paslaugos
+
+Jei norite paleisti tik vieną iš serverių:
+
+```bash
+# Tik frontend (veiks adresu http://localhost:3000)
 npm run dev:frontend
 
-# Tik backend
+# Tik backend (veiks adresu http://localhost:3001)
 npm run dev:backend
 ```
+
+### Prisijungimas prie sistemos
+
+Paleidus serverius, frontend aplikacija bus pasiekiama adresu http://localhost:3000, o backend API - http://localhost:3001.
