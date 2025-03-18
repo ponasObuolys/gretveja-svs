@@ -42,7 +42,9 @@
       "out_of_stock_only": "Out of Stock Only",
       "products": "Products",
       "plateNumber": "License Plate",
-      "count": "Count"
+      "count": "Count",
+      "phone": "Phone",
+      "email": "Email"
     },
     "fields": {
       "company": "Company"
@@ -216,5 +218,8 @@
         "company": "Company"
       }
     }
+  },
+  "trucks": {
+    "new": "New Truck"
   }
 }
