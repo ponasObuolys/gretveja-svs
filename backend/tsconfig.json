@@ -8,7 +8,9 @@
     "skipLibCheck": true,
     "outDir": "./dist",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "noImplicitAny": false,
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": [
     "*.ts",
