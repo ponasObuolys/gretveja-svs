@@ -4,6 +4,10 @@
   "outputDirectory": "frontend/build",
   "rewrites": [
     {
+      "source": "/api/debug/:path*",
+      "destination": "/api/debug-api"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api"
     },
