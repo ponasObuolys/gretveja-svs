@@ -32,6 +32,48 @@ app.get('/api/products', async (req, res) => {
     if (error) throw error;
     res.json(data);
   } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/products', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('products').insert(req.body);
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('products')
+      .update(req.body)
+      .eq('id', id);
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting product:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -42,6 +84,48 @@ app.get('/api/suppliers', async (req, res) => {
     if (error) throw error;
     res.json(data);
   } catch (error) {
+    console.error('Error fetching suppliers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/suppliers', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('suppliers').insert(req.body);
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating supplier:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/suppliers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('suppliers')
+      .update(req.body)
+      .eq('id', id);
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating supplier:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/suppliers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('suppliers')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting supplier:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -52,6 +136,226 @@ app.get('/api/stocks', async (req, res) => {
     if (error) throw error;
     res.json(data);
   } catch (error) {
+    console.error('Error fetching stocks:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Purchases endpoints
+app.get('/api/purchases', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('purchases').select('*');
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/purchases', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('purchases').insert(req.body);
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating purchase:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/purchases/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('purchases')
+      .update(req.body)
+      .eq('id', id);
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating purchase:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/purchases/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('purchases')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting purchase:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Issuances endpoints
+app.get('/api/issuances', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('issuances').select('*');
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching issuances:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/issuances', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('issuances').insert(req.body);
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating issuance:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/issuances/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('issuances')
+      .update(req.body)
+      .eq('id', id);
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating issuance:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/issuances/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('issuances')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting issuance:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Companies endpoints
+app.get('/api/companies', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('companies').select('*');
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching companies:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/companies', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('companies').insert(req.body);
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating company:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/companies/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('companies')
+      .update(req.body)
+      .eq('id', id);
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating company:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/companies/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('companies')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting company:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Trucks endpoints
+app.get('/api/trucks', async (req, res) => {
+  try {
+    let query = supabase.from('trucks').select('*');
+    
+    // Handle include parameter for related data
+    if (req.query.include === 'company') {
+      query = supabase.from('trucks').select('*, company:companies(*)');
+    }
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching trucks:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/trucks', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('trucks').insert(req.body);
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating truck:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/trucks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('trucks')
+      .update(req.body)
+      .eq('id', id);
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating truck:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/trucks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('trucks')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting truck:', error);
     res.status(500).json({ error: error.message });
   }
 });
