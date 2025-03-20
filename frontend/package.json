@@ -31,7 +31,8 @@
     "start": "react-scripts start",
     "build": "CI=false react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "npm list i18next || npm install i18next@^23.2.3 i18next-browser-languagedetector@^8.0.4 i18next-http-backend@^3.0.2 react-i18next@^13.0.0"
   },
   "eslintConfig": {
     "extends": [

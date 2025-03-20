@@ -8,8 +8,9 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "build": "cd backend && npm run build && cd ../frontend && npm run build",
-    "test": "cd frontend && npm run test && cd ../backend && npm run test"
+    "build": "npm run install:all && cd backend && npm run build && cd ../frontend && npm run build",
+    "test": "cd frontend && npm run test && cd ../backend && npm run test",
+    "vercel-build": "npm run install:all && cd backend && npm run build && cd ../frontend && CI=false npm run build"
   },
   "keywords": [
     "sandėlis",
