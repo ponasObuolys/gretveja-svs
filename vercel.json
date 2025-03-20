@@ -1,15 +1,23 @@
 {
   "version": 2,
-  "builds": [
+  "buildCommand": "cd backend && npm install && npm run build && cd ../frontend && npm install --force && CI=false npm run build && cd ../api && npm install",
+  "outputDirectory": "frontend/build",
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
+      "source": "/api/simple/:path*",
+      "destination": "/api/simple"
+    },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "source": "/api/debug/:path*",
+      "destination": "/api/debug-api"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ],
   "env": {

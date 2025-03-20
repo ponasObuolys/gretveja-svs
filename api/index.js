@@ -1,98 +1,100 @@
-// Main API file for Gretveja SVS
+// Vercel Serverless API handler
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
-// Supabase configuration
+// Aplinkos kintamieji
 const supabaseUrl = process.env.SUPABASE_URL || 'https://krddmfggwygganqronyl.supabase.co';
 const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZGRtZmdnd3lnZ2FucXJvbnlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyMjYzOTQsImV4cCI6MjA1NzgwMjM5NH0.KxAhOUSg9cSkyCo-IPCf82qN0Be7rt2L0tQDFuAtWro';
 
-// Create Supabase client
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Supabase klientas
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false
+  }
+});
 
-// Create Express app
+// Express aplikacija
 const app = express();
 
-// Enable CORS
+// Middleware
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true
 }));
-
-// Parse JSON bodies
 app.use(express.json());
 
-// Root endpoint
-app.get('/api', (req, res) => {
-  res.json({
-    message: 'Gretveja SVS API is running',
-    version: '1.0.0',
-    endpoints: [
-      '/api/products',
-      '/api/suppliers',
-      '/api/companies',
-      '/api/trucks',
-      '/api/stocks',
-      '/api/purchases',
-      '/api/issuances'
-    ]
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message,
+    stack: process.env.NODE_ENV === 'production' ? undefined : err.stack
   });
 });
 
-// Debug endpoint
+// Diagnostikos maršrutas
 app.get('/api/debug', async (req, res) => {
   try {
-    // Check connection
-    const { data, error } = await supabase.from('_dummy_query_').select('*').limit(1).catch(() => {
-      return { data: null, error: { message: 'Expected error from dummy query' } };
-    });
-
-    // Check tables
-    const tables = ['products', 'suppliers', 'companies', 'trucks', 'stocks', 'purchases', 'issuances'];
-    const tableStatus = {};
-
-    for (const table of tables) {
-      try {
-        const { data, error } = await supabase
-          .from(table)
-          .select('count')
-          .limit(1);
-        
-        tableStatus[table] = {
-          exists: !error,
-          error: error ? error.message : null
-        };
-      } catch (err) {
-        tableStatus[table] = {
-          exists: false,
-          error: err.message
-        };
-      }
+    // Tikriname Supabase ryšį
+    const { data, error } = await supabase.from('products').select('count').limit(1);
+    
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        error: 'Supabase connection error',
+        details: error,
+        env: {
+          supabaseUrl: supabaseUrl,
+          nodeEnv: process.env.NODE_ENV,
+          vercelEnv: process.env.VERCEL_ENV || 'not set'
+        }
+      });
     }
-
+    
     res.json({
       success: true,
-      message: 'Debug information',
-      supabaseUrl,
-      tables: tableStatus
+      message: 'Supabase connection successful',
+      timestamp: new Date().toISOString(),
+      env: {
+        supabaseUrl: supabaseUrl,
+        nodeEnv: process.env.NODE_ENV,
+        vercelEnv: process.env.VERCEL_ENV || 'not set'
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Debug error',
-      message: error.message
+      error: 'Failed to connect to Supabase',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'production' ? undefined : error.stack
     });
   }
 });
 
-// PRODUCTS ENDPOINTS
+// Pagrindinis maršrutas
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Sveiki atvykę į Gretvėja-SVS API!',
+    version: '1.0.0',
+    supabaseUrl: supabaseUrl
+  });
+});
+
+// API maršrutai
 app.get('/api/products', async (req, res) => {
   try {
     console.log('Fetching products from Supabase...');
-    const { data, error } = await supabase
-      .from('products')
-      .select('*');
+    const { data, error } = await supabase.from('products').select('*');
     
     if (error) {
       console.error('Error fetching products:', error);
@@ -113,13 +115,60 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// SUPPLIERS ENDPOINTS
+app.post('/api/products', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('products').insert(req.body);
+    if (error) {
+      console.error('Error creating product:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('products')
+      .update(req.body)
+      .eq('id', id);
+    if (error) {
+      console.error('Error updating product:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Error deleting product:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/suppliers', async (req, res) => {
   try {
     console.log('Fetching suppliers from Supabase...');
-    const { data, error } = await supabase
-      .from('suppliers')
-      .select('*');
+    const { data, error } = await supabase.from('suppliers').select('*');
     
     if (error) {
       console.error('Error fetching suppliers:', error);
@@ -140,83 +189,60 @@ app.get('/api/suppliers', async (req, res) => {
   }
 });
 
-// COMPANIES ENDPOINTS
-app.get('/api/companies', async (req, res) => {
+app.post('/api/suppliers', async (req, res) => {
   try {
-    console.log('Fetching companies from Supabase...');
+    const { data, error } = await supabase.from('suppliers').insert(req.body);
+    if (error) {
+      console.error('Error creating supplier:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating supplier:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/suppliers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
     const { data, error } = await supabase
-      .from('companies')
-      .select('*');
-    
+      .from('suppliers')
+      .update(req.body)
+      .eq('id', id);
     if (error) {
-      console.error('Error fetching companies:', error);
-      return res.status(500).json({
-        error: 'Failed to fetch companies',
-        details: error
-      });
+      console.error('Error updating supplier:', error);
+      return res.status(500).json({ error: error.message });
     }
-    
-    console.log(`Successfully fetched ${data.length} companies`);
     res.json(data);
   } catch (error) {
-    console.error('Unexpected error in companies endpoint:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error.message
-    });
+    console.error('Error updating supplier:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// TRUCKS ENDPOINTS
-app.get('/api/trucks', async (req, res) => {
+app.delete('/api/suppliers/:id', async (req, res) => {
   try {
-    console.log('Fetching trucks from Supabase...');
-    
-    // Check if we need to include company details
-    const includeCompany = req.query.include === 'company';
-    
-    let query = supabase.from('trucks').select('*');
-    
-    // If include=company is specified, join with companies table
-    if (includeCompany) {
-      query = supabase.from('trucks').select(`
-        *,
-        companies:company_id (
-          id,
-          name,
-          code
-        )
-      `);
-    }
-    
-    const { data, error } = await query;
-    
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('suppliers')
+      .delete()
+      .eq('id', id);
     if (error) {
-      console.error('Error fetching trucks:', error);
-      return res.status(500).json({
-        error: 'Failed to fetch trucks',
-        details: error
-      });
+      console.error('Error deleting supplier:', error);
+      return res.status(500).json({ error: error.message });
     }
-    
-    console.log(`Successfully fetched ${data.length} trucks`);
-    res.json(data);
+    res.json({ success: true });
   } catch (error) {
-    console.error('Unexpected error in trucks endpoint:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error.message
-    });
+    console.error('Error deleting supplier:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// STOCKS ENDPOINTS
 app.get('/api/stocks', async (req, res) => {
   try {
     console.log('Fetching stocks from Supabase...');
-    const { data, error } = await supabase
-      .from('stocks')
-      .select('*');
+    const { data, error } = await supabase.from('stocks').select('*');
     
     if (error) {
       console.error('Error fetching stocks:', error);
@@ -237,13 +263,11 @@ app.get('/api/stocks', async (req, res) => {
   }
 });
 
-// PURCHASES ENDPOINTS
+// Purchases endpoints
 app.get('/api/purchases', async (req, res) => {
   try {
     console.log('Fetching purchases from Supabase...');
-    const { data, error } = await supabase
-      .from('purchases')
-      .select('*');
+    const { data, error } = await supabase.from('purchases').select('*');
     
     if (error) {
       console.error('Error fetching purchases:', error);
@@ -264,13 +288,61 @@ app.get('/api/purchases', async (req, res) => {
   }
 });
 
-// ISSUANCES ENDPOINTS
+app.post('/api/purchases', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('purchases').insert(req.body);
+    if (error) {
+      console.error('Error creating purchase:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating purchase:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/purchases/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('purchases')
+      .update(req.body)
+      .eq('id', id);
+    if (error) {
+      console.error('Error updating purchase:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating purchase:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/purchases/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('purchases')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Error deleting purchase:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting purchase:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Issuances endpoints
 app.get('/api/issuances', async (req, res) => {
   try {
     console.log('Fetching issuances from Supabase...');
-    const { data, error } = await supabase
-      .from('issuances')
-      .select('*');
+    const { data, error } = await supabase.from('issuances').select('*');
     
     if (error) {
       console.error('Error fetching issuances:', error);
@@ -291,142 +363,233 @@ app.get('/api/issuances', async (req, res) => {
   }
 });
 
-// Setup database tables if they don't exist
-async function setupDatabase() {
-  console.log('Setting up database tables...');
-  
+app.post('/api/issuances', async (req, res) => {
   try {
-    // Required tables with their schemas
-    const tables = {
-      products: `
-        CREATE TABLE IF NOT EXISTS products (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          name TEXT NOT NULL,
-          code TEXT,
-          description TEXT,
-          unit TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-      `,
-      suppliers: `
-        CREATE TABLE IF NOT EXISTS suppliers (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          name TEXT NOT NULL,
-          code TEXT,
-          contact_person TEXT,
-          phone TEXT,
-          email TEXT,
-          address TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-      `,
-      companies: `
-        CREATE TABLE IF NOT EXISTS companies (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          name TEXT NOT NULL,
-          code TEXT,
-          contact_person TEXT,
-          phone TEXT,
-          email TEXT,
-          address TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-      `,
-      trucks: `
-        CREATE TABLE IF NOT EXISTS trucks (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          plate_number TEXT NOT NULL,
-          model TEXT,
-          year INTEGER,
-          company_id UUID REFERENCES companies(id),
-          notes TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-      `,
-      stocks: `
-        CREATE TABLE IF NOT EXISTS stocks (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          product_id UUID REFERENCES products(id),
-          quantity NUMERIC NOT NULL DEFAULT 0,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-      `,
-      purchases: `
-        CREATE TABLE IF NOT EXISTS purchases (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          supplier_id UUID REFERENCES suppliers(id),
-          date DATE NOT NULL,
-          document_number TEXT,
-          total_amount NUMERIC NOT NULL DEFAULT 0,
-          notes TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-      `,
-      issuances: `
-        CREATE TABLE IF NOT EXISTS issuances (
-          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-          company_id UUID REFERENCES companies(id),
-          date DATE NOT NULL,
-          document_number TEXT,
-          total_amount NUMERIC NOT NULL DEFAULT 0,
-          notes TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-        );
-      `
-    };
+    const { data, error } = await supabase.from('issuances').insert(req.body);
+    if (error) {
+      console.error('Error creating issuance:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating issuance:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/issuances/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('issuances')
+      .update(req.body)
+      .eq('id', id);
+    if (error) {
+      console.error('Error updating issuance:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating issuance:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/issuances/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('issuances')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Error deleting issuance:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting issuance:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Companies endpoints
+app.get('/api/companies', async (req, res) => {
+  try {
+    console.log('Fetching companies from Supabase...');
+    const { data, error } = await supabase.from('companies').select('*');
     
-    // Check if tables exist
-    const tableOrder = ['products', 'suppliers', 'companies', 'trucks', 'stocks', 'purchases', 'issuances'];
-    
-    for (const table of tableOrder) {
-      try {
-        console.log(`Checking if table ${table} exists...`);
-        
-        // Try to select from the table
-        const { data, error } = await supabase
-          .from(table)
-          .select('count')
-          .limit(1);
-        
-        if (error) {
-          console.log(`Table ${table} does not exist or is not accessible. Creating...`);
-          
-          // Try to create the table
-          const { error: createError } = await supabase.rpc(
-            'execute_sql',
-            { sql: tables[table] }
-          );
-          
-          if (createError) {
-            console.error(`Error creating table ${table}:`, createError);
-          } else {
-            console.log(`Table ${table} created successfully.`);
-          }
-        } else {
-          console.log(`Table ${table} already exists.`);
-        }
-      } catch (err) {
-        console.error(`Error processing table ${table}:`, err);
-      }
+    if (error) {
+      console.error('Error fetching companies:', error);
+      return res.status(500).json({
+        error: 'Failed to fetch companies',
+        details: error
+      });
     }
     
-    console.log('Database setup completed.');
+    console.log(`Successfully fetched ${data.length} companies`);
+    res.json(data);
   } catch (error) {
-    console.error('Error setting up database:', error);
+    console.error('Unexpected error in companies endpoint:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
   }
-}
+});
 
-// Run database setup when the app starts
-setupDatabase();
+app.post('/api/companies', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('companies').insert(req.body);
+    if (error) {
+      console.error('Error creating company:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating company:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
-// Export the Express app
-module.exports = (req, res) => {
-  return app(req, res);
-};
+app.put('/api/companies/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('companies')
+      .update(req.body)
+      .eq('id', id);
+    if (error) {
+      console.error('Error updating company:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating company:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/companies/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('companies')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Error deleting company:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting company:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Trucks endpoints
+app.get('/api/trucks', async (req, res) => {
+  try {
+    console.log('Fetching trucks from Supabase...');
+    console.log('Query params:', req.query);
+    
+    let query = supabase.from('trucks').select('*');
+    
+    // Handle include parameter for related data
+    if (req.query.include === 'company') {
+      console.log('Including company data in trucks query');
+      query = supabase.from('trucks').select('*, company:companies(*)');
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Supabase error fetching trucks:', error);
+      return res.status(500).json({ 
+        error: error.message,
+        details: error 
+      });
+    }
+    
+    console.log(`Successfully fetched ${data.length} trucks`);
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching trucks:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: error.stack 
+    });
+  }
+});
+
+app.post('/api/trucks', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('trucks').insert(req.body);
+    if (error) {
+      console.error('Error creating truck:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(201).json(data);
+  } catch (error) {
+    console.error('Error creating truck:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/trucks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('trucks')
+      .update(req.body)
+      .eq('id', id);
+    if (error) {
+      console.error('Error updating truck:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Error updating truck:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/trucks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from('trucks')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Error deleting truck:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting truck:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Catch-all route for undefined endpoints
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `The requested endpoint ${req.originalUrl} does not exist`
+  });
+});
+
+// Klaidų apdorojimas
+app.use((err, req, res, next) => {
+  console.error('Global error handler caught:', err);
+  res.status(500).json({ 
+    error: 'Serverio klaida', 
+    message: err.message,
+    stack: err.stack
+  });
+});
+
+// Eksportuojame Express aplikaciją
+module.exports = app;
