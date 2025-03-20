@@ -17,7 +17,12 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://gretveja-svs.vercel.app', /\.vercel\.app$/] 
+    : 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
 // Pagrindinis maršrutas
@@ -46,12 +51,21 @@ const startServer = async () => {
     
     console.log('Supabase ryšys sėkmingai sukurtas.');
     
-    app.listen(PORT, () => {
-      console.log(`Serveris paleistas adresu: http://localhost:${PORT}`);
-    });
+    // Vercel serverless aplinkoje nereikia klausytis porto
+    if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === undefined) {
+      app.listen(PORT, () => {
+        console.log(`Serveris paleistas adresu: http://localhost:${PORT}`);
+      });
+    }
   } catch (error) {
     console.error('Nepavyko prisijungti prie Supabase:', error);
   }
 };
 
-startServer();
+// Paleidžiame serverį, jei tai nėra Vercel serverless aplinka
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === undefined) {
+  startServer();
+}
+
+// Eksportuojame Express app objektą, kad jį galėtų naudoti Vercel serverless funkcijos
+export default app;
