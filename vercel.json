@@ -1,16 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "cd backend && npm install && npm run build && cd ../frontend && npm install --force && CI=false npm run build && cd ../api && npm install",
+  "buildCommand": "cd backend && npm install && npm run build && cd ../frontend && npm install --force && CI=false npm run build",
   "outputDirectory": "frontend/build",
   "rewrites": [
-    {
-      "source": "/api/simple/:path*",
-      "destination": "/api/simple"
-    },
-    {
-      "source": "/api/debug/:path*",
-      "destination": "/api/debug-api"
-    },
     {
       "source": "/api/(.*)",
       "destination": "/api"
