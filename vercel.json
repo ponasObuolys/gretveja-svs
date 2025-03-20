@@ -1,59 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "cd backend && npm install && npm run build && cd ../frontend && npm install --force && CI=false npm run build && cd ../api && npm install && node setup.js",
-  "outputDirectory": "frontend/build",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/stocks/:path*",
-      "destination": "/api/stocks"
-    },
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
     {
-      "source": "/api/purchases/:path*",
-      "destination": "/api/purchases"
-    },
-    {
-      "source": "/api/issuances/:path*",
-      "destination": "/api/issuances"
-    },
-    {
-      "source": "/api/products/:path*",
-      "destination": "/api/products"
-    },
-    {
-      "source": "/api/suppliers/:path*",
-      "destination": "/api/suppliers"
-    },
-    {
-      "source": "/api/companies/:path*",
-      "destination": "/api/companies"
-    },
-    {
-      "source": "/api/trucks/:path*",
-      "destination": "/api/trucks"
-    },
-    {
-      "source": "/api/simple/:path*",
-      "destination": "/api/simple"
-    },
-    {
-      "source": "/api/debug/:path*",
-      "destination": "/api/debug-api"
-    },
-    {
-      "source": "/api/setup/:path*",
-      "destination": "/api/setup-endpoint"
-    },
-    {
-      "source": "/api/debug-dashboard/:path*",
-      "destination": "/api/debug-dashboard"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/"
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
     }
   ],
   "env": {
