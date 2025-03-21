@@ -27,6 +27,8 @@ const getAllPurchases = async (req, res) => {
       return handleError(res, error);
     }
     
+    console.log('Raw purchases data from DB:', JSON.stringify(data[0], null, 2));
+    
     // Transform the data from snake_case to camelCase for frontend
     const transformedData = data.map(item => {
       // First transform the main purchase data
@@ -50,6 +52,8 @@ const getAllPurchases = async (req, res) => {
       
       return purchase;
     });
+    
+    console.log('Transformed purchase data for frontend:', JSON.stringify(transformedData[0], null, 2));
     
     console.log('Sending transformed purchases data to client');
     return res.json(transformedData);
@@ -94,8 +98,12 @@ const createPurchase = async (req, res) => {
       return handleError(res, { message: 'Failed to create purchase record' }, 500);
     }
     
+    console.log('Raw created purchase data from DB:', JSON.stringify(data[0], null, 2));
+    
     // Transform the returned data back to camelCase for frontend
     const transformedData = data.map(item => snakeToCamel(item));
+    
+    console.log('Transformed created purchase data for frontend:', JSON.stringify(transformedData[0], null, 2));
     
     return res.status(201).json(transformedData);
   } catch (error) {
@@ -132,8 +140,12 @@ const updatePurchase = async (req, res) => {
     
     if (error) throw error;
     
+    console.log('Raw updated purchase data from DB:', JSON.stringify(data[0], null, 2));
+    
     // Transform data back to camelCase for frontend
     const transformedData = data.map(item => snakeToCamel(item));
+    
+    console.log('Transformed updated purchase data for frontend:', JSON.stringify(transformedData[0], null, 2));
     
     return res.json(transformedData);
   } catch (error) {
@@ -171,6 +183,8 @@ const deletePurchase = async (req, res) => {
     if (!data || data.length === 0) {
       return handleError(res, { message: 'Purchase not found' }, 404);
     }
+    
+    console.log('Deleted purchase data:', JSON.stringify(data[0], null, 2));
     
     return res.json({ 
       success: true, 

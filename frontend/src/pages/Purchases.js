@@ -111,21 +111,13 @@ function Purchases() {
       
       const purchasesResponse = await axios.get(url);
       
-      // Transform data from snake_case (backend) to camelCase (frontend)
-      const transformedPurchases = purchasesResponse.data.map(purchase => ({
-        id: purchase.id,
-        invoiceNumber: purchase.invoice_number,
-        productId: purchase.product_id,
-        supplierId: purchase.supplier_id,
-        quantity: purchase.quantity,
-        purchaseDate: purchase.purchase_date,
-        unitPrice: purchase.unit_price,
-        companyId: purchase.company_id,
-        totalAmount: purchase.total_amount,
-        product: purchase.products,
-        supplier: purchase.suppliers,
-        company: purchase.companies
-      }));
+      console.log('Raw purchases data from API:', purchasesResponse.data[0]);
+      
+      // The backend is already transforming the data, so we should use it directly
+      // instead of trying to transform it again
+      const transformedPurchases = purchasesResponse.data;
+      
+      console.log('Purchases data for frontend:', transformedPurchases[0]);
       
       setPurchases(transformedPurchases);
       

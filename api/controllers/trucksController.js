@@ -46,6 +46,8 @@ const getAllTrucks = async (req, res) => {
       return handleError(res, error);
     }
     
+    console.log('Raw trucks data from DB:', data.length > 0 ? JSON.stringify(data[0], null, 2) : 'No trucks found');
+    
     // Transform the data from snake_case to camelCase for frontend
     const transformedData = data.map(truck => {
       // First transform the main truck data
@@ -65,7 +67,7 @@ const getAllTrucks = async (req, res) => {
       return transformedTruck;
     });
     
-    console.log('Sending transformed trucks data to client:', transformedData.length > 0 ? transformedData[0] : 'No trucks found');
+    console.log('Sending transformed trucks data to client:', transformedData.length > 0 ? JSON.stringify(transformedData[0], null, 2) : 'No trucks found');
     return res.json(transformedData);
   } catch (error) {
     console.error('Error in trucks endpoint:', error);
@@ -87,6 +89,8 @@ const createTruck = async (req, res) => {
     // Convert camelCase to snake_case for database
     const truckData = camelToSnake(req.body);
     
+    console.log('Creating truck with data:', JSON.stringify(truckData, null, 2));
+    
     const { data, error } = await supabase
       .from('trucks')
       .insert(truckData)
@@ -96,6 +100,8 @@ const createTruck = async (req, res) => {
     
     // Transform the returned data back to camelCase for frontend
     const transformedData = data.map(item => snakeToCamel(item));
+    
+    console.log('Created truck with data:', JSON.stringify(transformedData[0], null, 2));
     
     return res.status(201).json(transformedData);
   } catch (error) {
@@ -119,6 +125,8 @@ const updateTruck = async (req, res) => {
     // Convert camelCase to snake_case for database
     const truckData = camelToSnake(req.body);
     
+    console.log('Updating truck with ID:', id, 'and data:', JSON.stringify(truckData, null, 2));
+    
     const { data, error } = await supabase
       .from('trucks')
       .update(truckData)
@@ -129,6 +137,8 @@ const updateTruck = async (req, res) => {
     
     // Transform data back to camelCase for frontend
     const transformedData = data.map(item => snakeToCamel(item));
+    
+    console.log('Updated truck with data:', JSON.stringify(transformedData[0], null, 2));
     
     return res.json(transformedData);
   } catch (error) {
@@ -149,6 +159,8 @@ const deleteTruck = async (req, res) => {
       return handleError(res, { message: 'Invalid truck ID' }, 400);
     }
     
+    console.log('Deleting truck with ID:', id);
+    
     const { data, error } = await supabase
       .from('trucks')
       .delete()
@@ -160,6 +172,8 @@ const deleteTruck = async (req, res) => {
     if (!data || data.length === 0) {
       return handleError(res, { message: 'Truck not found' }, 404);
     }
+    
+    console.log('Deleted truck with ID:', id);
     
     return res.json({ 
       success: true, 

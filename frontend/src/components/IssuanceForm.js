@@ -406,7 +406,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                   <option value="">{t('common.select.truck')}</option>
                   {trucks.map(truck => (
                     <option key={truck.id} value={truck.id}>
-                      {truck.plateNumber} {truck.model ? `(${truck.model})` : ''}
+                      {truck.plateNumber}
                     </option>
                   ))}
                 </Form.Select>
