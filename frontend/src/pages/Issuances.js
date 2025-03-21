@@ -6,7 +6,7 @@ import './Issuances.css';
 import IssuanceForm from '../components/IssuanceForm';
 
 function Issuances() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [issuances, setIssuances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,6 +38,24 @@ function Issuances() {
     { value: 11, name: 'november' },
     { value: 12, name: 'december' }
   ];
+
+  // Helper function to get product name based on current language
+  const getLocalizedProductName = (issuance) => {
+    if (!issuance || !issuance.product) return t('common.messages.no_data');
+    
+    const product = issuance.product;
+    const currentLanguage = i18n.language;
+    
+    // Check if product has the nameEn/name_en or nameRu/name_ru properties (handling both camelCase and snake_case)
+    if (currentLanguage === 'en') {
+      return product.nameEn || product.name_en || product.name || t('common.messages.no_data');
+    } else if (currentLanguage === 'ru') {
+      return product.nameRu || product.name_ru || product.name || t('common.messages.no_data');
+    }
+    
+    // Default to Lithuanian name
+    return product.name || t('common.messages.no_data');
+  };
 
   // Filtravimo komponentas
   const FilterComponent = () => {
@@ -139,7 +157,45 @@ function Issuances() {
       }
       
       const response = await axios.get(url);
-      setIssuances(response.data);
+      
+      // Gauti produktų duomenis su vertimais (jei reikia)
+      let issuancesData = response.data;
+      
+      // Patikrinti, ar yra bent vienam produktui trūksta nameEn ar nameRu laukų
+      const needsProductTranslations = issuancesData.some(issuance => 
+        issuance.product && (!issuance.product.nameEn || !issuance.product.nameRu)
+      );
+      
+      // Jei reikia, gauti išsamius produktų duomenis
+      if (needsProductTranslations) {
+        try {
+          const productsResponse = await axios.get('/api/products');
+          const productsData = productsResponse.data;
+          
+          // Papildyti išdavimų produktų duomenis vertimais
+          issuancesData = issuancesData.map(issuance => {
+            if (issuance.product && issuance.productId) {
+              const matchingProduct = productsData.find(p => p.id === issuance.productId);
+              if (matchingProduct) {
+                return {
+                  ...issuance,
+                  product: {
+                    ...issuance.product,
+                    nameEn: matchingProduct.nameEn || issuance.product.nameEn || issuance.product.name,
+                    nameRu: matchingProduct.nameRu || issuance.product.nameRu || issuance.product.name
+                  }
+                };
+              }
+            }
+            return issuance;
+          });
+        } catch (err) {
+          console.error('Klaida gaunant produktų duomenis:', err);
+          // Tęsti su esamais duomenimis, net jei nepavyko gauti vertimų
+        }
+      }
+      
+      setIssuances(issuancesData);
       setError(null);
     } catch (err) {
       console.error('Klaida gaunant išdavimus:', err);
@@ -152,6 +208,14 @@ function Issuances() {
   useEffect(() => {
     fetchIssuances();
   }, [selectedYear, selectedMonth]);
+  
+  // Atnaujinti komponentą, kai pasikeičia kalba
+  useEffect(() => {
+    // Forsuoti komponento atnaujinimą, kai pasikeičia kalba
+    // (Produktų pavadinimai turi reaguoti į kalbos pakeitimą)
+    const newIssuances = [...issuances];
+    setIssuances(newIssuances);
+  }, [i18n.language]);
 
   // Atidaryti formą naujo išdavimo sukūrimui
   const handleAddNew = () => {
@@ -339,7 +403,7 @@ function Issuances() {
                   {issuances.map((issuance) => (
                     <tr key={issuance.id}>
                       <td>{formatDate(issuance.issuanceDate)}</td>
-                      <td>{issuance.product?.name || t('common.messages.no_data')}</td>
+                      <td>{getLocalizedProductName(issuance)}</td>
                       <td>{issuance.quantity} {issuance.product?.unit || ''}</td>
                       <td>{issuance.driverName}</td>
                       <td>{issuance.truck?.plateNumber || t('common.messages.no_data')}</td>
