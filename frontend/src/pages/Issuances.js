@@ -283,7 +283,14 @@ function Issuances() {
 
   // Formatuoti datą
   const formatDate = (dateString) => {
+    if (!dateString) return t('common.messages.no_data');
+    
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date:', dateString);
+      return t('common.messages.no_data');
+    }
+    
     return date.toLocaleDateString('lt-LT');
   };
 
@@ -331,15 +338,15 @@ function Issuances() {
                 <tbody>
                   {issuances.map((issuance) => (
                     <tr key={issuance.id}>
-                      <td>{formatDate(issuance.issuance_date)}</td>
-                      <td>{issuance.products?.name || t('common.messages.no_data')}</td>
-                      <td>{issuance.quantity} {issuance.products?.unit || ''}</td>
-                      <td>{issuance.driver_name}</td>
-                      <td>{issuance.trucks?.plate_number || t('common.messages.no_data')}</td>
-                      <td>{issuance.trucks?.companies?.name || t('common.messages.no_data')}</td>
+                      <td>{formatDate(issuance.issuanceDate)}</td>
+                      <td>{issuance.product?.name || t('common.messages.no_data')}</td>
+                      <td>{issuance.quantity} {issuance.product?.unit || ''}</td>
+                      <td>{issuance.driverName}</td>
+                      <td>{issuance.truck?.plateNumber || t('common.messages.no_data')}</td>
+                      <td>{issuance.truck?.company?.name || t('common.messages.no_data')}</td>
                       <td>
-                        <span className={`status-badge ${issuance.is_issued ? 'issued' : 'not-issued'}`}>
-                          {issuance.is_issued ? t('common.issuances.is_issued') : t('common.issuances.not_issued')}
+                        <span className={`status-badge ${issuance.isIssued ? 'issued' : 'not-issued'}`}>
+                          {issuance.isIssued ? t('common.issuances.is_issued') : t('common.issuances.not_issued')}
                         </span>
                       </td>
                       <td className="actions-cell">

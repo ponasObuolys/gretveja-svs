@@ -117,10 +117,12 @@ function IssuanceForm({ show, onHide, issuance }) {
   // Nustatyti formos duomenis, kai atidaroma redagavimo forma
   useEffect(() => {
     if (issuance) {
+      console.log('Setting form data from issuance:', issuance);
+      
       setFormData({
         productId: issuance.productId || '',
         isIssued: issuance.isIssued || false,
-        issuanceDate: new Date(issuance.issuanceDate).toISOString().split('T')[0],
+        issuanceDate: issuance.issuanceDate ? new Date(issuance.issuanceDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         quantity: issuance.quantity || 1,
         driverName: issuance.driverName || '',
         truckId: issuance.truckId || '',
@@ -149,7 +151,7 @@ function IssuanceForm({ show, onHide, issuance }) {
     }
     setValidated(false);
     setError(null);
-  }, [issuance, show, trucks]);
+  }, [issuance, show, trucks, initialFormState]);
 
   // Atnaujinti filtruotus produktus pagal paieškos terminą
   useEffect(() => {
@@ -264,8 +266,11 @@ function IssuanceForm({ show, onHide, issuance }) {
         ...formData,
         productId: parseInt(formData.productId),
         truckId: parseInt(formData.truckId),
-        quantity: parseInt(formData.quantity)
+        quantity: parseInt(formData.quantity),
+        isIssued: Boolean(formData.isIssued)
       };
+
+      console.log('Sending issuance data:', dataToSend);
 
       if (issuance) {
         // Atnaujinti esamą išdavimą

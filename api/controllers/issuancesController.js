@@ -18,7 +18,10 @@ const getAllIssuances = async (req, res) => {
       .select(`
         *,
         products:product_id (*),
-        trucks:truck_id (*)
+        trucks:truck_id (
+          *,
+          companies:company_id (*)
+        )
       `);
     
     if (error) {
@@ -26,22 +29,48 @@ const getAllIssuances = async (req, res) => {
       return handleError(res, error);
     }
     
+    console.log('Raw issuances data from API:', JSON.stringify(data?.slice(0, 1), null, 2));
+    
     // Transform the data from snake_case to camelCase for frontend
     const transformedData = data.map(item => {
-      const transformed = snakeToCamel({
-        ...item,
-        product: item.products,
-        truck: item.trucks
-      });
-      
-      // Remove the redundant fields that were added for the join
-      delete transformed.products;
-      delete transformed.trucks;
+      const transformed = {
+        id: item.id,
+        productId: item.product_id,
+        isIssued: item.is_issued,
+        issuanceDate: item.issuance_date,
+        quantity: item.quantity,
+        driverName: item.driver_name,
+        truckId: item.truck_id,
+        notes: item.notes,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+        
+        // Related entities
+        product: item.products ? {
+          id: item.products.id,
+          name: item.products.name,
+          nameEn: item.products.name_en,
+          nameRu: item.products.name_ru,
+          unit: item.products.unit
+        } : null,
+        
+        truck: item.trucks ? {
+          id: item.trucks.id,
+          plateNumber: item.trucks.plate_number,
+          companyId: item.trucks.company_id,
+          company: item.trucks.companies ? {
+            id: item.trucks.companies.id,
+            name: item.trucks.companies.name
+          } : null
+        } : null
+      };
       
       return transformed;
     });
     
-    console.log('Sending transformed issuances data to client');
+    console.log('Sending transformed issuances data to client - first item example:', 
+      transformedData.length > 0 ? JSON.stringify(transformedData[0], null, 2) : 'No data');
+    
     return res.json(transformedData);
   } catch (error) {
     console.error('Error in issuances GET endpoint:', error);
