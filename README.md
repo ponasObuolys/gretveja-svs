@@ -6,12 +6,11 @@ Gretvėja sandėlio valdymo sistema
 ### Reikalavimai
 
 1. Įsitikinkite, kad turite įdiegtą Node.js (rekomenduojama 16.x versija arba naujesnė).
-2. Įsitikinkite, kad turite įdiegtą PostgreSQL duomenų bazę.
-3. Sukurkite duomenų bazę `gretveja_svs`.
+2. Supabase projektas jau sukonfigūruotas, jokios vietinės duomenų bazės nereikia.
 
 ### Projekto paruošimas
 
-1. Sukonfigūruokite `.env` failą `backend` kataloge (žr. `.env.example`).
+1. Sukonfigūruokite `.env` failą `backend` kataloge (žr. `.env.example`), įtraukiant Supabase prisijungimo duomenis.
 2. Įdiekite visas reikalingas priklausomybes:
 
 ```bash

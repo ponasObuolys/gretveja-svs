@@ -1,145 +1,6 @@
 # Duomenų bazės informacija
 
-## Lentelės ir jų struktūra
-
-### Suppliers (Tiekėjai)
-- **Lentelė**: `suppliers`
-- **Modelis**: `Supplier.ts`
-- **Laukai**:
-  - `id` - Unikalus identifikatorius (PK)
-  - `name` - Tiekėjo pavadinimas
-  - `contactPerson` - Kontaktinis asmuo
-  - `phone` - Telefono numeris
-  - `email` - El. pašto adresas
-  - `createdAt` - Sukūrimo data
-  - `updatedAt` - Atnaujinimo data
-- **API Endpoint**: `http://localhost:3001/api/suppliers`
-- **Importavimo skriptas**: `import-suppliers.sh`
-- **Įrašų skaičius**: 13 tiekėjai
-
-### Products (Produktai)
-- **Lentelė**: `products`
-- **Modelis**: `Product.ts`
-- **Laukai**:
-  - `id` - Unikalus identifikatorius (PK)
-  - `code` - Produkto kodas (pvz., GRT001)
-  - `name` - Produkto pavadinimas lietuvių kalba
-  - `nameEn` - Produkto pavadinimas anglų kalba
-  - `nameRu` - Produkto pavadinimas rusų kalba
-  - `description` - Produkto aprašymas (gali būti null)
-  - `unit` - Matavimo vienetas (pvz., vnt)
-  - `createdAt` - Sukūrimo data
-  - `updatedAt` - Atnaujinimo data
-- **API Endpoint**: `http://localhost:3001/api/products`
-- **Importavimo skriptas**: `import-products.sh`
-- **Įrašų skaičius**: 187 produktai
-
-### Companies (Įmonės)
-- **Lentelė**: `companies`
-- **Modelis**: `Company.ts`
-- **Laukai**:
-  - `id` - Unikalus identifikatorius (PK)
-  - `name` - Įmonės pavadinimas
-  - `createdAt` - Sukūrimo data
-  - `updatedAt` - Atnaujinimo data
-- **API Endpoint**: `http://localhost:3001/api/companies`
-- **Įrašų skaičius**: 4 įmonės
-  - "UAB Gretvėja" (ID: 1)
-  - "Gwind" (ID: 3)
-  - "Gretvėja, DE" (ID: 4)
-  - "Parme Trans" (ID: 5)
-
-### Trucks (Vilkikai)
-- **Lentelė**: `trucks`
-- **Modelis**: `Truck.ts`
-- **Laukai**:
-  - `id` - Unikalus identifikatorius (PK)
-  - `plateNumber` - Valstybinis numeris
-  - `model` - Vilkiko modelis
-  - `companyId` - Įmonės ID (FK į `companies` lentelę)
-  - `createdAt` - Sukūrimo data
-  - `updatedAt` - Atnaujinimo data
-- **API Endpoint**: `http://localhost:3001/api/trucks`
-- **Įrašų skaičius**: 9 vilkikai (sukurti rankiniu būdu)
-
-### Purchases (Pirkimai)
-- **Lentelė**: `purchases`
-- **Modelis**: `Purchase.ts`
-- **Laukai**:
-  - `id` - Unikalus identifikatorius (PK)
-  - `productId` - Produkto ID (FK į `products` lentelę)
-  - `supplierId` - Tiekėjo ID (FK į `suppliers` lentelę)
-  - `quantity` - Kiekis
-  - `unitPrice` - Vieneto kaina
-  - `purchaseDate` - Pirkimo data
-  - `invoiceNumber` - Sąskaitos faktūros numeris
-  - `notes` - Pastabos
-  - `createdAt` - Sukūrimo data
-  - `updatedAt` - Atnaujinimo data
-- **API Endpoint**: `http://localhost:3001/api/purchases`
-
-### Issuances (Išdavimai)
-- **Lentelė**: `issuances`
-- **Modelis**: `Issuance.ts`
-- **Laukai**:
-  - `id` - Unikalus identifikatorius (PK)
-  - `productId` - Produkto ID (FK į `products` lentelę)
-  - `quantity` - Kiekis
-  - `issuanceDate` - Išdavimo data
-  - `driverName` - Vairuotojo vardas
-  - `truckId` - Vilkiko ID (FK į `trucks` lentelę)
-  - `companyId` - Įmonės ID (FK į `companies` lentelę)
-  - `isIssued` - Ar išduota (boolean)
-  - `notes` - Pastabos
-  - `createdAt` - Sukūrimo data
-  - `updatedAt` - Atnaujinimo data
-- **API Endpoint**: `http://localhost:3001/api/issuances`
-- **PDF generavimas**: `http://localhost:3001/api/issuances/:id/pdf`
-
-## Importavimo skriptai
-
-### import-suppliers.sh
-Šis skriptas importuoja tiekėjus iš `suppliers.json` failo į duomenų bazę. Jis naudoja `curl` komandą, kad siųstų POST užklausas į API.
-
-### import-products.sh
-Šis skriptas importuoja produktus iš `produktai.csv` failo į duomenų bazę. Jis naudoja `curl` komandą, kad siųstų POST užklausas į API.
-
-## Administravimo puslapis
-
-Admin puslapyje (`/admin`) galima valdyti:
-- Vilkikus (pridėti, redaguoti, ištrinti)
-- Produktus (pridėti, redaguoti, ištrinti)
-- Tiekėjus (pridėti, redaguoti, ištrinti)
-
-## Duomenų bazės prisijungimo informacija
-
-- **Duomenų bazės pavadinimas**: `gretveja_svs`
-- **Vartotojo vardas**: `postgres`
-- **Slaptažodis**: Nustatytas Docker aplinkoje
-- **Hostas**: `postgres` (Docker tinkle) arba `localhost` (lokaliai)
-- **Portas**: `5432`
-
-## Naudingos komandos
-
-### Patikrinti įrašų skaičių lentelėje
-```bash
-docker exec gretveja-svs-postgres psql -U postgres -d gretveja_svs -c "SELECT COUNT(*) FROM suppliers;"
-docker exec gretveja-svs-postgres psql -U postgres -d gretveja_svs -c "SELECT COUNT(*) FROM products;"
-docker exec gretveja-svs-postgres psql -U postgres -d gretveja_svs -c "SELECT COUNT(*) FROM trucks;"
-```
-
-### Gauti visus įrašus iš API
-```bash
-curl -s http://localhost:3001/api/suppliers
-curl -s http://localhost:3001/api/products
-curl -s http://localhost:3001/api/trucks
-```
-
-### Paleisti importavimo skriptus
-```bash
-chmod +x import-suppliers.sh && ./import-suppliers.sh
-chmod +x import-products.sh && ./import-products.sh
-```
+> **SVARBU**: Projektas buvo atnaujintas ir dabar naudoja tik Supabase duomenų bazę. Lokali PostgreSQL duomenų bazė nebėra naudojama.
 
 ## Supabase duomenų bazės struktūra
 
@@ -221,4 +82,49 @@ chmod +x import-products.sh && ./import-products.sh
   - `product_id` - Produkto ID (FK į `products` lentelę)
   - `quantity` - Kiekis
   - `location` - Vieta
-  - `last_updated` - Paskutinio atnaujinimo data 
+  - `last_updated` - Paskutinio atnaujinimo data
+
+## API Endpointai
+
+### Produktų API
+- **GET /api/products** - Gauti visus produktus
+- **GET /api/products/:id** - Gauti produktą pagal ID
+- **POST /api/products** - Sukurti naują produktą
+- **PUT /api/products/:id** - Atnaujinti produktą
+- **DELETE /api/products/:id** - Ištrinti produktą
+
+### Tiekėjų API
+- **GET /api/suppliers** - Gauti visus tiekėjus
+- **GET /api/suppliers/:id** - Gauti tiekėją pagal ID
+- **POST /api/suppliers** - Sukurti naują tiekėją
+- **PUT /api/suppliers/:id** - Atnaujinti tiekėją
+- **DELETE /api/suppliers/:id** - Ištrinti tiekėją
+
+### Įmonių API
+- **GET /api/companies** - Gauti visas įmones
+- **GET /api/companies/:id** - Gauti įmonę pagal ID
+- **POST /api/companies** - Sukurti naują įmonę
+- **PUT /api/companies/:id** - Atnaujinti įmonę
+- **DELETE /api/companies/:id** - Ištrinti įmonę
+
+### Vilkikų API
+- **GET /api/trucks** - Gauti visus vilkikus
+- **GET /api/trucks/:id** - Gauti vilkiką pagal ID
+- **POST /api/trucks** - Sukurti naują vilkiką
+- **PUT /api/trucks/:id** - Atnaujinti vilkiką
+- **DELETE /api/trucks/:id** - Ištrinti vilkiką
+
+### Pirkimų API
+- **GET /api/purchases** - Gauti visus pirkimus
+- **GET /api/purchases/:id** - Gauti pirkimą pagal ID
+- **POST /api/purchases** - Sukurti naują pirkimą
+- **PUT /api/purchases/:id** - Atnaujinti pirkimą
+- **DELETE /api/purchases/:id** - Ištrinti pirkimą
+
+### Išdavimų API
+- **GET /api/issuances** - Gauti visus išdavimus
+- **GET /api/issuances/:id** - Gauti išdavimą pagal ID
+- **POST /api/issuances** - Sukurti naują išdavimą
+- **PUT /api/issuances/:id** - Atnaujinti išdavimą
+- **DELETE /api/issuances/:id** - Ištrinti išdavimą
+- **GET /api/issuances/:id/pdf** - Generuoti išdavimo PDF 

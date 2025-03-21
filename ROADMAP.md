@@ -11,7 +11,7 @@
 ## 2. Jau įgyvendinta funkcionalumas
 
 ### Pagrindinės funkcijos
-- ✅ Duomenų bazės infrastruktūra (PostgreSQL + Supabase)
+- ✅ Duomenų bazės infrastruktūra (Supabase)
 - ✅ Pilnas API su endpoints prekėms, pirkimams, išdavimams, tiekėjams ir vilkikams
 - ✅ Pirkimų fiksavimas su produktų pasirinkimu ir kainų apskaita
 - ✅ Išdavimų registravimas su vilkiko ir įmonės atranka
