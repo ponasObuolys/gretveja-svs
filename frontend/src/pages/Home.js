@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Home.css';
 import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { testApiConnection } from '../utils/common';
 
 function Home() {
   const { t } = useTranslation();
@@ -13,8 +14,32 @@ function Home() {
   const [truckCount, setTruckCount] = useState(0);
   const [purchaseCount, setPurchaseCount] = useState(0);
   const [issuanceCount, setIssuanceCount] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState(null);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+
+  // Test API connection
+  const checkApiConnection = async () => {
+    setConnectionStatus({ loading: true });
+    try {
+      const result = await testApiConnection();
+      setConnectionStatus({ 
+        success: result.success, 
+        data: result,
+        loading: false
+      });
+    } catch (error) {
+      setConnectionStatus({ 
+        success: false, 
+        error: error.message,
+        loading: false
+      });
+    }
+  };
 
   useEffect(() => {
+    // Check connection on component mount
+    checkApiConnection();
+    
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -174,6 +199,72 @@ function Home() {
 
   return (
     <div className="home-container">
+      {/* Connection Diagnostic Panel */}
+      <div className="diagnostic-panel" style={{ 
+        marginBottom: '20px', 
+        padding: '10px', 
+        border: '1px solid #ddd', 
+        borderRadius: '5px',
+        backgroundColor: connectionStatus?.success ? '#e8f5e9' : '#ffebee'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ margin: '0' }}>
+            API Connection Status: {' '}
+            {connectionStatus?.loading ? 'Checking...' : 
+             connectionStatus?.success ? 'Connected' : 'Error'}
+          </h3>
+          <div>
+            <button 
+              onClick={checkApiConnection} 
+              style={{ 
+                marginRight: '10px',
+                padding: '5px 10px',
+                backgroundColor: '#2196f3',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Test Connection
+            </button>
+            <button 
+              onClick={() => setShowDiagnostics(!showDiagnostics)}
+              style={{ 
+                padding: '5px 10px',
+                backgroundColor: '#757575',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              {showDiagnostics ? 'Hide Details' : 'Show Details'}
+            </button>
+          </div>
+        </div>
+        
+        {showDiagnostics && (
+          <div style={{ 
+            marginTop: '10px', 
+            padding: '10px', 
+            backgroundColor: '#f5f5f5', 
+            borderRadius: '4px',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            fontFamily: 'monospace',
+            fontSize: '14px'
+          }}>
+            <h4>Connection Details:</h4>
+            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {connectionStatus?.loading 
+                ? 'Loading...' 
+                : JSON.stringify(connectionStatus?.data || connectionStatus?.error, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
+
       <div className="hero-section">
         <h1>{t('common.welcome')}</h1>
         <p className="subtitle">{t('common.system.title')}</p>

@@ -1,5 +1,33 @@
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import React from 'react';
+import axios from 'axios';
+
+// Configure axios with better error handling for Vercel deployment
+axios.interceptors.request.use(config => {
+  // Log outgoing requests in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`Request: ${config.method.toUpperCase()} ${config.url}`);
+  }
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
+
+axios.interceptors.response.use(response => {
+  return response;
+}, error => {
+  // Enhanced error logging
+  console.error('API Response Error:', {
+    url: error.config?.url,
+    method: error.config?.method,
+    status: error.response?.status,
+    statusText: error.response?.statusText,
+    data: error.response?.data,
+    message: error.message
+  });
+  
+  return Promise.reject(error);
+});
 
 /**
  * Rūšiuoja elementų masyvą pagal nurodytą lauką ir kryptį
@@ -47,8 +75,27 @@ export const getSortIcon = (sort, field) => {
  */
 export const handleApiError = (error, setError) => {
   console.error('API klaida:', error);
-  const errorMessage = error.response?.data?.message || 'Įvyko klaida. Bandykite dar kartą vėliau.';
-  setError(errorMessage);
+  
+  // Enhanced error message with more details
+  let errorMessage = 'Įvyko klaida. Bandykite dar kartą vėliau.';
+  
+  if (error.response) {
+    // Server responded with an error status
+    errorMessage = error.response.data?.message || 
+                  error.response.data?.error || 
+                  `Serverio klaida (${error.response.status}): ${error.response.statusText}`;
+  } else if (error.request) {
+    // Request was made but no response received
+    errorMessage = 'Nepavyko pasiekti serverio. Patikrinkite interneto ryšį arba bandykite vėliau.';
+  } else {
+    // Error in setting up the request
+    errorMessage = `Užklausos klaida: ${error.message}`;
+  }
+  
+  if (setError) {
+    setError(errorMessage);
+  }
+  
   return errorMessage;
 };
 
@@ -87,10 +134,27 @@ export const safeApiCall = async (apiCall, setLoading, setError, onSuccess) => {
   }
 };
 
+// Function to test API connection
+export const testApiConnection = async () => {
+  try {
+    const response = await axios.get('/api/test-connection');
+    console.log('API connection test result:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('API connection test failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      details: error.response?.data || {}
+    };
+  }
+};
+
 export default {
   sortItems,
   getNewSortDirection,
   getSortIcon,
   handleApiError,
-  safeApiCall
-}; 
+  safeApiCall,
+  testApiConnection
+};

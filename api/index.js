@@ -25,6 +25,44 @@ app.get('/', (req, res) => {
   res.json({ message: 'Sveiki atvykę į Gretvėja-SVS API!' });
 });
 
+// Test endpoint to check Supabase connection
+app.get('/api/test-connection', async (req, res) => {
+  try {
+    console.log('Testing Supabase connection...');
+    console.log('Using URL:', supabaseUrl);
+    console.log('Using Key:', supabaseKey.substring(0, 10) + '...');
+    
+    const { data, error } = await supabase.from('products').select('count');
+    
+    if (error) {
+      console.error('Error connecting to Supabase:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: error.message,
+        details: error
+      });
+    }
+    
+    console.log('Supabase connection successful!');
+    return res.json({ 
+      success: true, 
+      message: 'Supabase connection successful!',
+      data: data,
+      env: {
+        NODE_ENV: process.env.NODE_ENV,
+        SUPABASE_URL_SET: !!process.env.SUPABASE_URL,
+        SUPABASE_KEY_SET: !!process.env.SUPABASE_KEY
+      }
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // API maršrutai
 app.get('/api/products', async (req, res) => {
   try {
@@ -366,5 +404,20 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Serverio klaida' });
 });
 
-// Eksportuojame Express aplikaciją
-module.exports = app;
+// Vercel serverless function handler
+module.exports = (req, res) => {
+  // Log request for debugging
+  console.log('API Request:', req.method, req.url);
+  console.log('Supabase URL:', supabaseUrl);
+  
+  // Handle the request with the Express app
+  return app(req, res);
+};
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3001;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
