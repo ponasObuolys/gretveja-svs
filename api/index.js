@@ -315,7 +315,21 @@ app.get('/api/purchases', async (req, res) => {
 
 app.post('/api/purchases', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('purchases').insert(req.body);
+    // Convert camelCase field names to snake_case for database
+    const purchaseData = {
+      invoice_number: req.body.invoiceNumber,
+      product_id: req.body.productId,
+      supplier_id: req.body.supplierId,
+      quantity: req.body.quantity,
+      purchase_date: req.body.purchaseDate,
+      unit_price: req.body.unitPrice,
+      company_id: req.body.companyId,
+      total_amount: req.body.quantity * req.body.unitPrice
+    };
+    
+    console.log('Inserting purchase data:', purchaseData);
+    
+    const { data, error } = await supabase.from('purchases').insert(purchaseData);
     if (error) throw error;
     res.status(201).json(data);
   } catch (error) {
@@ -368,7 +382,20 @@ app.get('/api/issuances', async (req, res) => {
 
 app.post('/api/issuances', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('issuances').insert(req.body);
+    // Convert camelCase field names to snake_case for database
+    const issuanceData = {
+      product_id: req.body.productId,
+      is_issued: req.body.isIssued,
+      issuance_date: req.body.issuanceDate,
+      quantity: req.body.quantity,
+      driver_name: req.body.driverName,
+      truck_id: req.body.truckId,
+      notes: req.body.notes
+    };
+    
+    console.log('Inserting issuance data:', issuanceData);
+    
+    const { data, error } = await supabase.from('issuances').insert(issuanceData);
     if (error) throw error;
     res.status(201).json(data);
   } catch (error) {
@@ -460,19 +487,49 @@ app.delete('/api/companies/:id', async (req, res) => {
   }
 });
 
-// Trucks endpoints
 app.get('/api/trucks', async (req, res) => {
   try {
-    let query = supabase.from('trucks').select('*');
+    let query;
     
     // Handle include parameter for related data
     if (req.query.include === 'company') {
-      query = supabase.from('trucks').select('*, company:companies(*)');
+      query = supabase.from('trucks').select(`
+        id,
+        plate_number,
+        company_id,
+        created_at,
+        updated_at,
+        companies:company_id (
+          id,
+          name,
+          code,
+          vat_code
+        )
+      `);
+    } else {
+      query = supabase.from('trucks').select('*');
     }
     
     const { data, error } = await query;
+    
     if (error) throw error;
-    res.json(data);
+    
+    // Transform data to match frontend expectations if company data is included
+    if (req.query.include === 'company') {
+      const transformedData = data.map(truck => {
+        return {
+          id: truck.id,
+          plateNumber: truck.plate_number,
+          companyId: truck.company_id,
+          company: truck.companies,
+          createdAt: truck.created_at,
+          updatedAt: truck.updated_at
+        };
+      });
+      res.json(transformedData);
+    } else {
+      res.json(data);
+    }
   } catch (error) {
     console.error('Error fetching trucks:', error);
     res.status(500).json({ error: error.message });
