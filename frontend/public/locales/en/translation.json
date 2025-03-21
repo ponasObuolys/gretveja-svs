@@ -57,7 +57,9 @@
       "contact": "Contact"
     },
     "fields": {
-      "company": "Company"
+      "company": "Company",
+      "plateNumber": "License Plate",
+      "actions": "Actions"
     },
     "entities": {
       "truck": "Truck",
@@ -247,9 +249,12 @@
         "unit": "Unit",
         "balance": "Balance",
         "totalPurchased": "Total Purchased",
-        "totalIssued": "Total Issued",
-        "currentBalance": "Current Balance"
-      }
+        "totalIssued": "Total Issued"
+      },
+      "product": "Product",
+      "purchases": "Purchases (pcs)",
+      "issuances": "Issuances (pcs)",
+      "balance": "Balance (pcs)"
     }
   },
   "trucks": {

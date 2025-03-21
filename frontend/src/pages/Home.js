@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { testApiConnection } from '../utils/common';
 
 function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [stockData, setStockData] = useState([]);
   const [purchaseStats, setPurchaseStats] = useState([]);
   const [issuanceStats, setIssuanceStats] = useState([]);
@@ -43,14 +43,33 @@ function Home() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
         
-        // Gauti atsargų duomenis
+        // Fetch stock data
         const stockResponse = await fetch('/api/stocks');
         if (!stockResponse.ok) {
           throw new Error(t('common.errors.fetchFailed'));
         }
-        const stockData = await stockResponse.json();
-        setStockData(stockData);
+        
+        let stockData = await stockResponse.json();
+        
+        // Fetch products data for multilingual names
+        const productsResponse = await fetch('/api/products');
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          
+          // Map product data to stocks
+          stockData = stockData.map(stock => {
+            const product = productsData.find(p => p.id === stock.productId);
+            return {
+              ...stock,
+              productNameEn: product?.nameEn || product?.name_en,
+              productNameRu: product?.nameRu || product?.name_ru
+            };
+          });
+        }
+        
+        setStockData(stockData.sort((a, b) => b.stockInHand - a.stockInHand));
         
         // Gauti pirkimų duomenis
         const purchasesResponse = await fetch('/api/purchases');
@@ -257,6 +276,23 @@ function Home() {
     }
   };
 
+  // Helper function to get product name based on current language
+  const getLocalizedProductName = (product) => {
+    if (!product) return '';
+    
+    const currentLanguage = i18n.language;
+    
+    // Check if product has the productNameEn or productNameRu properties
+    if (currentLanguage === 'en' && product.productNameEn) {
+      return product.productNameEn;
+    } else if (currentLanguage === 'ru' && product.productNameRu) {
+      return product.productNameRu;
+    }
+    
+    // Default to Lithuanian name
+    return product.productName || '';
+  };
+
   if (loading) {
     return <div className="loading">{t('common.messages.loading')}</div>;
   }
@@ -421,10 +457,10 @@ function Home() {
           <table className="inventory-table">
             <thead>
               <tr>
-                <th>{t('common.labels.product')}</th>
-                <th>{t('common.inventory.purchases_units')}</th>
-                <th>{t('common.inventory.issuances_units')}</th>
-                <th>{t('common.inventory.balance')}</th>
+                <th>{t('common.stockTable.product')}</th>
+                <th>{t('common.stockTable.purchases')}</th>
+                <th>{t('common.stockTable.issuances')}</th>
+                <th>{t('common.stockTable.balance')}</th>
               </tr>
             </thead>
             <tbody>
@@ -433,7 +469,7 @@ function Home() {
                 .slice(0, 10)
                 .map((item) => (
                 <tr key={item.productId}>
-                  <td>{item.productName}</td>
+                  <td>{getLocalizedProductName(item)}</td>
                   <td>{item.totalPurchased}</td>
                   <td>{item.totalIssued}</td>
                   <td className={item.stockInHand <= 5 ? 'low-stock' : ''}>{item.stockInHand}</td>
