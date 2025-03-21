@@ -366,23 +366,42 @@ app.get('/api/purchases', async (req, res) => {
 
 app.post('/api/purchases', async (req, res) => {
   try {
+    // Validate required fields
+    const requiredFields = ['invoiceNumber', 'productId', 'quantity', 'purchaseDate'];
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ error: `Missing required field: ${field}` });
+      }
+    }
+    
     // Convert camelCase field names to snake_case for database
     const purchaseData = {
       invoice_number: req.body.invoiceNumber,
       product_id: req.body.productId,
-      supplier_id: req.body.supplierId,
-      quantity: req.body.quantity,
+      supplier_id: req.body.supplierId || null,
+      quantity: Number(req.body.quantity),
       purchase_date: req.body.purchaseDate,
-      unit_price: req.body.unitPrice,
-      company_id: req.body.companyId,
-      total_amount: req.body.quantity * req.body.unitPrice
+      unit_price: Number(req.body.unitPrice) || 0,
+      company_id: req.body.companyId || null,
+      total_amount: Number(req.body.quantity) * (Number(req.body.unitPrice) || 0)
     };
     
     console.log('Inserting purchase data:', purchaseData);
     
-    const { data, error } = await supabase.from('purchases').insert(purchaseData).select();
+    // Use upsert to handle both insert and update
+    const { data, error } = await supabase
+      .from('purchases')
+      .upsert(purchaseData)
+      .select();
     
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    if (!data || data.length === 0) {
+      return res.status(500).json({ error: 'Failed to create purchase record' });
+    }
     
     // Transform the returned data back to camelCase for frontend
     const transformedData = data.map(item => ({
@@ -465,22 +484,57 @@ app.get('/api/issuances', async (req, res) => {
 
 app.post('/api/issuances', async (req, res) => {
   try {
+    // Validate required fields
+    const requiredFields = ['productId', 'quantity', 'issuanceDate'];
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ error: `Missing required field: ${field}` });
+      }
+    }
+    
     // Convert camelCase field names to snake_case for database
     const issuanceData = {
       product_id: req.body.productId,
-      is_issued: req.body.isIssued,
+      is_issued: req.body.isIssued || false,
       issuance_date: req.body.issuanceDate,
-      quantity: req.body.quantity,
-      driver_name: req.body.driverName,
-      truck_id: req.body.truckId,
-      notes: req.body.notes
+      quantity: Number(req.body.quantity),
+      driver_name: req.body.driverName || null,
+      truck_id: req.body.truckId || null,
+      notes: req.body.notes || null
     };
     
     console.log('Inserting issuance data:', issuanceData);
     
-    const { data, error } = await supabase.from('issuances').insert(issuanceData);
-    if (error) throw error;
-    res.status(201).json(data);
+    // Use upsert to handle both insert and update
+    const { data, error } = await supabase
+      .from('issuances')
+      .upsert(issuanceData)
+      .select();
+    
+    if (error) {
+      console.error('Supabase error:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    if (!data || data.length === 0) {
+      return res.status(500).json({ error: 'Failed to create issuance record' });
+    }
+    
+    // Transform the returned data back to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      productId: item.product_id,
+      isIssued: item.is_issued,
+      issuanceDate: item.issuance_date,
+      quantity: item.quantity,
+      driverName: item.driver_name,
+      truckId: item.truck_id,
+      notes: item.notes,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.status(201).json(transformedData);
   } catch (error) {
     console.error('Error creating issuance:', error);
     res.status(500).json({ error: error.message });
