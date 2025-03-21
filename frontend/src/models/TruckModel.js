@@ -11,14 +11,11 @@ const transformTruckFromBackend = (truck) => {
   
   return {
     id: truck.id,
-    plateNumber: truck.plate_number,
-    companyId: truck.company_id,
-    company: truck.companies ? {
-      id: truck.companies.id,
-      name: truck.companies.name
-    } : null,
-    createdAt: truck.created_at,
-    updatedAt: truck.updated_at
+    plateNumber: truck.plateNumber || truck.plate_number,
+    companyId: truck.companyId || truck.company_id,
+    company: truck.company || null,
+    createdAt: truck.createdAt || truck.created_at,
+    updatedAt: truck.updatedAt || truck.updated_at
   };
 };
 
@@ -56,6 +53,9 @@ class TruckModel {
         console.error('Unexpected response format:', response.data);
         return [];
       }
+      
+      // Log the response data to see what we're getting
+      console.log('Trucks API response:', response.data[0]);
       
       return response.data.map(transformTruckFromBackend);
     } catch (error) {
