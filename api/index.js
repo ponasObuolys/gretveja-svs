@@ -339,6 +339,8 @@ app.get('/api/stocks', async (req, res) => {
 // Purchases endpoints
 app.get('/api/purchases', async (req, res) => {
   try {
+    console.log('Fetching purchases with related data');
+    
     // Join purchases with related tables to get all necessary data
     const { data, error } = await supabase
       .from('purchases')
@@ -354,27 +356,34 @@ app.get('/api/purchases', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    // Transform the data from snake_case to camelCase for frontend
-    const transformedData = data.map(item => ({
-      id: item.id,
-      invoiceNumber: item.invoice_number,
-      productId: item.product_id,
-      product: item.products,
-      supplierId: item.supplier_id,
-      supplier: item.suppliers,
-      quantity: item.quantity,
-      purchaseDate: item.purchase_date,
-      unitPrice: item.unit_price,
-      companyId: item.company_id,
-      company: item.companies,
-      totalAmount: item.total_amount,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at
-    }));
+    console.log('Raw purchases data:', JSON.stringify(data, null, 2));
     
+    // Transform the data from snake_case to camelCase for frontend
+    const transformedData = data.map(item => {
+      const transformed = {
+        id: item.id,
+        invoiceNumber: item.invoice_number,
+        productId: item.product_id,
+        product: item.products,
+        supplierId: item.supplier_id,
+        supplier: item.suppliers,
+        quantity: item.quantity,
+        purchaseDate: item.purchase_date,
+        unitPrice: item.unit_price,
+        companyId: item.company_id,
+        company: item.companies,
+        totalAmount: item.total_amount,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      };
+      console.log('Transformed purchase item:', JSON.stringify(transformed, null, 2));
+      return transformed;
+    });
+    
+    console.log('Sending transformed purchases data to client');
     res.json(transformedData);
   } catch (error) {
-    console.error('Error fetching purchases:', error);
+    console.error('Error in purchases GET endpoint:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -492,26 +501,49 @@ app.delete('/api/purchases/:id', async (req, res) => {
 // Issuances endpoints
 app.get('/api/issuances', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('issuances').select('*');
-    if (error) throw error;
+    console.log('Fetching issuances with related data');
+    
+    // Join issuances with related tables to get all necessary data
+    const { data, error } = await supabase
+      .from('issuances')
+      .select(`
+        *,
+        products:product_id (*),
+        trucks:truck_id (*)
+      `);
+    
+    if (error) {
+      console.error('Error fetching issuances:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    console.log('Raw issuances data:', JSON.stringify(data, null, 2));
     
     // Transform the data from snake_case to camelCase for frontend
-    const transformedData = data.map(item => ({
-      id: item.id,
-      productId: item.product_id,
-      isIssued: item.is_issued,
-      issuanceDate: item.issuance_date,
-      quantity: item.quantity,
-      driverName: item.driver_name,
-      truckId: item.truck_id,
-      notes: item.notes,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at
-    }));
+    const transformedData = data.map(item => {
+      const transformed = {
+        id: item.id,
+        productId: item.product_id,
+        product: item.products,
+        isIssued: item.is_issued,
+        issuanceDate: item.issuance_date,
+        quantity: item.quantity,
+        driverName: item.driver_name,
+        truckId: item.truck_id,
+        truck: item.trucks,
+        notes: item.notes,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
+      };
+      
+      console.log('Transformed issuance item:', JSON.stringify(transformed, null, 2));
+      return transformed;
+    });
     
+    console.log('Sending transformed issuances data to client');
     res.json(transformedData);
   } catch (error) {
-    console.error('Error fetching issuances:', error);
+    console.error('Error in issuances GET endpoint:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -744,72 +776,69 @@ app.get('/api/trucks', async (req, res) => {
   try {
     console.log('Fetching trucks with include:', req.query.include);
     
-    // Basic query to get all trucks
-    const { data, error } = await supabase.from('trucks').select('*');
+    let query;
+    
+    // If include=company parameter is present, join with companies table
+    if (req.query.include === 'company') {
+      console.log('Including company data in trucks query');
+      query = supabase
+        .from('trucks')
+        .select(`
+          id,
+          plate_number,
+          company_id,
+          created_at,
+          updated_at,
+          companies:company_id (
+            id, 
+            name, 
+            code, 
+            vat_code, 
+            created_at, 
+            updated_at
+          )
+        `);
+    } else {
+      console.log('Fetching only trucks data');
+      query = supabase.from('trucks').select('*');
+    }
+    
+    const { data, error } = await query;
     
     if (error) {
       console.error('Error fetching trucks:', error);
       return res.status(500).json({ error: error.message });
     }
     
-    // Log the raw data for debugging
-    console.log('Raw trucks data:', data);
+    console.log('Raw trucks data:', JSON.stringify(data, null, 2));
     
-    // If no trucks found, return empty array
-    if (!data || data.length === 0) {
-      console.log('No trucks found in database');
-      return res.json([]);
-    }
-    
-    // Transform data to camelCase
-    let transformedData = data.map(truck => ({
-      id: truck.id,
-      plateNumber: truck.plate_number,
-      companyId: truck.company_id,
-      createdAt: truck.created_at,
-      updatedAt: truck.updated_at
-    }));
-    
-    // If include=company parameter is present, fetch companies separately
-    if (req.query.include === 'company' && transformedData.length > 0) {
-      // Get unique company IDs from trucks
-      const companyIds = [...new Set(transformedData
-        .filter(truck => truck.companyId)
-        .map(truck => truck.companyId))];
+    // Transform the data from snake_case to camelCase for frontend
+    const transformedData = data.map(truck => {
+      const transformed = {
+        id: truck.id,
+        plateNumber: truck.plate_number,
+        companyId: truck.company_id,
+        createdAt: truck.created_at,
+        updatedAt: truck.updated_at
+      };
       
-      if (companyIds.length > 0) {
-        // Fetch companies data
-        const { data: companiesData, error: companiesError } = await supabase
-          .from('companies')
-          .select('*')
-          .in('id', companyIds);
-        
-        if (companiesError) {
-          console.error('Error fetching companies:', companiesError);
-        } else if (companiesData && companiesData.length > 0) {
-          // Create a map of companies by ID for quick lookup
-          const companiesMap = {};
-          companiesData.forEach(company => {
-            companiesMap[company.id] = {
-              id: company.id,
-              name: company.name,
-              code: company.code,
-              vatCode: company.vat_code,
-              createdAt: company.created_at,
-              updatedAt: company.updated_at
-            };
-          });
-          
-          // Add company data to each truck
-          transformedData = transformedData.map(truck => ({
-            ...truck,
-            company: truck.companyId ? companiesMap[truck.companyId] : null
-          }));
-        }
+      // Add company data if it exists
+      if (req.query.include === 'company' && truck.companies) {
+        transformed.company = {
+          id: truck.companies.id,
+          name: truck.companies.name,
+          code: truck.companies.code,
+          vatCode: truck.companies.vat_code,
+          createdAt: truck.companies.created_at,
+          updatedAt: truck.companies.updated_at
+        };
       }
-    }
+      
+      console.log('Transformed truck item:', JSON.stringify(transformed, null, 2));
+      return transformed;
+    });
     
-    console.log('Transformed trucks data:', transformedData);
+    console.log('Sending transformed trucks data to client');
     res.json(transformedData);
   } catch (error) {
     console.error('Error in trucks endpoint:', error);
