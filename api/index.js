@@ -163,7 +163,19 @@ app.get('/api/suppliers', async (req, res) => {
   try {
     const { data, error } = await supabase.from('suppliers').select('*');
     if (error) throw error;
-    res.json(data);
+    
+    // Transform the data from snake_case to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      name: item.name,
+      contactPerson: item.contact_person,
+      phone: item.phone,
+      email: item.email,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.json(transformedData);
   } catch (error) {
     console.error('Error fetching suppliers:', error);
     res.status(500).json({ error: error.message });
@@ -172,9 +184,32 @@ app.get('/api/suppliers', async (req, res) => {
 
 app.post('/api/suppliers', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('suppliers').insert(req.body);
+    // Convert camelCase field names to snake_case for database
+    const supplierData = {
+      name: req.body.name,
+      contact_person: req.body.contactPerson,
+      phone: req.body.phone,
+      email: req.body.email
+    };
+    
+    console.log('Inserting supplier data:', supplierData);
+    
+    const { data, error } = await supabase.from('suppliers').insert(supplierData).select();
+    
     if (error) throw error;
-    res.status(201).json(data);
+    
+    // Transform the returned data back to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      name: item.name,
+      contactPerson: item.contact_person,
+      phone: item.phone,
+      email: item.email,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.status(201).json(transformedData);
   } catch (error) {
     console.error('Error creating supplier:', error);
     res.status(500).json({ error: error.message });
@@ -306,7 +341,23 @@ app.get('/api/purchases', async (req, res) => {
   try {
     const { data, error } = await supabase.from('purchases').select('*');
     if (error) throw error;
-    res.json(data);
+    
+    // Transform the data from snake_case to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      invoiceNumber: item.invoice_number,
+      productId: item.product_id,
+      supplierId: item.supplier_id,
+      quantity: item.quantity,
+      purchaseDate: item.purchase_date,
+      unitPrice: item.unit_price,
+      companyId: item.company_id,
+      totalAmount: item.total_amount,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.json(transformedData);
   } catch (error) {
     console.error('Error fetching purchases:', error);
     res.status(500).json({ error: error.message });
@@ -329,9 +380,26 @@ app.post('/api/purchases', async (req, res) => {
     
     console.log('Inserting purchase data:', purchaseData);
     
-    const { data, error } = await supabase.from('purchases').insert(purchaseData);
+    const { data, error } = await supabase.from('purchases').insert(purchaseData).select();
+    
     if (error) throw error;
-    res.status(201).json(data);
+    
+    // Transform the returned data back to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      invoiceNumber: item.invoice_number,
+      productId: item.product_id,
+      supplierId: item.supplier_id,
+      quantity: item.quantity,
+      purchaseDate: item.purchase_date,
+      unitPrice: item.unit_price,
+      companyId: item.company_id,
+      totalAmount: item.total_amount,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.status(201).json(transformedData);
   } catch (error) {
     console.error('Error creating purchase:', error);
     res.status(500).json({ error: error.message });
@@ -373,7 +441,22 @@ app.get('/api/issuances', async (req, res) => {
   try {
     const { data, error } = await supabase.from('issuances').select('*');
     if (error) throw error;
-    res.json(data);
+    
+    // Transform the data from snake_case to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      productId: item.product_id,
+      isIssued: item.is_issued,
+      issuanceDate: item.issuance_date,
+      quantity: item.quantity,
+      driverName: item.driver_name,
+      truckId: item.truck_id,
+      notes: item.notes,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.json(transformedData);
   } catch (error) {
     console.error('Error fetching issuances:', error);
     res.status(500).json({ error: error.message });
@@ -407,12 +490,43 @@ app.post('/api/issuances', async (req, res) => {
 app.put('/api/issuances/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Convert camelCase field names to snake_case for database
+    const issuanceData = {
+      product_id: req.body.productId,
+      is_issued: req.body.isIssued,
+      issuance_date: req.body.issuanceDate,
+      quantity: req.body.quantity,
+      driver_name: req.body.driverName,
+      truck_id: req.body.truckId,
+      notes: req.body.notes
+    };
+    
+    console.log('Updating issuance data:', issuanceData);
+    
     const { data, error } = await supabase
       .from('issuances')
-      .update(req.body)
-      .eq('id', id);
+      .update(issuanceData)
+      .eq('id', id)
+      .select();
+    
     if (error) throw error;
-    res.json(data);
+    
+    // Transform the returned data back to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      productId: item.product_id,
+      isIssued: item.is_issued,
+      issuanceDate: item.issuance_date,
+      quantity: item.quantity,
+      driverName: item.driver_name,
+      truckId: item.truck_id,
+      notes: item.notes,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.json(transformedData);
   } catch (error) {
     console.error('Error updating issuance:', error);
     res.status(500).json({ error: error.message });
@@ -439,7 +553,18 @@ app.get('/api/companies', async (req, res) => {
   try {
     const { data, error } = await supabase.from('companies').select('*');
     if (error) throw error;
-    res.json(data);
+    
+    // Transform the data from snake_case to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      name: item.name,
+      code: item.code,
+      vatCode: item.vat_code,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.json(transformedData);
   } catch (error) {
     console.error('Error fetching companies:', error);
     res.status(500).json({ error: error.message });
@@ -448,9 +573,30 @@ app.get('/api/companies', async (req, res) => {
 
 app.post('/api/companies', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('companies').insert(req.body);
+    // Convert camelCase field names to snake_case for database
+    const companyData = {
+      name: req.body.name,
+      code: req.body.code,
+      vat_code: req.body.vatCode
+    };
+    
+    console.log('Inserting company data:', companyData);
+    
+    const { data, error } = await supabase.from('companies').insert(companyData).select();
+    
     if (error) throw error;
-    res.status(201).json(data);
+    
+    // Transform the returned data back to camelCase for frontend
+    const transformedData = data.map(item => ({
+      id: item.id,
+      name: item.name,
+      code: item.code,
+      vatCode: item.vat_code,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+    
+    res.status(201).json(transformedData);
   } catch (error) {
     console.error('Error creating company:', error);
     res.status(500).json({ error: error.message });
@@ -489,47 +635,60 @@ app.delete('/api/companies/:id', async (req, res) => {
 
 app.get('/api/trucks', async (req, res) => {
   try {
-    let query;
+    console.log('Fetching trucks with include:', req.query.include);
     
-    // Handle include parameter for related data
-    if (req.query.include === 'company') {
-      query = supabase.from('trucks').select(`
-        id,
-        plate_number,
-        company_id,
-        created_at,
-        updated_at,
-        companies:company_id (
-          id,
-          name,
-          code,
-          vat_code
-        )
-      `);
-    } else {
-      query = supabase.from('trucks').select('*');
-    }
+    // Basic query to get all trucks
+    let { data, error } = await supabase.from('trucks').select('*');
     
-    const { data, error } = await query;
-    
-    if (error) throw error;
-    
-    // Transform data to match frontend expectations if company data is included
-    if (req.query.include === 'company') {
-      const transformedData = data.map(truck => {
-        return {
+    // If include=company parameter is present, fetch companies separately
+    if (req.query.include === 'company' && data && data.length > 0) {
+      // Get unique company IDs from trucks
+      const companyIds = [...new Set(data.filter(truck => truck.company_id).map(truck => truck.company_id))];
+      
+      if (companyIds.length > 0) {
+        // Fetch companies data
+        const { data: companiesData, error: companiesError } = await supabase
+          .from('companies')
+          .select('*')
+          .in('id', companyIds);
+        
+        if (companiesError) throw companiesError;
+        
+        // Create a map of companies by ID for quick lookup
+        const companiesMap = {};
+        companiesData.forEach(company => {
+          companiesMap[company.id] = company;
+        });
+        
+        // Add company data to each truck
+        data = data.map(truck => {
+          const company = truck.company_id ? companiesMap[truck.company_id] : null;
+          
+          return {
+            id: truck.id,
+            plateNumber: truck.plate_number,
+            companyId: truck.company_id,
+            company: company,
+            createdAt: truck.created_at,
+            updatedAt: truck.updated_at
+          };
+        });
+      } else {
+        // If no company IDs found, just transform the truck data
+        data = data.map(truck => ({
           id: truck.id,
           plateNumber: truck.plate_number,
           companyId: truck.company_id,
-          company: truck.companies,
+          company: null,
           createdAt: truck.created_at,
           updatedAt: truck.updated_at
-        };
-      });
-      res.json(transformedData);
-    } else {
-      res.json(data);
+        }));
+      }
     }
+    
+    if (error) throw error;
+    
+    res.json(data);
   } catch (error) {
     console.error('Error fetching trucks:', error);
     res.status(500).json({ error: error.message });
