@@ -10,6 +10,43 @@ const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp
 // Supabase klientas
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Database initialization function
+async function initializeDatabase() {
+  try {
+    console.log('Checking database tables...');
+    
+    // Check if products table exists
+    const { data: productsData, error: productsError } = await supabase.from('products').select('count');
+    if (productsError && productsError.code === '42P01') {
+      console.log('Products table does not exist. Creating...');
+      // Create products table using SQL
+      const { error: createError } = await supabase.rpc('create_products_table');
+      if (createError) {
+        console.error('Error creating products table:', createError);
+      } else {
+        console.log('Products table created successfully');
+      }
+    }
+    
+    // Check if stocks table exists
+    const { data: stocksData, error: stocksError } = await supabase.from('stocks').select('count');
+    if (stocksError && stocksError.code === '42P01') {
+      console.log('Stocks table does not exist. Creating...');
+      // Create stocks table using SQL
+      const { error: createError } = await supabase.rpc('create_stocks_table');
+      if (createError) {
+        console.error('Error creating stocks table:', createError);
+      } else {
+        console.log('Stocks table created successfully');
+      }
+    }
+    
+    console.log('Database initialization completed');
+  } catch (error) {
+    console.error('Error initializing database:', error);
+  }
+}
+
 // Express aplikacija
 const app = express();
 
@@ -32,22 +69,28 @@ app.get('/api/test-connection', async (req, res) => {
     console.log('Using URL:', supabaseUrl);
     console.log('Using Key:', supabaseKey.substring(0, 10) + '...');
     
-    const { data, error } = await supabase.from('products').select('count');
+    // Check if products table exists
+    const { data: productsData, error: productsError } = await supabase.from('products').select('count');
     
-    if (error) {
-      console.error('Error connecting to Supabase:', error);
-      return res.status(500).json({ 
-        success: false, 
-        error: error.message,
-        details: error
-      });
-    }
+    // Check if stocks table exists
+    const { data: stocksData, error: stocksError } = await supabase.from('stocks').select('count');
     
-    console.log('Supabase connection successful!');
-    return res.json({ 
-      success: true, 
-      message: 'Supabase connection successful!',
-      data: data,
+    // Return detailed information about database status
+    return res.json({
+      success: true,
+      message: 'Supabase connection test',
+      database: {
+        products: {
+          exists: !productsError || productsError.code !== '42P01',
+          error: productsError ? productsError.message : null,
+          data: productsData
+        },
+        stocks: {
+          exists: !stocksError || stocksError.code !== '42P01',
+          error: stocksError ? stocksError.message : null,
+          data: stocksData
+        }
+      },
       env: {
         NODE_ENV: process.env.NODE_ENV,
         SUPABASE_URL_SET: !!process.env.SUPABASE_URL,
@@ -419,7 +462,8 @@ module.exports = (req, res) => {
 // For local development
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 3001;
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);
+    await initializeDatabase();
   });
 }
