@@ -213,9 +213,43 @@ app.delete('/api/suppliers/:id', async (req, res) => {
 
 app.get('/api/stocks', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('stocks').select('*');
+    // Get language preference from query parameter, default to Lithuanian
+    const lang = req.query.lang || 'lt';
+    
+    // Join stocks with products to get product names
+    const { data, error } = await supabase
+      .from('stocks')
+      .select(`
+        id,
+        product_id,
+        quantity,
+        location,
+        last_updated,
+        products (
+          id,
+          name,
+          description,
+          price,
+          category
+        )
+      `);
+    
     if (error) throw error;
-    res.json(data);
+    
+    // Format the response to include product details
+    const formattedData = data.map(item => ({
+      id: item.id,
+      product_id: item.product_id,
+      product_name: item.products.name,
+      product_description: item.products.description,
+      product_price: item.products.price,
+      product_category: item.products.category,
+      quantity: item.quantity,
+      location: item.location,
+      last_updated: item.last_updated
+    }));
+    
+    res.json(formattedData);
   } catch (error) {
     console.error('Error fetching stocks:', error);
     res.status(500).json({ error: error.message });
