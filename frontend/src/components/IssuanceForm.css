@@ -402,3 +402,18 @@ body.modal-open {
     padding: 1.25rem 1.5rem;
   }
 }
+
+/* Esami stiliai */
+
+/* Įmonės pasirinkimo stiliai */
+.company-selected {
+  background-color: #f8f9fa !important;
+  color: #212529 !important;
+  font-weight: bold;
+}
+
+.company-not-selected {
+  background-color: #e9ecef !important;
+  color: #6c757d !important;
+  font-style: italic;
+}

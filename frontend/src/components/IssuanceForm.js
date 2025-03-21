@@ -69,15 +69,31 @@ function IssuanceForm({ show, onHide, issuance }) {
         setFilteredProducts(productsResponse.data);
         
         // Transform truck data from backend (snake_case) to frontend (camelCase) format
-        const transformedTrucks = trucksResponse.data.map(truck => ({
-          id: truck.id,
-          plateNumber: truck.plate_number || truck.plateNumber || `ID: ${truck.id}`, // Fallback options
-          companyId: truck.company_id || truck.companyId,
-          company: truck.companies ? {
-            id: truck.companies.id,
-            name: truck.companies.name
-          } : null
-        }));
+        const transformedTrucks = trucksResponse.data.map(truck => {
+          console.log('Raw truck data:', truck); // Debugging raw truck data
+          
+          const transformedTruck = {
+            id: truck.id,
+            plateNumber: truck.plate_number || truck.plateNumber || `ID: ${truck.id}`, // Fallback options
+            companyId: truck.company_id || truck.companyId,
+            company: null
+          };
+          
+          // Handle company data from various possible structures
+          if (truck.companies) {
+            transformedTruck.company = {
+              id: truck.companies.id,
+              name: truck.companies.name
+            };
+          } else if (truck.company) {
+            transformedTruck.company = {
+              id: truck.company.id,
+              name: truck.company.name
+            };
+          }
+          
+          return transformedTruck;
+        });
         
         // Log transformed trucks to help with debugging
         console.log('Transformed trucks:', transformedTrucks);
@@ -113,7 +129,19 @@ function IssuanceForm({ show, onHide, issuance }) {
 
       // Nustatyti įmonę pagal vilkiką
       if (issuance.truck && issuance.truck.company) {
+        console.log('Setting company from issuance:', issuance.truck.company);
         setSelectedCompany(issuance.truck.company.name);
+      } else if (issuance.truckId) {
+        // Jei redaguojame issuance ir yra truckId, bet nėra kompanijos,
+        // pabandykime rasti vilkiką iš trucks masyvo
+        console.log('Trying to find company from truck ID:', issuance.truckId);
+        const truck = trucks.find(t => t.id === issuance.truckId);
+        if (truck && truck.company) {
+          console.log('Found company from trucks array:', truck.company);
+          setSelectedCompany(truck.company.name);
+        }
+      } else {
+        setSelectedCompany('');
       }
     } else {
       setFormData(initialFormState);
@@ -121,7 +149,7 @@ function IssuanceForm({ show, onHide, issuance }) {
     }
     setValidated(false);
     setError(null);
-  }, [issuance, show]);
+  }, [issuance, show, trucks]);
 
   // Atnaujinti filtruotus produktus pagal paieškos terminą
   useEffect(() => {
@@ -165,10 +193,43 @@ function IssuanceForm({ show, onHide, issuance }) {
 
     // Jei pasirenkamas vilkikas, nustatyti įmonę
     if (name === 'truckId' && value) {
-      const selectedTruck = trucks.find(truck => truck.id === parseInt(value));
-      if (selectedTruck && selectedTruck.company) {
-        setSelectedCompany(selectedTruck.company.name);
+      const truckId = parseInt(value);
+      console.log('Truck selected with ID:', truckId);
+      console.log('Available trucks:', trucks);
+      
+      const selectedTruck = trucks.find(truck => truck.id === truckId);
+      console.log('Selected truck:', selectedTruck);
+      
+      if (selectedTruck) {
+        if (selectedTruck.company) {
+          console.log('Company found:', selectedTruck.company);
+          setSelectedCompany(selectedTruck.company.name);
+        } else if (selectedTruck.companyId) {
+          console.log('Company ID found but no company object:', selectedTruck.companyId);
+          
+          // Gauti kompanijos informaciją pagal ID
+          const fetchCompany = async () => {
+            try {
+              const response = await axios.get(`/api/companies/${selectedTruck.companyId}`);
+              if (response.data && response.data.name) {
+                console.log('Company data fetched:', response.data);
+                setSelectedCompany(response.data.name);
+              } else {
+                setSelectedCompany(`Įmonė ID: ${selectedTruck.companyId}`);
+              }
+            } catch (err) {
+              console.error('Error fetching company:', err);
+              setSelectedCompany(`Įmonė ID: ${selectedTruck.companyId}`);
+            }
+          };
+          
+          fetchCompany();
+        } else {
+          console.log('No company info found for truck');
+          setSelectedCompany('');
+        }
       } else {
+        console.log('Truck not found in trucks array');
         setSelectedCompany('');
       }
     }
@@ -426,9 +487,10 @@ function IssuanceForm({ show, onHide, issuance }) {
                 <Form.Label>{t('common.labels.company')}</Form.Label>
                 <Form.Control
                   type="text"
-                  value={selectedCompany}
+                  value={selectedCompany || t('common.messages.companyWillBeSelected')}
                   disabled
                   readOnly
+                  className={selectedCompany ? "company-selected" : "company-not-selected"}
                 />
                 <Form.Text className="text-muted">
                   {t('common.labels.company')} {t('common.messages.autoGenerated')}
