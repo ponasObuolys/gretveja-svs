@@ -218,44 +218,81 @@ app.get('/api/stocks', async (req, res) => {
     
     console.log('Fetching stocks with language:', lang);
     
-    // Join stocks with products to get product names
-    const { data, error } = await supabase
+    // Get all products first
+    const { data: productsData, error: productsError } = await supabase
+      .from('products')
+      .select('id, name, name_en, name_ru, unit');
+    
+    if (productsError) throw productsError;
+    
+    // Get stocks data
+    const { data: stocksData, error: stocksError } = await supabase
       .from('stocks')
-      .select(`
-        id,
-        product_id,
-        quantity,
-        location,
-        last_updated,
-        products (
-          id,
-          name,
-          name_en,
-          name_ru,
-          unit
-        )
-      `);
+      .select('id, product_id, quantity, location, last_updated');
     
-    if (error) throw error;
+    if (stocksError) throw stocksError;
     
-    // Format the response to include product details
-    const formattedData = data.map(item => {
+    // Create a map of stocks by product_id for quick lookup
+    const stocksMap = {};
+    stocksData.forEach(stock => {
+      stocksMap[stock.product_id] = stock;
+    });
+    
+    // Get all purchases for calculating totals
+    const { data: purchasesData, error: purchasesError } = await supabase
+      .from('purchases')
+      .select('product_id, quantity');
+    
+    if (purchasesError) throw purchasesError;
+    
+    // Get all issuances for calculating totals
+    const { data: issuancesData, error: issuancesError } = await supabase
+      .from('issuances')
+      .select('product_id, quantity');
+    
+    if (issuancesError) throw issuancesError;
+    
+    // Calculate totals for each product
+    const purchaseTotals = {};
+    const issuanceTotals = {};
+    
+    // Sum up all purchases by product_id
+    purchasesData.forEach(purchase => {
+      const productId = purchase.product_id;
+      purchaseTotals[productId] = (purchaseTotals[productId] || 0) + purchase.quantity;
+    });
+    
+    // Sum up all issuances by product_id
+    issuancesData.forEach(issuance => {
+      const productId = issuance.product_id;
+      issuanceTotals[productId] = (issuanceTotals[productId] || 0) + issuance.quantity;
+    });
+    
+    // Format the response to include all products, even if they don't have stock entries
+    const formattedData = productsData.map(product => {
       // Select the appropriate name based on language preference
-      let productName = item.products.name; // Default to Lithuanian
-      if (lang === 'en' && item.products.name_en) {
-        productName = item.products.name_en;
-      } else if (lang === 'ru' && item.products.name_ru) {
-        productName = item.products.name_ru;
+      let productName = product.name; // Default to Lithuanian
+      if (lang === 'en' && product.name_en) {
+        productName = product.name_en;
+      } else if (lang === 'ru' && product.name_ru) {
+        productName = product.name_ru;
       }
       
+      const productId = product.id;
+      const stockInfo = stocksMap[productId] || { quantity: 0, location: 'Nenurodyta', last_updated: null };
+      const totalPurchased = purchaseTotals[productId] || 0;
+      const totalIssued = issuanceTotals[productId] || 0;
+      const currentBalance = totalPurchased - totalIssued;
+      
       return {
-        id: item.id,
-        product_id: item.product_id,
+        id: productId,
         product_name: productName,
-        product_unit: item.products.unit,
-        quantity: item.quantity,
-        location: item.location,
-        last_updated: item.last_updated
+        product_unit: product.unit,
+        total_purchased: totalPurchased,
+        total_issued: totalIssued,
+        current_balance: currentBalance,
+        location: stockInfo.location,
+        last_updated: stockInfo.last_updated
       };
     });
     
