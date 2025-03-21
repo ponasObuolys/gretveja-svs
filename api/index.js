@@ -405,10 +405,12 @@ app.use((err, req, res, next) => {
 });
 
 // Vercel serverless function handler
+// This is the format Vercel expects for serverless functions
 module.exports = (req, res) => {
   // Log request for debugging
   console.log('API Request:', req.method, req.url);
-  console.log('Supabase URL:', supabaseUrl);
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('Supabase URL set:', !!process.env.SUPABASE_URL);
   
   // Handle the request with the Express app
   return app(req, res);
