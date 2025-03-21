@@ -216,6 +216,8 @@ app.get('/api/stocks', async (req, res) => {
     // Get language preference from query parameter, default to Lithuanian
     const lang = req.query.lang || 'lt';
     
+    console.log('Fetching stocks with language:', lang);
+    
     // Join stocks with products to get product names
     const { data, error } = await supabase
       .from('stocks')
@@ -228,26 +230,34 @@ app.get('/api/stocks', async (req, res) => {
         products (
           id,
           name,
-          description,
-          price,
-          category
+          name_en,
+          name_ru,
+          unit
         )
       `);
     
     if (error) throw error;
     
     // Format the response to include product details
-    const formattedData = data.map(item => ({
-      id: item.id,
-      product_id: item.product_id,
-      product_name: item.products.name,
-      product_description: item.products.description,
-      product_price: item.products.price,
-      product_category: item.products.category,
-      quantity: item.quantity,
-      location: item.location,
-      last_updated: item.last_updated
-    }));
+    const formattedData = data.map(item => {
+      // Select the appropriate name based on language preference
+      let productName = item.products.name; // Default to Lithuanian
+      if (lang === 'en' && item.products.name_en) {
+        productName = item.products.name_en;
+      } else if (lang === 'ru' && item.products.name_ru) {
+        productName = item.products.name_ru;
+      }
+      
+      return {
+        id: item.id,
+        product_id: item.product_id,
+        product_name: productName,
+        product_unit: item.products.unit,
+        quantity: item.quantity,
+        location: item.location,
+        last_updated: item.last_updated
+      };
+    });
     
     res.json(formattedData);
   } catch (error) {

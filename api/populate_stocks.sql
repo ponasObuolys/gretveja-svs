@@ -5,7 +5,7 @@ TRUNCATE TABLE public.stocks RESTART IDENTITY;
 INSERT INTO public.stocks (product_id, quantity, location)
 SELECT 
   id, 
-  100, -- Default quantity
+  0, -- Default quantity
   'Pagrindinis sandėlys' -- Default location in Lithuanian
 FROM 
   public.products;
