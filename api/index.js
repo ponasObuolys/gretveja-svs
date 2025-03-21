@@ -339,19 +339,34 @@ app.get('/api/stocks', async (req, res) => {
 // Purchases endpoints
 app.get('/api/purchases', async (req, res) => {
   try {
-    const { data, error } = await supabase.from('purchases').select('*');
-    if (error) throw error;
+    // Join purchases with related tables to get all necessary data
+    const { data, error } = await supabase
+      .from('purchases')
+      .select(`
+        *,
+        products:product_id (*),
+        suppliers:supplier_id (*),
+        companies:company_id (*)
+      `);
+    
+    if (error) {
+      console.error('Error fetching purchases:', error);
+      return res.status(500).json({ error: error.message });
+    }
     
     // Transform the data from snake_case to camelCase for frontend
     const transformedData = data.map(item => ({
       id: item.id,
       invoiceNumber: item.invoice_number,
       productId: item.product_id,
+      product: item.products,
       supplierId: item.supplier_id,
+      supplier: item.suppliers,
       quantity: item.quantity,
       purchaseDate: item.purchase_date,
       unitPrice: item.unit_price,
       companyId: item.company_id,
+      company: item.companies,
       totalAmount: item.total_amount,
       createdAt: item.created_at,
       updatedAt: item.updated_at
@@ -443,12 +458,31 @@ app.put('/api/purchases/:id', async (req, res) => {
 app.delete('/api/purchases/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Validate that id is provided and is a valid number
+    if (!id || id === 'undefined' || isNaN(parseInt(id))) {
+      console.error('Invalid purchase ID:', id);
+      return res.status(400).json({ error: 'Invalid purchase ID' });
+    }
+    
+    console.log('Deleting purchase with ID:', id);
+    
     const { data, error } = await supabase
       .from('purchases')
       .delete()
-      .eq('id', id);
-    if (error) throw error;
-    res.json({ success: true });
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('Error deleting purchase:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'Purchase not found' });
+    }
+    
+    res.json({ success: true, message: 'Purchase deleted successfully', deletedId: id });
   } catch (error) {
     console.error('Error deleting purchase:', error);
     res.status(500).json({ error: error.message });
@@ -590,12 +624,31 @@ app.put('/api/issuances/:id', async (req, res) => {
 app.delete('/api/issuances/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Validate that id is provided and is a valid number
+    if (!id || id === 'undefined' || isNaN(parseInt(id))) {
+      console.error('Invalid issuance ID:', id);
+      return res.status(400).json({ error: 'Invalid issuance ID' });
+    }
+    
+    console.log('Deleting issuance with ID:', id);
+    
     const { data, error } = await supabase
       .from('issuances')
       .delete()
-      .eq('id', id);
-    if (error) throw error;
-    res.json({ success: true });
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('Error deleting issuance:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'Issuance not found' });
+    }
+    
+    res.json({ success: true, message: 'Issuance deleted successfully', deletedId: id });
   } catch (error) {
     console.error('Error deleting issuance:', error);
     res.status(500).json({ error: error.message });
@@ -692,12 +745,37 @@ app.get('/api/trucks', async (req, res) => {
     console.log('Fetching trucks with include:', req.query.include);
     
     // Basic query to get all trucks
-    let { data, error } = await supabase.from('trucks').select('*');
+    const { data, error } = await supabase.from('trucks').select('*');
+    
+    if (error) {
+      console.error('Error fetching trucks:', error);
+      return res.status(500).json({ error: error.message });
+    }
+    
+    // Log the raw data for debugging
+    console.log('Raw trucks data:', data);
+    
+    // If no trucks found, return empty array
+    if (!data || data.length === 0) {
+      console.log('No trucks found in database');
+      return res.json([]);
+    }
+    
+    // Transform data to camelCase
+    let transformedData = data.map(truck => ({
+      id: truck.id,
+      plateNumber: truck.plate_number,
+      companyId: truck.company_id,
+      createdAt: truck.created_at,
+      updatedAt: truck.updated_at
+    }));
     
     // If include=company parameter is present, fetch companies separately
-    if (req.query.include === 'company' && data && data.length > 0) {
+    if (req.query.include === 'company' && transformedData.length > 0) {
       // Get unique company IDs from trucks
-      const companyIds = [...new Set(data.filter(truck => truck.company_id).map(truck => truck.company_id))];
+      const companyIds = [...new Set(transformedData
+        .filter(truck => truck.companyId)
+        .map(truck => truck.companyId))];
       
       if (companyIds.length > 0) {
         // Fetch companies data
@@ -706,45 +784,35 @@ app.get('/api/trucks', async (req, res) => {
           .select('*')
           .in('id', companyIds);
         
-        if (companiesError) throw companiesError;
-        
-        // Create a map of companies by ID for quick lookup
-        const companiesMap = {};
-        companiesData.forEach(company => {
-          companiesMap[company.id] = company;
-        });
-        
-        // Add company data to each truck
-        data = data.map(truck => {
-          const company = truck.company_id ? companiesMap[truck.company_id] : null;
+        if (companiesError) {
+          console.error('Error fetching companies:', companiesError);
+        } else if (companiesData && companiesData.length > 0) {
+          // Create a map of companies by ID for quick lookup
+          const companiesMap = {};
+          companiesData.forEach(company => {
+            companiesMap[company.id] = {
+              id: company.id,
+              name: company.name,
+              code: company.code,
+              vatCode: company.vat_code,
+              createdAt: company.created_at,
+              updatedAt: company.updated_at
+            };
+          });
           
-          return {
-            id: truck.id,
-            plateNumber: truck.plate_number,
-            companyId: truck.company_id,
-            company: company,
-            createdAt: truck.created_at,
-            updatedAt: truck.updated_at
-          };
-        });
-      } else {
-        // If no company IDs found, just transform the truck data
-        data = data.map(truck => ({
-          id: truck.id,
-          plateNumber: truck.plate_number,
-          companyId: truck.company_id,
-          company: null,
-          createdAt: truck.created_at,
-          updatedAt: truck.updated_at
-        }));
+          // Add company data to each truck
+          transformedData = transformedData.map(truck => ({
+            ...truck,
+            company: truck.companyId ? companiesMap[truck.companyId] : null
+          }));
+        }
       }
     }
     
-    if (error) throw error;
-    
-    res.json(data);
+    console.log('Transformed trucks data:', transformedData);
+    res.json(transformedData);
   } catch (error) {
-    console.error('Error fetching trucks:', error);
+    console.error('Error in trucks endpoint:', error);
     res.status(500).json({ error: error.message });
   }
 });
