@@ -272,11 +272,6 @@ app.get('/api/stocks', async (req, res) => {
     const formattedData = productsData.map(product => {
       // Select the appropriate name based on language preference
       let productName = product.name; // Default to Lithuanian
-      if (lang === 'en' && product.name_en) {
-        productName = product.name_en;
-      } else if (lang === 'ru' && product.name_ru) {
-        productName = product.name_ru;
-      }
       
       const productId = product.id;
       const stockInfo = stocksMap[productId] || { quantity: 0, location: 'Nenurodyta', last_updated: null };
@@ -285,12 +280,15 @@ app.get('/api/stocks', async (req, res) => {
       const currentBalance = totalPurchased - totalIssued;
       
       return {
-        id: productId,
-        product_name: productName,
-        product_unit: product.unit,
-        total_purchased: totalPurchased,
-        total_issued: totalIssued,
-        current_balance: currentBalance,
+        id: stockInfo.id || null,
+        productId: productId, // Frontend expects productId, not id
+        productName: productName,
+        name_en: product.name_en, // Keep original field names for frontend compatibility
+        name_ru: product.name_ru, // Keep original field names for frontend compatibility
+        unit: product.unit,
+        totalPurchased: totalPurchased,
+        totalIssued: totalIssued,
+        stockInHand: currentBalance, // Frontend expects stockInHand, not current_balance
         location: stockInfo.location,
         last_updated: stockInfo.last_updated
       };
