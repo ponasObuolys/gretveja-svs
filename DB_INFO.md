@@ -139,4 +139,86 @@ curl -s http://localhost:3001/api/trucks
 ```bash
 chmod +x import-suppliers.sh && ./import-suppliers.sh
 chmod +x import-products.sh && ./import-products.sh
-``` 
+```
+
+## Supabase duomenų bazės struktūra
+
+Šiame projekte naudojama Supabase duomenų bazė su šiomis lentelėmis:
+
+### Companies (Įmonės)
+- **Lentelė**: `companies`
+- **Laukai**:
+  - `id` - Unikalus identifikatorius (PK)
+  - `name` - Įmonės pavadinimas
+  - `code` - Įmonės kodas
+  - `vat_code` - PVM mokėtojo kodas
+  - `created_at` - Sukūrimo data
+  - `updated_at` - Atnaujinimo data
+
+### Products (Produktai)
+- **Lentelė**: `products`
+- **Laukai**:
+  - `id` - Unikalus identifikatorius (PK)
+  - `name` - Produkto pavadinimas lietuvių kalba
+  - `name_en` - Produkto pavadinimas anglų kalba
+  - `name_ru` - Produkto pavadinimas rusų kalba
+  - `unit` - Matavimo vienetas
+  - `created_at` - Sukūrimo data
+  - `updated_at` - Atnaujinimo data
+
+### Suppliers (Tiekėjai)
+- **Lentelė**: `suppliers`
+- **Laukai**:
+  - `name` - Tiekėjo pavadinimas
+  - `contact_person` - Kontaktinis asmuo
+  - `phone` - Telefono numeris
+  - `email` - El. pašto adresas
+  - `created_at` - Sukūrimo data
+  - `updated_at` - Atnaujinimo data
+
+### Trucks (Vilkikai)
+- **Lentelė**: `trucks`
+- **Laukai**:
+  - `id` - Unikalus identifikatorius (PK)
+  - `plate_number` - Valstybinis numeris
+  - `company_id` - Įmonės ID (FK į `companies` lentelę)
+  - `created_at` - Sukūrimo data
+  - `updated_at` - Atnaujinimo data
+
+### Purchases (Pirkimai)
+- **Lentelė**: `purchases`
+- **Laukai**:
+  - `id` - Unikalus identifikatorius (PK)
+  - `invoice_number` - Sąskaitos faktūros numeris
+  - `product_id` - Produkto ID (FK į `products` lentelę)
+  - `supplier_id` - Tiekėjo ID (FK į `suppliers` lentelę)
+  - `quantity` - Kiekis
+  - `purchase_date` - Pirkimo data
+  - `unit_price` - Vieneto kaina
+  - `company_id` - Įmonės ID (FK į `companies` lentelę)
+  - `total_amount` - Bendra suma
+  - `created_at` - Sukūrimo data
+  - `updated_at` - Atnaujinimo data
+
+### Issuances (Išdavimai)
+- **Lentelė**: `issuances`
+- **Laukai**:
+  - `id` - Unikalus identifikatorius (PK)
+  - `product_id` - Produkto ID (FK į `products` lentelę)
+  - `is_issued` - Ar išduota (boolean)
+  - `issuance_date` - Išdavimo data
+  - `quantity` - Kiekis
+  - `driver_name` - Vairuotojo vardas
+  - `truck_id` - Vilkiko ID (FK į `trucks` lentelę)
+  - `notes` - Pastabos
+  - `created_at` - Sukūrimo data
+  - `updated_at` - Atnaujinimo data
+
+### Stocks (Atsargos)
+- **Lentelė**: `stocks`
+- **Laukai**:
+  - `id` - Unikalus identifikatorius (PK)
+  - `product_id` - Produkto ID (FK į `products` lentelę)
+  - `quantity` - Kiekis
+  - `location` - Vieta
+  - `last_updated` - Paskutinio atnaujinimo data 

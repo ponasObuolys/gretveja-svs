@@ -19,7 +19,7 @@
 ### 2.1 Planavimas (Project Setup) ✅
 1. **Tech Stack pasirinkimas** ✅
    - Backend: Node.js (Express) su TypeScript.  
-   - Duomenų bazė: PostgreSQL.  
+   - Duomenų bazė: PostgreSQL ir Supabase.  
    - ORM: Sequelize.  
    - Frontend: React su TypeScript.  
    - UI biblioteka: Bootstrap + React Bootstrap.  
@@ -53,7 +53,12 @@
    - **Trucks** (vilkikai) ✅
    - **Purchases** (pirkimai) ✅
    - **Issuances** (išdavimai) ✅
+   - **Stocks** (atsargos) ✅
    - **Users** (jei reikalinga autentifikacija) ⏳
+
+2. **Duomenų bazių sprendimai**:
+   - **PostgreSQL** - lokali duomenų bazė ✅
+   - **Supabase** - nuotolinė duomenų bazė su integracijomis ✅
 
 ---
 

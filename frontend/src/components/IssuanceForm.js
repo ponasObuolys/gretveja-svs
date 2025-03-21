@@ -71,13 +71,16 @@ function IssuanceForm({ show, onHide, issuance }) {
         // Transform truck data from backend (snake_case) to frontend (camelCase) format
         const transformedTrucks = trucksResponse.data.map(truck => ({
           id: truck.id,
-          plateNumber: truck.plate_number,
-          companyId: truck.company_id,
+          plateNumber: truck.plate_number || truck.plateNumber || `ID: ${truck.id}`, // Fallback options
+          companyId: truck.company_id || truck.companyId,
           company: truck.companies ? {
             id: truck.companies.id,
             name: truck.companies.name
           } : null
         }));
+        
+        // Log transformed trucks to help with debugging
+        console.log('Transformed trucks:', transformedTrucks);
         
         setTrucks(transformedTrucks);
         setStockData(stockResponse.data);
@@ -406,7 +409,7 @@ function IssuanceForm({ show, onHide, issuance }) {
                   <option value="">{t('common.select.truck')}</option>
                   {trucks.map(truck => (
                     <option key={truck.id} value={truck.id}>
-                      {truck.plateNumber}
+                      {truck.plateNumber || `ID: ${truck.id}`}
                     </option>
                   ))}
                 </Form.Select>
