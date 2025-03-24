@@ -76,8 +76,8 @@ const ProductList = ({
                 {filteredProducts.map(product => (
                   <tr key={product.id}>
                     <td>{product.name}</td>
-                    <td>{product.name_en || product.nameEn || '-'}</td>
-                    <td>{product.name_ru || product.nameRu || '-'}</td>
+                    <td>{product.nameEn || '-'}</td>
+                    <td>{product.nameRu || '-'}</td>
                     <td>{product.unit || 'VNT'}</td>
                     <td>
                       <Button 

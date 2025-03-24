@@ -14,10 +14,8 @@ const getAllProducts = async (req, res) => {
     
     if (error) throw error;
     
-    // Transform data from snake_case to camelCase
-    const transformedData = data.map(item => snakeToCamel(item));
-    
-    return res.json(transformedData);
+    // Return original data without transformation
+    return res.json(data);
   } catch (error) {
     console.error('Error fetching products:', error);
     return handleError(res, error);
