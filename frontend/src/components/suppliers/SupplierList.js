@@ -76,7 +76,7 @@ const SupplierList = ({
                 {filteredSuppliers.map(supplier => (
                   <tr key={supplier.id}>
                     <td>{supplier.name}</td>
-                    <td>{supplier.contact_person || '-'}</td>
+                    <td>{supplier.contact_person || supplier.contactPerson || '-'}</td>
                     <td>{supplier.phone || '-'}</td>
                     <td>{supplier.email || '-'}</td>
                     <td>
