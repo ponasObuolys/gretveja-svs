@@ -46,6 +46,15 @@
   - `created_at` - Sukūrimo data
   - `updated_at` - Atnaujinimo data
 
+### Drivers (Vairuotojai)
+- **Lentelė**: `drivers`
+- **Laukai**:
+  - `id` - Unikalus identifikatorius (PK)
+  - `driver` - Vairuotojo vardas ir pavardė
+  - `company_id` - Įmonės ID (FK į `companies` lentelę)
+  - `created_at` - Sukūrimo data
+  - `updated_at` - Atnaujinimo data
+
 ### Purchases (Pirkimai)
 - **Lentelė**: `purchases`
 - **Laukai**:
@@ -113,6 +122,13 @@
 - **POST /api/trucks** - Sukurti naują vilkiką
 - **PUT /api/trucks/:id** - Atnaujinti vilkiką
 - **DELETE /api/trucks/:id** - Ištrinti vilkiką
+
+### Vairuotojų API
+- **GET /api/drivers** - Gauti visus vairuotojus
+- **GET /api/drivers/:id** - Gauti vairuotoją pagal ID
+- **POST /api/drivers** - Sukurti naują vairuotoją
+- **PUT /api/drivers/:id** - Atnaujinti vairuotoją
+- **DELETE /api/drivers/:id** - Ištrinti vairuotoją
 
 ### Pirkimų API
 - **GET /api/purchases** - Gauti visus pirkimus

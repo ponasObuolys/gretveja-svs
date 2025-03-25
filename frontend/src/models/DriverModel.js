@@ -9,13 +9,24 @@ import { handleApiError } from '../utils/common';
 const transformDriverFromBackend = (driver) => {
   if (!driver) return null;
   
+  // Handle nested company object from Supabase's join query
+  let company = null;
+  if (driver.companies) {
+    company = {
+      id: driver.companies.id,
+      name: driver.companies.name
+    };
+  } else if (driver.company) {
+    company = driver.company;
+  }
+  
   return {
     id: driver.id,
     driver: driver.driver, // Using the 'driver' field as specified in requirements
-    companyId: driver.companyId || driver.company_id,
-    company: driver.company || null,
-    createdAt: driver.createdAt || driver.created_at,
-    updatedAt: driver.updatedAt || driver.updated_at
+    companyId: driver.company_id,
+    company: company,
+    createdAt: driver.created_at,
+    updatedAt: driver.updated_at
   };
 };
 
