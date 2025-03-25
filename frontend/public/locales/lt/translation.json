@@ -126,6 +126,13 @@
       "trucks_count": "Vilkikų skaičius",
       "stock_overview": "Sandėlio atsargos"
     },
+    "filters": {
+      "year": "Metai",
+      "all_years": "Visi metai",
+      "month": "Mėnuo",
+      "all_months": "Visi mėnesiai",
+      "clear": "Išvalyti filtrus"
+    },
     "purchases": {
       "title": "Pirkimai",
       "new_purchase": "Naujas pirkimas",

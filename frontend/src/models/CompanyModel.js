@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { handleApiError } from '../utils/common';
 
+// Get API base URL from environment variables or use default for local development
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+
 /**
  * CompanyModel - Klasė, valdanti įmonių duomenis
  */
@@ -11,7 +14,7 @@ class CompanyModel {
    */
   static async getAll() {
     try {
-      const response = await axios.get('/api/companies');
+      const response = await axios.get(`${API_BASE_URL}/api/companies`);
       return response.data;
     } catch (error) {
       throw error;
@@ -25,7 +28,7 @@ class CompanyModel {
    */
   static async getById(id) {
     try {
-      const response = await axios.get(`/api/companies/${id}`);
+      const response = await axios.get(`${API_BASE_URL}/api/companies/${id}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -39,7 +42,7 @@ class CompanyModel {
    */
   static async create(companyData) {
     try {
-      const response = await axios.post('/api/companies', companyData);
+      const response = await axios.post(`${API_BASE_URL}/api/companies`, companyData);
       return response.data;
     } catch (error) {
       throw error;
@@ -54,7 +57,7 @@ class CompanyModel {
    */
   static async update(id, companyData) {
     try {
-      const response = await axios.put(`/api/companies/${id}`, companyData);
+      const response = await axios.put(`${API_BASE_URL}/api/companies/${id}`, companyData);
       return response.data;
     } catch (error) {
       throw error;
@@ -68,7 +71,7 @@ class CompanyModel {
    */
   static async delete(id) {
     try {
-      const response = await axios.delete(`/api/companies/${id}`);
+      const response = await axios.delete(`${API_BASE_URL}/api/companies/${id}`);
       return response.data;
     } catch (error) {
       throw error;
@@ -76,4 +79,4 @@ class CompanyModel {
   }
 }
 
-export default CompanyModel; 
+export default CompanyModel;

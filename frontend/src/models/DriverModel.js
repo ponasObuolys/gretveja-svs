@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { handleApiError } from '../utils/common';
 
+// Get API base URL from environment variables or use default for local development
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+
 /**
  * Transforms driver data from backend (snake_case) to frontend (camelCase) format
  * @param {Object} driver - Driver data from backend
@@ -58,7 +61,7 @@ class DriverModel {
         params.append('include', options.include);
       }
       
-      const response = await axios.get(`/api/drivers?${params.toString()}`);
+      const response = await axios.get(`${API_BASE_URL}/api/drivers?${params.toString()}`);
       
       if (!response.data || !Array.isArray(response.data)) {
         console.error('Unexpected response format:', response.data);
@@ -79,7 +82,7 @@ class DriverModel {
    */
   static async getById(id) {
     try {
-      const response = await axios.get(`/api/drivers/${id}?include=company`);
+      const response = await axios.get(`${API_BASE_URL}/api/drivers/${id}?include=company`);
       return transformDriverFromBackend(response.data);
     } catch (error) {
       console.error('Error fetching driver by ID:', error);
@@ -95,7 +98,7 @@ class DriverModel {
   static async create(driverData) {
     try {
       const backendData = transformDriverToBackend(driverData);
-      const response = await axios.post('/api/drivers', backendData);
+      const response = await axios.post(`${API_BASE_URL}/api/drivers`, backendData);
       return transformDriverFromBackend(response.data);
     } catch (error) {
       console.error('Error creating driver:', error);
@@ -112,7 +115,7 @@ class DriverModel {
   static async update(id, driverData) {
     try {
       const backendData = transformDriverToBackend(driverData);
-      const response = await axios.put(`/api/drivers/${id}`, backendData);
+      const response = await axios.put(`${API_BASE_URL}/api/drivers/${id}`, backendData);
       return transformDriverFromBackend(response.data);
     } catch (error) {
       console.error('Error updating driver:', error);
@@ -127,7 +130,7 @@ class DriverModel {
    */
   static async delete(id) {
     try {
-      const response = await axios.delete(`/api/drivers/${id}`);
+      const response = await axios.delete(`${API_BASE_URL}/api/drivers/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error deleting driver:', error);

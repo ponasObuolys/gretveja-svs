@@ -164,6 +164,13 @@
       "trucks_count": "Trucks",
       "stock_overview": "Stock Overview"
     },
+    "filters": {
+      "year": "Year",
+      "all_years": "All Years",
+      "month": "Month",
+      "all_months": "All Months",
+      "clear": "Clear Filters"
+    },
     "purchases": {
       "title": "Purchases",
       "new_purchase": "New Purchase",
