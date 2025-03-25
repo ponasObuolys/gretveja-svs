@@ -2,7 +2,7 @@
  * Trucks controller
  */
 const { supabase } = require('../db/supabase');
-const { handleError, validateRequiredFields, isValidId } = require('../utils/errorHandler');
+const { handleError, isValidId } = require('../utils/errorHandler');
 const { snakeToCamel, camelToSnake } = require('../utils/caseConverters');
 
 /**
@@ -80,14 +80,16 @@ const getAllTrucks = async (req, res) => {
  */
 const createTruck = async (req, res) => {
   try {
-    // Validate required fields
-    const validation = validateRequiredFields(req.body, ['plateNumber']);
-    if (validation) {
-      return handleError(res, { message: validation.message }, validation.statusCode);
-    }
+    // Log the incoming request body for debugging
+    console.log('Received truck creation request body:', JSON.stringify(req.body, null, 2));
     
     // Convert camelCase to snake_case for database
     const truckData = camelToSnake(req.body);
+    
+    // Validate required fields - check for snake_case field after conversion
+    if (!truckData.plate_number) {
+      return handleError(res, { message: 'Missing required field: plate_number' }, 400);
+    }
     
     console.log('Creating truck with data:', JSON.stringify(truckData, null, 2));
     

@@ -17,7 +17,7 @@ const transformProductFromBackend = (product) => {
     nameDe: product.name_de,
     unit: product.unit,
     // Add a placeholder for code to maintain compatibility with existing code
-    code: product.id.toString(), // Using ID as a fallback for code
+    code: product.id ? product.id.toString() : '', // Using ID as a fallback for code, with null check
     createdAt: product.created_at,
     updatedAt: product.updated_at
   };
@@ -32,11 +32,11 @@ const transformProductToBackend = (product) => {
   const { code, ...rest } = product; // Remove code field as it's not in the backend
   
   return {
-    name: rest.name,
-    name_en: rest.nameEn,
-    name_ru: rest.nameRu,
-    name_de: rest.nameDe,
-    unit: rest.unit
+    name: rest.name || '',
+    name_en: rest.nameEn || '', // Default to empty string if not provided
+    name_ru: rest.nameRu || '',
+    name_de: rest.nameDe || '',
+    unit: 'vnt' // Default to 'vnt' as per request to remove unit field
   };
 };
 

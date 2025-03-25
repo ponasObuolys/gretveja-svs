@@ -39,16 +39,6 @@ const ProductForm = ({
           </Form.Group>
           
           <Form.Group className="mb-3">
-            <Form.Label>{t('common.labels.name')} (EN)</Form.Label>
-            <Form.Control
-              type="text"
-              name="nameEn"
-              value={productFormData.nameEn}
-              onChange={handleProductInputChange}
-            />
-          </Form.Group>
-          
-          <Form.Group className="mb-3">
             <Form.Label>{t('common.labels.name')} (RU)</Form.Label>
             <Form.Control
               type="text"
@@ -65,17 +55,6 @@ const ProductForm = ({
               name="nameDe"
               value={productFormData.nameDe}
               onChange={handleProductInputChange}
-            />
-          </Form.Group>
-          
-          <Form.Group className="mb-3">
-            <Form.Label>{t('common.labels.unit')} *</Form.Label>
-            <Form.Control
-              type="text"
-              name="unit"
-              value={productFormData.unit}
-              onChange={handleProductInputChange}
-              required
             />
           </Form.Group>
           

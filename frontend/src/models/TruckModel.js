@@ -87,7 +87,12 @@ class TruckModel {
   static async create(truckData) {
     try {
       const backendData = transformTruckToBackend(truckData);
-      const response = await axios.post('/api/trucks', backendData);
+      console.log('Sending truck data to backend:', backendData);
+      const response = await axios.post('/api/trucks', backendData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       return transformTruckFromBackend(response.data);
     } catch (error) {
       console.error('Error creating truck:', error);
