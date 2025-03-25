@@ -39,22 +39,22 @@ function IssuanceForm({ show, onHide, issuance }) {
     
     const currentLanguage = i18n.language;
     
-    // Check if product has the nameEn or nameRu properties directly
+    // First check camelCase properties (frontend format)
     if (currentLanguage === 'en' && product.nameEn) {
       return product.nameEn;
     } else if (currentLanguage === 'ru' && product.nameRu) {
       return product.nameRu;
     }
     
-    // Check if product has name_en or name_ru (snake_case format from API)
+    // Then check snake_case properties (backend format)
     if (currentLanguage === 'en' && product.name_en) {
       return product.name_en;
     } else if (currentLanguage === 'ru' && product.name_ru) {
       return product.name_ru;
     }
     
-    // Default to Lithuanian name
-    return product.name || '';
+    // Default to Lithuanian name (could be either name or name_lt)
+    return product.name || product.name_lt || '';
   };
 
   // Gauti produktus, vilkikus ir vairuotojus

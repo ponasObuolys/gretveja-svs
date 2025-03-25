@@ -46,15 +46,22 @@ function Issuances() {
     const product = issuance.product;
     const currentLanguage = i18n.language;
     
-    // Check if product has the nameEn/name_en or nameRu/name_ru properties (handling both camelCase and snake_case)
+    // First check camelCase properties (frontend format)
     if (currentLanguage === 'en') {
-      return product.nameEn || product.name_en || product.name || t('common.messages.no_data');
+      if (product.nameEn) return product.nameEn;
     } else if (currentLanguage === 'ru') {
-      return product.nameRu || product.name_ru || product.name || t('common.messages.no_data');
+      if (product.nameRu) return product.nameRu;
     }
     
-    // Default to Lithuanian name
-    return product.name || t('common.messages.no_data');
+    // Then check snake_case properties (backend format)
+    if (currentLanguage === 'en') {
+      if (product.name_en) return product.name_en;
+    } else if (currentLanguage === 'ru') {
+      if (product.name_ru) return product.name_ru;
+    }
+    
+    // Default to Lithuanian name (could be either name or name_lt)
+    return product.name || product.name_lt || t('common.messages.no_data');
   };
 
   // Filtravimo komponentas
