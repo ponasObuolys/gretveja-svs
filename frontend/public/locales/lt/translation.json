@@ -96,6 +96,12 @@
       "copyright": "Visos teisės saugomos.",
       "created_by": "Sukūrė Aurimas Butvilauskas"
     },
+    "stockTable": {
+      "product": "Produktas",
+      "purchases": "Pirkimai",
+      "issuances": "Išdavimai",
+      "balance": "Likutis"
+    },
     "statistics": {
       "purchases_issuances": "Pirkimų ir išdavimų statistika",
       "purchases_6months": "Pirkimai per paskutinius 6 mėnesius",
@@ -224,11 +230,15 @@
       "unit": "vnt.",
       "balance": "Likutis",
       "initial_stock": "Pradinis likutis",
+      "initialStock": "Pradinis likutis",
       "add_initial_stock": "Pridėti pradinį likutį",
       "edit_initial_stock": "Redaguoti pradinį likutį",
       "delete_initial_stock": "Ištrinti pradinį likutį",
       "initial_stock_date": "Pradinio likučio data",
-      "confirm_delete": "Ar tikrai norite ištrinti šį pradinį likutį?"
+      "confirm_delete": "Ar tikrai norite ištrinti šį pradinį likutį?",
+      "total_purchased": "Viso nupirkta",
+      "total_issued": "Viso išduota",
+      "current_balance": "Dabartinis likutis"
     },
     "modals": {
       "delete": {
@@ -244,7 +254,10 @@
           "add_title": "Pridėti naują vairuotoją",
           "edit_title": "Redaguoti vairuotoją"
         }
-      }
+      },
+      "confirmDelete": "Patvirtinkite ištrynimą",
+      "deleteConfirmation": "Ar tikrai norite ištrinti šį elementą?",
+      "cannotUndo": "Šio veiksmo negalima atšaukti"
     },
     "drivers": {
       "title": "Vairuotojai",
