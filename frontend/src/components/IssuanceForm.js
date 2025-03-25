@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import './IssuanceForm.css';
+import DriverModel from '../models/DriverModel';
 
 function IssuanceForm({ show, onHide, issuance }) {
   const { t, i18n } = useTranslation();
@@ -13,7 +14,7 @@ function IssuanceForm({ show, onHide, issuance }) {
     isIssued: false,
     issuanceDate: new Date().toISOString().split('T')[0],
     quantity: 1,
-    driverName: '',
+    driverId: '',
     truckId: '',
     notes: ''
   }), []);
@@ -21,6 +22,7 @@ function IssuanceForm({ show, onHide, issuance }) {
   const [formData, setFormData] = useState(initialFormState);
   const [products, setProducts] = useState([]);
   const [trucks, setTrucks] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [validated, setValidated] = useState(false);
@@ -55,15 +57,16 @@ function IssuanceForm({ show, onHide, issuance }) {
     return product.name || '';
   };
 
-  // Gauti produktus ir vilkikus
+  // Gauti produktus, vilkikus ir vairuotojus
   useEffect(() => {
     const fetchData = async () => {
       setDataLoading(true);
       try {
-        const [productsResponse, trucksResponse, stockResponse] = await Promise.all([
+        const [productsResponse, trucksResponse, stockResponse, driversResponse] = await Promise.all([
           axios.get('/api/products'),
           axios.get('/api/trucks?include=company'),
-          axios.get('/api/stocks')
+          axios.get('/api/stocks'),
+          axios.get('/api/drivers?include=company')
         ]);
         setProducts(productsResponse.data);
         setFilteredProducts(productsResponse.data);
@@ -100,6 +103,23 @@ function IssuanceForm({ show, onHide, issuance }) {
         
         setTrucks(transformedTrucks);
         setStockData(stockResponse.data);
+        
+        // Transform and set drivers data
+        const transformedDrivers = driversResponse.data.map(driver => {
+          return {
+            id: driver.id,
+            driver: driver.driver,
+            companyId: driver.company_id || driver.companyId,
+            company: driver.company ? {
+              id: driver.company.id,
+              name: driver.company.name
+            } : null
+          };
+        });
+        
+        console.log('Transformed drivers:', transformedDrivers);
+        setDrivers(transformedDrivers);
+        
         setError(null);
       } catch (err) {
         console.error(t('common.errors.fetchFailed'), err);
@@ -124,7 +144,7 @@ function IssuanceForm({ show, onHide, issuance }) {
         isIssued: issuance.isIssued || false,
         issuanceDate: issuance.issuanceDate ? new Date(issuance.issuanceDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
         quantity: issuance.quantity || 1,
-        driverName: issuance.driverName || '',
+        driverId: issuance.driverId || '',
         truckId: issuance.truckId || '',
         notes: issuance.notes || ''
       });
@@ -266,6 +286,7 @@ function IssuanceForm({ show, onHide, issuance }) {
         ...formData,
         productId: parseInt(formData.productId),
         truckId: parseInt(formData.truckId),
+        driverId: parseInt(formData.driverId),
         quantity: parseInt(formData.quantity),
         isIssued: Boolean(formData.isIssued)
       };
@@ -309,6 +330,13 @@ function IssuanceForm({ show, onHide, issuance }) {
 
   const handleClose = () => {
     onHide(false);
+  };
+
+  // Get the selected driver's name for display
+  const getSelectedDriverName = () => {
+    if (!formData.driverId) return '';
+    const selectedDriver = drivers.find(d => d.id === parseInt(formData.driverId));
+    return selectedDriver ? selectedDriver.driver : '';
   };
 
   return (
@@ -451,13 +479,19 @@ function IssuanceForm({ show, onHide, issuance }) {
             <Col md={6} className="mb-3">
               <Form.Group>
                 <Form.Label>{t('common.labels.driver')} *</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="driverName"
-                  value={formData.driverName}
+                <Form.Select
+                  name="driverId"
+                  value={formData.driverId}
                   onChange={handleInputChange}
                   required
-                />
+                >
+                  <option value="">{t('common.select.driver')}</option>
+                  {drivers.map(driver => (
+                    <option key={driver.id} value={driver.id}>
+                      {driver.driver} {driver.company ? `(${driver.company.name})` : ''}
+                    </option>
+                  ))}
+                </Form.Select>
                 <Form.Control.Feedback type="invalid">
                   {t('common.errors.required')}
                 </Form.Control.Feedback>
@@ -546,4 +580,4 @@ function IssuanceForm({ show, onHide, issuance }) {
   );
 }
 
-export default IssuanceForm; 
+export default IssuanceForm;

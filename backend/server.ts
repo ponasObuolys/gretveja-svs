@@ -8,6 +8,7 @@ import productRoutes from './routes/productRoutes';
 import supplierRoutes from './routes/supplierRoutes';
 import companyRoutes from './routes/companyRoutes';
 import truckRoutes from './routes/truckRoutes';
+import driverRoutes from './routes/driverRoutes';
 import { supabase } from './config/supabase';
 
 // Įkrauname aplinkos kintamuosius
@@ -38,6 +39,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/trucks', truckRoutes);
+app.use('/api/drivers', driverRoutes);
 
 // Serverio paleidimas
 const startServer = async () => {

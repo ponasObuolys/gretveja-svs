@@ -22,13 +22,19 @@ const productRoutes_1 = __importDefault(require("./routes/productRoutes"));
 const supplierRoutes_1 = __importDefault(require("./routes/supplierRoutes"));
 const companyRoutes_1 = __importDefault(require("./routes/companyRoutes"));
 const truckRoutes_1 = __importDefault(require("./routes/truckRoutes"));
+const driverRoutes_1 = __importDefault(require("./routes/driverRoutes"));
 const supabase_1 = require("./config/supabase");
 // Įkrauname aplinkos kintamuosius
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
 // Middleware
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: process.env.NODE_ENV === 'production'
+        ? ['https://gretveja-svs.vercel.app', /\.vercel\.app$/]
+        : 'http://localhost:3000',
+    credentials: true
+}));
 app.use(express_1.default.json());
 // Pagrindinis maršrutas
 app.get('/', (req, res) => {
@@ -42,6 +48,7 @@ app.use('/api/products', productRoutes_1.default);
 app.use('/api/suppliers', supplierRoutes_1.default);
 app.use('/api/companies', companyRoutes_1.default);
 app.use('/api/trucks', truckRoutes_1.default);
+app.use('/api/drivers', driverRoutes_1.default);
 // Serverio paleidimas
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -51,12 +58,20 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
             throw error;
         }
         console.log('Supabase ryšys sėkmingai sukurtas.');
-        app.listen(PORT, () => {
-            console.log(`Serveris paleistas adresu: http://localhost:${PORT}`);
-        });
+        // Vercel serverless aplinkoje nereikia klausytis porto
+        if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === undefined) {
+            app.listen(PORT, () => {
+                console.log(`Serveris paleistas adresu: http://localhost:${PORT}`);
+            });
+        }
     }
     catch (error) {
         console.error('Nepavyko prisijungti prie Supabase:', error);
     }
 });
-startServer();
+// Paleidžiame serverį, jei tai nėra Vercel serverless aplinka
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL_ENV === undefined) {
+    startServer();
+}
+// Eksportuojame Express app objektą, kad jį galėtų naudoti Vercel serverless funkcijos
+exports.default = app;

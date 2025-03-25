@@ -7,6 +7,7 @@ import './Admin.css';
 import Vilkikai from './Vilkikai';
 import Produktai from './Produktai';
 import Tiekejai from './Tiekejai';
+import Vairuotojai from './Vairuotojai';
 
 /**
  * Administravimo puslapis
@@ -42,9 +43,14 @@ function Admin() {
         <Tab eventKey="suppliers" title={t('common.menu.suppliers')} tabClassName="admin-tab-item">
           <Tiekejai />
         </Tab>
+        
+        {/* VAIRUOTOJŲ SKILTIS */}
+        <Tab eventKey="drivers" title={t('common.menu.drivers')} tabClassName="admin-tab-item">
+          <Vairuotojai />
+        </Tab>
       </Tabs>
     </Container>
   );
 }
 
-export default Admin; 
+export default Admin;
