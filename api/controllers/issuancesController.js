@@ -89,11 +89,37 @@ const createIssuance = async (req, res) => {
       return handleError(res, { message: validation.message }, validation.statusCode);
     }
     
+    // If driverId is provided, fetch the driver's name
+    let driverName = '';
+    if (req.body.driverId) {
+      try {
+        const { data: driverData, error: driverError } = await supabase
+          .from('drivers')
+          .select('driver')
+          .eq('id', req.body.driverId)
+          .single();
+        
+        if (driverError) throw driverError;
+        if (driverData) {
+          driverName = driverData.driver;
+        }
+      } catch (driverError) {
+        console.error('Error fetching driver:', driverError);
+        // Continue with empty driver name if there's an error
+      }
+    }
+    
     // Convert camelCase field names to snake_case for database
     const issuanceData = camelToSnake({
       ...req.body,
+      driverName, // Add driver name to the data
       isIssued: req.body.isIssued || false
     });
+    
+    // Remove driver_id as it's not in the database schema
+    if (issuanceData.driver_id) {
+      delete issuanceData.driver_id;
+    }
     
     console.log('Inserting issuance data:', issuanceData);
     
@@ -113,7 +139,14 @@ const createIssuance = async (req, res) => {
     }
     
     // Transform the returned data back to camelCase for frontend
-    const transformedData = data.map(item => snakeToCamel(item));
+    const transformedData = data.map(item => {
+      const transformed = snakeToCamel(item);
+      // Add driverId back to the response for frontend consistency
+      if (req.body.driverId) {
+        transformed.driverId = req.body.driverId;
+      }
+      return transformed;
+    });
     
     return res.status(201).json(transformedData);
   } catch (error) {
@@ -134,8 +167,36 @@ const updateIssuance = async (req, res) => {
       return handleError(res, { message: 'Invalid issuance ID' }, 400);
     }
     
+    // If driverId is provided, fetch the driver's name
+    let driverName = '';
+    if (req.body.driverId) {
+      try {
+        const { data: driverData, error: driverError } = await supabase
+          .from('drivers')
+          .select('driver')
+          .eq('id', req.body.driverId)
+          .single();
+        
+        if (driverError) throw driverError;
+        if (driverData) {
+          driverName = driverData.driver;
+        }
+      } catch (driverError) {
+        console.error('Error fetching driver:', driverError);
+        // Continue with empty driver name if there's an error
+      }
+    }
+    
     // Convert camelCase to snake_case for database
-    const issuanceData = camelToSnake(req.body);
+    const issuanceData = camelToSnake({
+      ...req.body,
+      driverName, // Add driver name to the data
+    });
+    
+    // Remove driver_id as it's not in the database schema
+    if (issuanceData.driver_id) {
+      delete issuanceData.driver_id;
+    }
     
     console.log('Updating issuance data:', issuanceData);
     
@@ -148,7 +209,14 @@ const updateIssuance = async (req, res) => {
     if (error) throw error;
     
     // Transform data back to camelCase for frontend
-    const transformedData = data.map(item => snakeToCamel(item));
+    const transformedData = data.map(item => {
+      const transformed = snakeToCamel(item);
+      // Add driverId back to the response for frontend consistency
+      if (req.body.driverId) {
+        transformed.driverId = req.body.driverId;
+      }
+      return transformed;
+    });
     
     return res.json(transformedData);
   } catch (error) {

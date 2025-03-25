@@ -267,41 +267,44 @@ function IssuanceForm({ show, onHide, issuance }) {
   };
 
   // Pateikti formą
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const form = e.currentTarget;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     
+    // Validate form
+    const form = event.currentTarget;
     if (form.checkValidity() === false) {
-      e.stopPropagation();
+      event.stopPropagation();
       setValidated(true);
       return;
     }
-
+    
     setLoading(true);
     setError(null);
-
+    
     try {
-      // Konvertuoti reikšmes į tinkamus tipus
-      const dataToSend = {
+      // Prepare data for API
+      const issuanceData = {
         ...formData,
-        productId: parseInt(formData.productId),
-        truckId: parseInt(formData.truckId),
-        driverId: parseInt(formData.driverId),
-        quantity: parseInt(formData.quantity),
+        // Make sure we're sending the correct data types
+        quantity: Number(formData.quantity),
         isIssued: Boolean(formData.isIssued)
       };
-
-      console.log('Sending issuance data:', dataToSend);
-
-      if (issuance) {
-        // Atnaujinti esamą išdavimą
-        await axios.put(`/api/issuances/${issuance.id}`, dataToSend);
+      
+      console.log('Sending issuance data:', issuanceData);
+      
+      let response;
+      if (issuance?.id) {
+        // Update existing issuance
+        response = await axios.put(`/api/issuances/${issuance.id}`, issuanceData);
       } else {
-        // Sukurti naują išdavimą
-        await axios.post('/api/issuances', dataToSend);
+        // Create new issuance
+        response = await axios.post('/api/issuances', issuanceData);
       }
-
-      onHide(true); // Uždaryti formą ir atnaujinti duomenis
+      
+      console.log('Issuance saved successfully:', response.data);
+      
+      // Close modal and refresh parent component
+      onHide(true);
     } catch (err) {
       console.error(t('common.errors.saveFailed'), err);
       setError(t('common.errors.saveFailed'));
