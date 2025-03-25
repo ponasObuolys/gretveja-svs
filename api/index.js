@@ -15,6 +15,7 @@ const purchasesRoutes = require('./routes/purchasesRoutes');
 const issuancesRoutes = require('./routes/issuancesRoutes');
 const companiesRoutes = require('./routes/companiesRoutes');
 const trucksRoutes = require('./routes/trucksRoutes');
+const driversRoutes = require('./routes/driversRoutes');
 
 // Express application
 const app = express();
@@ -81,6 +82,7 @@ app.use('/api/purchases', purchasesRoutes);
 app.use('/api/issuances', issuancesRoutes);
 app.use('/api/companies', companiesRoutes);
 app.use('/api/trucks', trucksRoutes);
+app.use('/api/drivers', driversRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
