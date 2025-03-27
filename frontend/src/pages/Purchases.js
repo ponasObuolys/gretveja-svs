@@ -526,12 +526,6 @@ function Purchases() {
       
       <div className="action-buttons">
         <ExportButtons />
-        <button 
-          className="btn-add-initial-stock" 
-          onClick={() => setShowInitialStockForm(true)}
-        >
-          {t('common.inventory.initialStock')}
-        </button>
       </div>
       
       <div className="purchase-form-container">
